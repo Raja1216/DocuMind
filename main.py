@@ -24,4 +24,13 @@ print("PAGES")
 print("=" * 60)
 
 for page in pages:
-    print(page)
+    print()
+
+    print(f"Page : {page.number}")
+    print(f"Width : {page.width}")
+    print(f"Height : {page.height}")
+    print(f"Left : {page.left}")
+    print(f"Top : {page.top}")
+    print(f"Right : {page.right}")
+    print(f"Bottom : {page.bottom}")
+    print(f"Rotation : {page.rotation}")
