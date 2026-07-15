@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from src.models.color.rgb_color import RGBColor
 
 
 @dataclass(slots=True)
@@ -15,7 +16,7 @@ class Span:
 
     font_size: float
 
-    color: int
+    color: RGBColor
 
     flags: int
 
