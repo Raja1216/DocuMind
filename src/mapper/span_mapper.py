@@ -5,11 +5,11 @@ from src.models.span import Span
 
 class SpanMapper:
     """
-    Maps a PyMuPDF span dictionary
-    into a DocuMind Span model.
+    Maps a PyMuPDF span dictionary into a DocuMind Span model.
     """
 
-    def map(self, span_data: dict) -> Span:
+    @staticmethod
+    def map(span_data: dict) -> Span:
         bbox = span_data["bbox"]
         origin = span_data["origin"]
 

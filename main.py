@@ -1,8 +1,8 @@
 import pprint
 
-from src.parser.pdf_reader import PDFReader
 from src.extractor.text_block_extractor import TextBlockExtractor
-from src.mapper.span_mapper import SpanMapper
+from src.mapper.line_mapper import LineMapper
+from src.parser.pdf_reader import PDFReader
 
 reader = PDFReader()
 
@@ -12,8 +12,6 @@ page = document.load_page(0)
 
 data = TextBlockExtractor().extract(page)
 
-mapper = SpanMapper()
-
 for block in data["blocks"]:
 
     if block["type"] != 0:
@@ -21,13 +19,9 @@ for block in data["blocks"]:
 
     for line in block["lines"]:
 
-        for span in line["spans"]:
+        model = LineMapper.map(line)
 
-            model = mapper.map(span)
-
-            pprint.pp(model)
-
-            break
+        pprint.pp(model)
 
         break
 
