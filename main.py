@@ -1,11 +1,15 @@
+import pprint
+
 from src.parser.pdf_reader import PDFReader
 from src.extractor.metadata_extractor import MetadataExtractor
 from src.extractor.document_info_extractor import DocumentInfoExtractor
 from src.extractor.page_extractor import PageExtractor
 
+from src.extractor.text_block_extractor import TextBlockExtractor
+
 reader = PDFReader()
 
-document = reader.open("samples/pdf/spdf4.pdf")
+document = reader.open("samples/pdf/spdf1.pdf")
 
 
 print("=" * 50)
@@ -34,3 +38,11 @@ for page in pages:
     print(f"Right : {page.right}")
     print(f"Bottom : {page.bottom}")
     print(f"Rotation : {page.rotation}")
+    
+page = document.load_page(0)
+
+data = TextBlockExtractor().extract(page)
+
+pp = pprint.PrettyPrinter(indent=2, width=120)
+
+pp.pprint(data)
