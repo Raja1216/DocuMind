@@ -9,7 +9,9 @@ pdf = reader.open("samples/pdf/spdf1.pdf")
 
 document = DocumentMapper.map(pdf)
 
-DocumentAnalyzer.analyze(document)
+analyzer = DocumentAnalyzer()
+
+analyzer.analyze(document)
 
 DocxExporter.export(
     document,
