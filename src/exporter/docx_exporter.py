@@ -1,34 +1,36 @@
-from __future__ import annotations
-
 from docx import Document as WordDocument
+from docx.enum.text import WD_BREAK
+from src.analyzer.paragraph_analyzer import ParagraphAnalyzer
 
 
 class DocxExporter:
-    """
-    Export a DocuMind Document into a DOCX file.
-    """
 
     @staticmethod
-    def export(document, output_path: str) -> None:
+    def export(document, output_path):
 
         doc = WordDocument()
 
-        for page in document.pages:
+        total_pages = len(document.pages)
+
+        for page_index, page in enumerate(document.pages):
 
             for block in page.blocks:
 
-                paragraph = doc.add_paragraph()
+                has_text = any(
+                    span.text.strip()
+                    for line in block.lines
+                    for span in line.spans
+                )
 
-                for line in block.lines:
+                if not has_text:
+                    continue
 
-                    for span in line.spans:
+                paragraphs = ParagraphAnalyzer.analyze(block)
+                for para in paragraphs:
 
-                        paragraph.add_run(span.text)
+                    word_paragraph = doc.add_paragraph()
 
-                # Keep line separation
-                paragraph.add_run("\n")
+                    word_paragraph.add_run(para.text)
 
-            # Keep page separation
-            doc.add_page_break()
 
         doc.save(output_path)
