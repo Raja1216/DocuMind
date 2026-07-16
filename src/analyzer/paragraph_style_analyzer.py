@@ -138,11 +138,12 @@ class ParagraphStyleAnalyzer:
         paragraphs: list[Paragraph],
     ) -> None:
         """
-        Calculate real vertical spacing between consecutive
+        Calculate only the additional vertical space between
         PDF paragraphs.
 
-        The first paragraph starts at the page's top margin,
-        so it receives no extra spacing.
+        Normal baseline-to-baseline line movement is already
+        handled through paragraph line spacing, so it must be
+        subtracted from the geometric paragraph gap.
         """
 
         if not paragraphs:
@@ -153,41 +154,99 @@ class ParagraphStyleAnalyzer:
         )
 
         paragraphs[0].style.spacing_before = 0.0
+        paragraphs[0].style.spacing_after = 0.0
 
         previous_paragraph = paragraphs[0]
 
         for current_paragraph in paragraphs[1:]:
 
-            previous_bottom = (
-                ParagraphStyleAnalyzer._paragraph_bottom(
+            previous_baseline = (
+                ParagraphStyleAnalyzer
+                ._paragraph_last_baseline(
                     previous_paragraph
                 )
             )
 
-            current_top = (
-                ParagraphStyleAnalyzer._paragraph_top(
+            current_baseline = (
+                ParagraphStyleAnalyzer
+                ._paragraph_first_baseline(
                     current_paragraph
                 )
             )
 
-            visible_gap = (
-                current_top - previous_bottom
+            normal_line_advance = max(
+                previous_paragraph.style.line_spacing,
+                current_paragraph.style.line_spacing,
+            )
+
+            baseline_distance = (
+                current_baseline - previous_baseline
+            )
+
+            additional_gap = (
+                baseline_distance - normal_line_advance
             )
 
             if (
-                visible_gap
+                additional_gap
                 <= ParagraphStyleAnalyzer
                 .PARAGRAPH_GAP_TOLERANCE
             ):
                 spacing_before = 0.0
             else:
-                spacing_before = visible_gap
+                spacing_before = additional_gap
 
-            current_paragraph.style.spacing_before = (
-                spacing_before
+            current_paragraph.style.spacing_before = max(
+                spacing_before,
+                0.0,
             )
 
+            current_paragraph.style.spacing_after = 0.0
+
             previous_paragraph = current_paragraph
+
+    @staticmethod
+    def _paragraph_first_baseline(
+        paragraph: Paragraph,
+    ) -> float:
+        """
+        Return the first visible baseline in a paragraph.
+        """
+    
+        visible_lines = [
+            line
+            for line in paragraph.lines
+            if ParagraphStyleAnalyzer._line_has_text(line)
+        ]
+    
+        if not visible_lines:
+            return 0.0
+    
+        return ParagraphStyleAnalyzer._line_baseline(
+            visible_lines[0]
+        )
+    
+    @staticmethod
+    def _paragraph_last_baseline(
+        paragraph: Paragraph,
+    ) -> float:
+        """
+        Return the final visible baseline in a paragraph.
+        """
+    
+        visible_lines = [
+            line
+            for line in paragraph.lines
+            if ParagraphStyleAnalyzer._line_has_text(line)
+        ]
+    
+        if not visible_lines:
+            return 0.0
+    
+        return ParagraphStyleAnalyzer._line_baseline(
+            visible_lines[-1]
+        )
+
 
     @staticmethod
     def _paragraph_top(

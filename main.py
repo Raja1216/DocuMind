@@ -1,21 +1,34 @@
-from src.exporter.docx_exporter import DocxExporter
+from src.analyzer.document_analyzer import (
+    DocumentAnalyzer,
+)
+from src.exporter.fixed_layout_docx_exporter import (
+    FixedLayoutDocxExporter,
+)
 from src.mapper.document_mapper import DocumentMapper
 from src.parser.pdf_reader import PDFReader
-from src.analyzer.document_analyzer import DocumentAnalyzer
+
 
 reader = PDFReader()
 
-pdf = reader.open("samples/pdf/spdf1.pdf")
+pdf = reader.open(
+    "samples/pdf/spdf1.pdf"
+)
 
-document = DocumentMapper.map(pdf)
+document = DocumentMapper.map(
+    pdf
+)
 
 analyzer = DocumentAnalyzer()
 
-analyzer.analyze(document)
-
-DocxExporter.export(
-    document,
-    "output/output.docx",
+analyzer.analyze(
+    document
 )
 
-print("DOCX created successfully!")
+FixedLayoutDocxExporter.export(
+    document=document,
+    output_path="output/output.docx",
+)
+
+print(
+    "Fixed-layout DOCX created successfully!"
+)

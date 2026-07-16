@@ -13,7 +13,6 @@ from docx.enum.text import (
     WD_LINE_SPACING,
 )
 
-from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from src.exporter.font_name_resolver import (
     FontNameResolver,
@@ -27,17 +26,11 @@ class DocxExporter:
 
     DEFAULT_MARGIN = 36.0
     MINIMUM_MARGIN = 18.0
-    
-    FIT_TEXT_START_ID = 1
-
-    _fit_text_id = FIT_TEXT_START_ID
 
     @staticmethod
     def export(document, output_path: str) -> None:
         word_document = WordDocument()
-        DocxExporter._fit_text_id = (
-            DocxExporter.FIT_TEXT_START_ID
-        )
+        
         for page_index, page in enumerate(document.pages):
 
             section = DocxExporter._prepare_page_section(
@@ -319,14 +312,11 @@ class DocxExporter:
         paragraph,
     ) -> None:
         """
-        Render text while preserving:
+        Render text while preserving original PDF line
+        boundaries and typography.
 
-        - original PDF line boundaries;
-        - typography;
-        - original line width.
-
-        All Word runs belonging to one PDF line receive the
-        same fit-text ID and target width.
+        PDF lines remain in one Word paragraph and are
+        separated using soft line breaks.
         """
 
         visible_lines = [
@@ -341,16 +331,6 @@ class DocxExporter:
             text_runs = RunBuilder.build(
                 line
             )
-
-            line_width = DocxExporter._line_width(
-                line
-            )
-
-            fit_text_id = (
-                DocxExporter._next_fit_text_id()
-            )
-
-            created_runs = []
 
             for text_run in text_runs:
                 run = word_paragraph.add_run(
@@ -377,118 +357,13 @@ class DocxExporter:
                 run.bold = text_run.bold
                 run.italic = text_run.italic
 
-                created_runs.append(run)
-
-            if line_width > 0:
-                for run in created_runs:
-                    DocxExporter._apply_fit_text(
-                        run=run,
-                        width_points=line_width,
-                        fit_text_id=fit_text_id,
-                    )
-
             if line_index < len(visible_lines) - 1:
                 break_run = word_paragraph.add_run()
 
                 break_run.add_break(
                     WD_BREAK.LINE
                 )
-    
-    @staticmethod
-    def _line_width(line) -> float:
-        """
-        Calculate the original visible width of one PDF line.
-
-        The result is returned in points.
-        """
-
-        visible_spans = [
-            span
-            for span in line.spans
-            if span.text.strip()
-        ]
-
-        if not visible_spans:
-            return 0.0
-
-        left = min(
-            span.left
-            for span in visible_spans
-        )
-
-        right = max(
-            span.right
-            for span in visible_spans
-        )
-
-        return max(
-            right - left,
-            0.0,
-        )
-        
-    @staticmethod
-    def _next_fit_text_id() -> int:
-        """
-        Return a unique ID used to group contiguous Word runs
-        belonging to the same fitted PDF line.
-        """
-
-        current_id = DocxExporter._fit_text_id
-
-        DocxExporter._fit_text_id += 1
-
-        return current_id    
                 
-    @staticmethod
-    def _apply_fit_text(
-        run,
-        width_points: float,
-        fit_text_id: int,
-    ) -> None:
-        """
-        Force a Word run group to occupy the original PDF
-        line width.
-    
-        Word stores this width in twentieths of a point.
-        """
-    
-        width_twips = max(
-            int(round(width_points * 20)),
-            1,
-        )
-    
-        run_properties = (
-            run._element.get_or_add_rPr()
-        )
-    
-        existing_fit_text = run_properties.find(
-            qn("w:fitText")
-        )
-    
-        if existing_fit_text is not None:
-            run_properties.remove(
-                existing_fit_text
-            )
-    
-        fit_text = OxmlElement(
-            "w:fitText"
-        )
-    
-        fit_text.set(
-            qn("w:val"),
-            str(width_twips),
-        )
-    
-        fit_text.set(
-            qn("w:id"),
-            str(fit_text_id),
-        )
-    
-        run_properties.append(
-            fit_text
-        )
-        
-                    
     @staticmethod
     def _apply_font_name(
         run,
