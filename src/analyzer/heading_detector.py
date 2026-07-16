@@ -29,6 +29,6 @@ class HeadingDetector:
             for line in block.lines:
                 for span in line.spans:
 
-                    if span.font_size == largest_font:
+                    if span.font_size >= largest_font - 0.1:
                         block.block_type = BlockType.HEADING
                         break
