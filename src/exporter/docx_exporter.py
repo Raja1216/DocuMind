@@ -1,5 +1,7 @@
 from docx import Document as WordDocument
 from src.models.enums.block_type import BlockType
+from src.exporter.builders.run_builder import RunBuilder
+from docx.shared import Pt
 
 
 class DocxExporter:
@@ -32,8 +34,15 @@ class DocxExporter:
                         word_paragraph = doc.add_heading(level=1)
                     else:
                         word_paragraph = doc.add_paragraph()
+                        for line in para.lines:
 
-                    word_paragraph.add_run(para.text)
+                            runs = RunBuilder.build(line)
+                        
+                            for text_run in runs:
+                            
+                                run = word_paragraph.add_run(text_run.text)
+                        
+                                run.font.size = Pt(text_run.font_size)
             if page_index < total_pages - 1:
                 doc.add_page_break()        
 
