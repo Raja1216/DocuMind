@@ -50,8 +50,11 @@ class FixedLayoutDocxExporter:
         "w": WORD_NAMESPACE,
     }
     
-    TEXTBOX_WIDTH_PADDING = 2.0
-    TEXTBOX_HEIGHT_PADDING = 1.0
+    TEXTBOX_WIDTH_PADDING = 3.0
+    TEXTBOX_HEIGHT_PADDING = 6.0
+
+    TEXTBOX_TOP_ADJUSTMENT = 1.5
+    LINE_HEIGHT_FACTOR = 1.25
 
     ANCHOR_FONT_SIZE = 1.0
     ANCHOR_LINE_SPACING = 1.0
@@ -219,20 +222,34 @@ class FixedLayoutDocxExporter:
         """
 
         left = span.left
-        top = span.top
+
+        top = max(
+            span.top
+            - FixedLayoutDocxExporter.TEXTBOX_TOP_ADJUSTMENT,
+            0.0,
+        )
 
         width = max(
-            span.right - span.left
-            + FixedLayoutDocxExporter
-            .TEXTBOX_WIDTH_PADDING,
+            span.right
+            - span.left
+            + FixedLayoutDocxExporter.TEXTBOX_WIDTH_PADDING,
             1.0,
         )
 
-        height = max(
-            span.bottom - span.top
-            + FixedLayoutDocxExporter
-            .TEXTBOX_HEIGHT_PADDING,
-            span.font_size,
+        pdf_span_height = max(
+            span.bottom - span.top,
+            1.0,
+        )
+
+        word_line_height = max(
+            span.font_size
+            * FixedLayoutDocxExporter.LINE_HEIGHT_FACTOR,
+            pdf_span_height,
+        )
+
+        height = (
+            word_line_height
+            + FixedLayoutDocxExporter.TEXTBOX_HEIGHT_PADDING
         )
 
         shape_id = (
@@ -367,6 +384,7 @@ class FixedLayoutDocxExporter:
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
+            "mso-fit-shape-to-text:t;"
         )
 
         shape.set(
@@ -400,7 +418,7 @@ class FixedLayoutDocxExporter:
         Create a VML element with all namespaces required by
         Microsoft Word's legacy text-box format.
         """
-    
+
         return etree.Element(
             (
                 f"{{{FixedLayoutDocxExporter.VML_NAMESPACE}}}"
@@ -408,7 +426,7 @@ class FixedLayoutDocxExporter:
             ),
             nsmap=FixedLayoutDocxExporter.VML_NAMESPACE_MAP,
         )
-    
+
     @staticmethod
     def _create_word_2003_element(
         local_name: str,
@@ -417,7 +435,7 @@ class FixedLayoutDocxExporter:
         Create an element from the legacy Microsoft Word 2003
         namespace, such as w10:wrap.
         """
-    
+
         return etree.Element(
             (
                 f"{{"
@@ -452,8 +470,9 @@ class FixedLayoutDocxExporter:
 
         paragraph_format.line_spacing = Pt(
             max(
+                span.font_size
+                * FixedLayoutDocxExporter.LINE_HEIGHT_FACTOR,
                 span.bottom - span.top,
-                span.font_size,
             )
         )
 

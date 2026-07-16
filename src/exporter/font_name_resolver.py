@@ -14,6 +14,21 @@ class FontNameResolver:
         "Arial-BoldMT": "Arial",
         "Arial-ItalicMT": "Arial",
         "Arial-BoldItalicMT": "Arial",
+        
+        "Helvetica": "Arial",
+        "Helvetica-Bold": "Arial",
+        "Helvetica-Oblique": "Arial",
+        "Helvetica-BoldOblique": "Arial",
+
+        "HelveticaNeue": "Arial",
+        "HelveticaNeue-Light": "Arial",
+        "HelveticaNeue-UltraLight": "Arial",
+        "HelveticaNeue-Italic": "Arial",
+        "HelveticaNeue-LightItalic": "Arial",
+        "HelveticaNeue-LightItali": "Arial",
+        "HelveticaNeue-Bold": "Arial",
+        "HelveticaNeue-BoldItalic": "Arial",
+        "HelveticaNeue-Medium": "Arial",
 
         "Calibri": "Calibri",
         "Calibri-Bold": "Calibri",
