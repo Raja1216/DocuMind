@@ -9,6 +9,7 @@ from docx.oxml.ns import qn
 from docx.shared import Pt
 from docx.text.paragraph import Paragraph
 from lxml import etree
+from io import BytesIO
 
 from src.exporter.font_name_resolver import (
     FontNameResolver,
@@ -42,12 +43,18 @@ class FixedLayoutDocxExporter:
         "http://schemas.openxmlformats.org/"
         "wordprocessingml/2006/main"
     )
+    
+    RELATIONSHIPS_NAMESPACE = (
+        "http://schemas.openxmlformats.org/"
+        "officeDocument/2006/relationships"
+    )
 
     VML_NAMESPACE_MAP = {
         "v": VML_NAMESPACE,
         "o": OFFICE_NAMESPACE,
         "w10": WORD_2003_NAMESPACE,
         "w": WORD_NAMESPACE,
+        "r": RELATIONSHIPS_NAMESPACE,
     }
     
     TEXTBOX_WIDTH_PADDING = 3.0
@@ -94,6 +101,7 @@ class FixedLayoutDocxExporter:
             )
 
             FixedLayoutDocxExporter._render_page(
+                word_document=word_document,
                 anchor_paragraph=anchor_paragraph,
                 page=page,
             )
@@ -188,16 +196,23 @@ class FixedLayoutDocxExporter:
 
     @staticmethod
     def _render_page(
+        word_document,
         anchor_paragraph,
         page,
     ) -> None:
         """
-        Render every visible span at its PDF coordinates.
+        Render every supported page element.
 
-        Page numbers are intentionally included because
-        fixed-layout mode aims to reproduce all visible
-        PDF content.
+        Images are rendered first so that text remains above
+        images when their bounding boxes overlap.
         """
+
+        for image in page.images:
+            FixedLayoutDocxExporter._add_image_shape(
+                document_part=word_document.part,
+                anchor_paragraph=anchor_paragraph,
+                image=image,
+            )
 
         for block in page.blocks:
             for line in block.lines:
@@ -210,6 +225,171 @@ class FixedLayoutDocxExporter:
                         anchor_paragraph=anchor_paragraph,
                         span=span,
                     )
+
+    @staticmethod
+    def _add_image_shape(
+        document_part,
+        anchor_paragraph,
+        image,
+    ) -> None:
+        """
+        Add one extracted PDF image as an absolutely positioned
+        Word VML image shape.
+        """
+
+        relationship_id, _ = (
+            document_part.get_or_add_image(
+                BytesIO(image.image_bytes)
+            )
+        )
+
+        width = max(
+            image.displayed_width,
+            1.0,
+        )
+
+        height = max(
+            image.displayed_height,
+            1.0,
+        )
+
+        shape_id = (
+            FixedLayoutDocxExporter._next_shape_id()
+        )
+
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_image_shape(
+                shape_id=shape_id,
+                left=image.left,
+                top=image.top,
+                width=width,
+                height=height,
+            )
+        )
+
+        image_data = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "imagedata"
+            )
+        )
+
+        image_data.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.RELATIONSHIPS_NAMESPACE}"
+                f"}}id"
+            ),
+            relationship_id,
+        )
+
+        image_data.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
+                f"}}title"
+            ),
+            "",
+        )
+
+        shape.append(
+            image_data
+        )
+
+        pict = OxmlElement(
+            "w:pict"
+        )
+
+        pict.append(
+            shape
+        )
+
+        anchor_run = (
+            anchor_paragraph.add_run()
+        )
+
+        anchor_run._r.append(
+            pict
+        )
+
+    @staticmethod
+    def _create_image_shape(
+        shape_id: int,
+        left: float,
+        top: float,
+        width: float,
+        height: float,
+    ):
+        """
+        Create an absolutely positioned VML image shape.
+        """
+    
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "shape"
+            )
+        )
+    
+        shape.set(
+            "id",
+            f"DocuMindImage{shape_id}",
+        )
+    
+        shape.set(
+            "type",
+            "#_x0000_t75",
+        )
+    
+        shape.set(
+            "stroked",
+            "f",
+        )
+    
+        shape.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
+                f"}}allowincell"
+            ),
+            "f",
+        )
+    
+        style = (
+            "position:absolute;"
+            f"margin-left:{left:.3f}pt;"
+            f"margin-top:{top:.3f}pt;"
+            f"width:{width:.3f}pt;"
+            f"height:{height:.3f}pt;"
+            "z-index:1;"
+            "mso-position-horizontal-relative:page;"
+            "mso-position-vertical-relative:page;"
+            "mso-wrap-style:none;"
+        )
+    
+        shape.set(
+            "style",
+            style,
+        )
+    
+        wrap = (
+            FixedLayoutDocxExporter
+            ._create_word_2003_element(
+                "wrap"
+            )
+        )
+    
+        wrap.set(
+            "type",
+            "none",
+        )
+    
+        shape.append(
+            wrap
+        )
+    
+        return shape
 
     @staticmethod
     def _add_span_textbox(
