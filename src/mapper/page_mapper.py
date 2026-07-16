@@ -72,6 +72,7 @@ class PageMapper:
             page.tables.append(
                 TableMapper.map(
                     pymupdf_table=detected_table,
+                    pdf_page=pdf_page,
                     page_number=page.number,
                 )
             )        

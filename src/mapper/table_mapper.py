@@ -4,6 +4,11 @@ from dataclasses import dataclass
 
 from src.models.table import Table
 from src.models.table_cell import TableCell
+from src.models.table_border_style import TableBorderStyle
+
+import fitz
+from collections import Counter
+from statistics import median
 
 
 @dataclass(slots=True)
@@ -29,10 +34,21 @@ class TableMapper:
     """
 
     FULL_WIDTH_THRESHOLD = 0.90
+    
+    DRAWING_BBOX_TOLERANCE = 2.0
+
+    MAX_BORDER_THICKNESS = 3.0
+    MIN_BORDER_THICKNESS = 0.10
+
+    MIN_LINE_ASPECT_RATIO = 4.0
+
+    DEFAULT_BORDER_COLOR = "#B7B7B7"
+    DEFAULT_BORDER_THICKNESS = 0.5
 
     @staticmethod
     def map(
         pymupdf_table,
+        pdf_page,
         page_number: int,
     ) -> Table:
         extracted_rows = (
@@ -77,6 +93,13 @@ class TableMapper:
 
             row_count=len(normalized_rows),
             column_count=column_count,
+        )
+        
+        table.border_style = (
+            TableMapper._detect_border_style(
+                pdf_page=pdf_page,
+                table_bbox=table_bbox,
+            )
         )
 
         TableMapper._map_cells(
@@ -338,3 +361,300 @@ class TableMapper:
             return ""
 
         return str(value).strip()
+    
+    @staticmethod
+    def _detect_border_style(
+        pdf_page,
+        table_bbox,
+    ) -> TableBorderStyle:
+        """
+        Detect the dominant table-border appearance.
+
+        PDF producers may represent borders as either:
+
+        1. stroked paths:
+           - drawing["color"]
+           - drawing["width"]
+
+        2. thin filled rectangles:
+           - drawing["fill"]
+           - thickness derived from drawing["rect"]
+        """
+
+        table_rect = fitz.Rect(
+            table_bbox
+        )
+
+        tolerance = (
+            TableMapper.DRAWING_BBOX_TOLERANCE
+        )
+
+        expanded_table_rect = fitz.Rect(
+            table_rect.x0 - tolerance,
+            table_rect.y0 - tolerance,
+            table_rect.x1 + tolerance,
+            table_rect.y1 + tolerance,
+        )
+
+        detected_colors: list[str] = []
+        detected_thicknesses: list[float] = []
+
+        for drawing in pdf_page.get_drawings():
+
+            drawing_rect_value = drawing.get(
+                "rect"
+            )
+
+            if drawing_rect_value is None:
+                continue
+
+            drawing_rect = fitz.Rect(
+                drawing_rect_value
+            )
+
+            if not TableMapper._rectangles_overlap(
+                drawing_rect,
+                expanded_table_rect,
+            ):
+                continue
+
+            border_candidate = (
+                TableMapper._extract_border_candidate(
+                    drawing=drawing,
+                    drawing_rect=drawing_rect,
+                )
+            )
+
+            if border_candidate is None:
+                continue
+
+            border_color, border_thickness = (
+                border_candidate
+            )
+
+            detected_colors.append(
+                border_color
+            )
+
+            detected_thicknesses.append(
+                border_thickness
+            )
+
+        if not detected_colors:
+            return TableBorderStyle(
+                color=TableMapper.DEFAULT_BORDER_COLOR,
+                thickness=(
+                    TableMapper.DEFAULT_BORDER_THICKNESS
+                ),
+            )
+
+        dominant_color = Counter(
+            detected_colors
+        ).most_common(1)[0][0]
+
+        dominant_thickness = float(
+            median(detected_thicknesses)
+        )
+
+        dominant_thickness = min(
+            max(
+                dominant_thickness,
+                TableMapper.MIN_BORDER_THICKNESS,
+            ),
+            TableMapper.MAX_BORDER_THICKNESS,
+        )
+
+        return TableBorderStyle(
+            color=dominant_color,
+            thickness=dominant_thickness,
+        )
+
+    @staticmethod
+    def _extract_border_candidate(
+        drawing: dict,
+        drawing_rect: fitz.Rect,
+    ) -> tuple[str, float] | None:
+        """
+        Extract border color and thickness from either a stroked
+        path or a thin filled rectangle.
+        """
+
+        rectangle_width = max(
+            float(drawing_rect.width),
+            0.0,
+        )
+
+        rectangle_height = max(
+            float(drawing_rect.height),
+            0.0,
+        )
+
+        if (
+            rectangle_width <= 0
+            or rectangle_height <= 0
+        ):
+            return None
+
+        shorter_side = min(
+            rectangle_width,
+            rectangle_height,
+        )
+
+        longer_side = max(
+            rectangle_width,
+            rectangle_height,
+        )
+
+        aspect_ratio = (
+            longer_side
+            / max(shorter_side, 0.001)
+        )
+
+        stroke_color = drawing.get(
+            "color"
+        )
+
+        stroke_width = drawing.get(
+            "width"
+        )
+
+        fill_color = drawing.get(
+            "fill"
+        )
+
+        # Case 1: normal stroked PDF line.
+        if (
+            stroke_color is not None
+            and stroke_width is not None
+            and float(stroke_width) > 0
+        ):
+            thickness = float(
+                stroke_width
+            )
+
+            if (
+                thickness
+                > TableMapper.MAX_BORDER_THICKNESS
+            ):
+                return None
+
+            return (
+                TableMapper._rgb_to_hex(
+                    stroke_color
+                ),
+                thickness,
+            )
+
+        # Case 2: thin filled rectangle used as a line.
+        if fill_color is None:
+            return None
+
+        if (
+            aspect_ratio
+            < TableMapper.MIN_LINE_ASPECT_RATIO
+        ):
+            return None
+
+        if (
+            shorter_side
+            > TableMapper.MAX_BORDER_THICKNESS
+        ):
+            return None
+
+        if TableMapper._is_nearly_white(
+            fill_color
+        ):
+            return None
+
+        return (
+            TableMapper._rgb_to_hex(
+                fill_color
+            ),
+            shorter_side,
+        )
+
+    @staticmethod
+    def _rectangles_overlap(
+        first: fitz.Rect,
+        second: fitz.Rect,
+    ) -> bool:
+        """
+        Return True when rectangles overlap or touch.
+
+        This avoids relying on intersection.is_empty, which can
+        reject extremely thin line-like rectangles.
+        """
+
+        return not (
+            first.x1 < second.x0
+            or first.x0 > second.x1
+            or first.y1 < second.y0
+            or first.y0 > second.y1
+        )
+
+    @staticmethod
+    def _is_nearly_white(
+        color,
+    ) -> bool:
+        """
+        Ignore white page backgrounds and white cell fills.
+        """
+    
+        if color is None or len(color) < 3:
+            return False
+    
+        red = float(color[0])
+        green = float(color[1])
+        blue = float(color[2])
+    
+        return (
+            red >= 0.95
+            and green >= 0.95
+            and blue >= 0.95
+        )
+
+    @staticmethod
+    def _rgb_to_hex(
+        color,
+    ) -> str:
+        """
+        Convert PyMuPDF's 0–1 RGB tuple into a hexadecimal color.
+        """
+
+        if len(color) < 3:
+            return "#000000"
+
+        red = TableMapper._color_component_to_int(
+            color[0]
+        )
+
+        green = TableMapper._color_component_to_int(
+            color[1]
+        )
+
+        blue = TableMapper._color_component_to_int(
+            color[2]
+        )
+
+        return (
+            f"#{red:02X}"
+            f"{green:02X}"
+            f"{blue:02X}"
+        )
+
+    @staticmethod
+    def _color_component_to_int(
+        component: float,
+    ) -> int:
+        """
+        Convert one normalized PDF color component into 0–255.
+        """
+
+        component = min(
+            max(float(component), 0.0),
+            1.0,
+        )
+
+        return int(
+            round(component * 255)
+        )

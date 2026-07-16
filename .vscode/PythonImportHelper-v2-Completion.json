@@ -280,11 +280,11 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -321,6 +321,86 @@
     },
     {
         "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -377,70 +457,6 @@
     },
     {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -729,11 +745,11 @@
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "collections",
         "documentation": {}
     },
     {
@@ -782,6 +798,22 @@
         "description": "src.models.line",
         "isExtraImport": true,
         "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "median",
+        "importPath": "statistics",
+        "description": "statistics",
+        "isExtraImport": true,
+        "detail": "statistics",
         "documentation": {}
     },
     {
@@ -1233,6 +1265,31 @@
         "documentation": {}
     },
     {
+        "label": "TableBorderStyle",
+        "importPath": "src.models.table_border_style",
+        "description": "src.models.table_border_style",
+        "isExtraImport": true,
+        "detail": "src.models.table_border_style",
+        "documentation": {}
+    },
+    {
+        "label": "TableBorderStyle",
+        "importPath": "src.models.table_border_style",
+        "description": "src.models.table_border_style",
+        "isExtraImport": true,
+        "detail": "src.models.table_border_style",
+        "documentation": {}
+    },
+    {
+        "label": "fitz",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "fitz",
+        "description": "fitz",
+        "detail": "fitz",
+        "documentation": {}
+    },
+    {
         "label": "Enum",
         "importPath": "enum",
         "description": "enum",
@@ -1294,15 +1351,6 @@
         "description": "src.models.block",
         "isExtraImport": true,
         "detail": "src.models.block",
-        "documentation": {}
-    },
-    {
-        "label": "fitz",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "fitz",
-        "description": "fitz",
-        "detail": "fitz",
         "documentation": {}
     },
     {
@@ -1761,8 +1809,17 @@
         "kind": 6,
         "importPath": "src.models.table",
         "description": "src.models.table",
-        "peekOfCode": "class Table(BaseElement):\n    \"\"\"\n    Represents one logical table detected on a PDF page.\n    \"\"\"\n    row_count: int\n    column_count: int\n    cells: list[TableCell] = field(\n        default_factory=list\n    )\n    @property",
+        "peekOfCode": "class Table(BaseElement):\n    \"\"\"\n    Represents one logical table detected on a PDF page.\n    \"\"\"\n    row_count: int\n    column_count: int\n    cells: list[TableCell] = field(\n        default_factory=list\n    )\n    border_style: TableBorderStyle = field(",
         "detail": "src.models.table",
+        "documentation": {}
+    },
+    {
+        "label": "TableBorderStyle",
+        "kind": 6,
+        "importPath": "src.models.table_border_style",
+        "description": "src.models.table_border_style",
+        "peekOfCode": "class TableBorderStyle:\n    \"\"\"\n    Represents the dominant border appearance of a PDF table.\n    \"\"\"\n    color: str = \"#B7B7B7\"\n    thickness: float = 0.5",
+        "detail": "src.models.table_border_style",
         "documentation": {}
     },
     {
@@ -1869,7 +1926,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,",
         "detail": "main",
         "documentation": {}
     },
@@ -1878,7 +1935,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,\n        start=1,",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,\n        start=1,",
         "detail": "main",
         "documentation": {}
     },
@@ -1887,7 +1944,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,\n        start=1,\n    ):\n        print(\n            f\"Page {page.number}, \"",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,\n        start=1,\n    ):\n        print(\n            f\"Page {page.number}, \"",
         "detail": "main",
         "documentation": {}
     },

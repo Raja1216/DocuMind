@@ -18,35 +18,16 @@ document = DocumentMapper.map(
     pdf
 )
 for page in document.pages:
-    for table_index, table in enumerate(
+    for index, table in enumerate(
         page.tables,
         start=1,
     ):
         print(
             f"Page {page.number}, "
-            f"Table {table_index}: "
-            f"{table.row_count} rows x "
-            f"{table.column_count} columns"
+            f"Table {index}:",
+            table.border_style.color,
+            table.border_style.thickness,
         )
-
-        print(
-            "BBox:",
-            (
-                table.left,
-                table.top,
-                table.right,
-                table.bottom,
-            ),
-        )
-
-        for cell in table.cells:
-            print(
-                (
-                    cell.row_index,
-                    cell.column_index,
-                    cell.text,
-                )
-            )
 
 analyzer = DocumentAnalyzer()
 

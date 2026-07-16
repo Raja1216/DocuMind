@@ -340,6 +340,8 @@ class FixedLayoutDocxExporter:
                 top=y_position,
                 right=right,
                 bottom=y_position,
+                border_color=table.border_style.color,
+                border_thickness=table.border_style.thickness,
             )
 
         for x_position, top, bottom in vertical_segments:
@@ -349,6 +351,8 @@ class FixedLayoutDocxExporter:
                 top=top,
                 right=x_position,
                 bottom=bottom,
+                border_color=table.border_style.color,
+                border_thickness=table.border_style.thickness,
             )
 
     @staticmethod
@@ -569,6 +573,8 @@ class FixedLayoutDocxExporter:
         top: float,
         right: float,
         bottom: float,
+        border_color: str,
+        border_thickness: float,
     ) -> None:
         """
         Render one table border as a very thin filled VML
@@ -578,9 +584,9 @@ class FixedLayoutDocxExporter:
         than absolutely positioned VML line elements.
         """
 
-        thickness = (
-            FixedLayoutDocxExporter
-            .TABLE_BORDER_THICKNESS
+        thickness = max(
+            border_thickness,
+            0.10,
         )
 
         is_horizontal = abs(
@@ -624,6 +630,7 @@ class FixedLayoutDocxExporter:
                 top=adjusted_top,
                 width=width,
                 height=height,
+                border_color=border_color,
             )
         )
 
@@ -650,6 +657,7 @@ class FixedLayoutDocxExporter:
         top: float,
         width: float,
         height: float,
+        border_color: str,
     ):
         """
         Create one thin, filled VML rectangle used as a
@@ -675,7 +683,7 @@ class FixedLayoutDocxExporter:
 
         shape.set(
             "fillcolor",
-            FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
+            border_color,
         )
 
         shape.set(
@@ -1248,54 +1256,54 @@ class FixedLayoutDocxExporter:
     ):
         """
         Detect alignment for one visual line inside a table cell.
-    
+
         Left alignment is preferred unless the line clearly
         appears centered or right-aligned.
         """
-    
+
         if not span_line:
             return WD_ALIGN_PARAGRAPH.LEFT
-    
+
         text_left = min(
             span.left
             for span in span_line
         )
-    
+
         text_right = max(
             span.right
             for span in span_line
         )
-    
+
         cell_width = max(
             cell.right - cell.left,
             1.0,
         )
-    
+
         text_width = max(
             text_right - text_left,
             0.0,
         )
-    
+
         left_gap = max(
             text_left - cell.left,
             0.0,
         )
-    
+
         right_gap = max(
             cell.right - text_right,
             0.0,
         )
-    
+
         tolerance = (
             FixedLayoutDocxExporter
             .TABLE_ALIGNMENT_TOLERANCE
         )
-    
+
         minimum_center_margin = (
             FixedLayoutDocxExporter
             .TABLE_CENTER_MIN_MARGIN
         )
-    
+
         # A line is considered centered only when both sides have
         # meaningful whitespace and those margins are nearly equal.
         is_centered = (
@@ -1303,10 +1311,10 @@ class FixedLayoutDocxExporter:
             and right_gap >= minimum_center_margin
             and abs(left_gap - right_gap) <= tolerance
         )
-    
+
         if is_centered:
             return WD_ALIGN_PARAGRAPH.CENTER
-    
+
         # Right alignment requires the text to sit substantially
         # closer to the right boundary than the left boundary.
         if left_gap > 0:
@@ -1319,22 +1327,22 @@ class FixedLayoutDocxExporter:
             )
         else:
             right_alignment_ratio = 0.0
-    
+
         is_right_aligned = (
             right_gap <= tolerance
             and right_alignment_ratio
             >= FixedLayoutDocxExporter
             .TABLE_RIGHT_ALIGNMENT_RATIO
         )
-    
+
         if is_right_aligned:
             return WD_ALIGN_PARAGRAPH.RIGHT
-    
+
         # Wide text usually represents normal left-aligned content,
         # even when its outer bounds appear visually balanced.
         if text_width >= cell_width * 0.60:
             return WD_ALIGN_PARAGRAPH.LEFT
-    
+
         return WD_ALIGN_PARAGRAPH.LEFT
     
     @staticmethod

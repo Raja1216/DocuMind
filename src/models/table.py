@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from src.models.base_element import BaseElement
 from src.models.table_cell import TableCell
+from src.models.table_border_style import TableBorderStyle
 
 
 @dataclass(slots=True)
@@ -19,6 +20,10 @@ class Table(BaseElement):
         default_factory=list
     )
 
+    border_style: TableBorderStyle = field(
+        default_factory=TableBorderStyle
+    )
+    
     @property
     def width(self) -> float:
         return self.right - self.left
