@@ -296,11 +296,27 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -329,102 +345,6 @@
     },
     {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -497,6 +417,126 @@
     },
     {
         "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -1225,6 +1265,22 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphicExtractor",
+        "importPath": "src.extractor.vector_graphic_extractor",
+        "description": "src.extractor.vector_graphic_extractor",
+        "isExtraImport": true,
+        "detail": "src.extractor.vector_graphic_extractor",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicMapper",
+        "importPath": "src.mapper.vector_graphic_mapper",
+        "description": "src.mapper.vector_graphic_mapper",
+        "isExtraImport": true,
+        "detail": "src.mapper.vector_graphic_mapper",
+        "documentation": {}
+    },
+    {
         "label": "RGBColor",
         "importPath": "src.models.color.rgb_color",
         "description": "src.models.color.rgb_color",
@@ -1306,11 +1362,35 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
         "label": "Enum",
         "importPath": "enum",
         "description": "enum",
         "isExtraImport": true,
         "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "BaseElement",
+        "importPath": "src.models.base_element",
+        "description": "src.models.base_element",
+        "isExtraImport": true,
+        "detail": "src.models.base_element",
         "documentation": {}
     },
     {
@@ -1367,6 +1447,14 @@
         "description": "src.models.block",
         "isExtraImport": true,
         "detail": "src.models.block",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
         "documentation": {}
     },
     {
@@ -1632,6 +1720,15 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphicExtractor",
+        "kind": 6,
+        "importPath": "src.extractor.vector_graphic_extractor",
+        "description": "src.extractor.vector_graphic_extractor",
+        "peekOfCode": "class VectorGraphicExtractor:\n    \"\"\"\n    Extracts vector drawing groups from one PyMuPDF page.\n    \"\"\"\n    @staticmethod\n    def extract(pdf_page) -> list[dict]:\n        \"\"\"\n        Return normalized PyMuPDF drawing dictionaries.\n        \"\"\"\n        drawings = pdf_page.get_drawings()",
+        "detail": "src.extractor.vector_graphic_extractor",
+        "documentation": {}
+    },
+    {
         "label": "BlockMapper",
         "kind": 6,
         "importPath": "src.mapper.block_mapper",
@@ -1701,6 +1798,15 @@
         "description": "src.mapper.table_mapper",
         "peekOfCode": "class TableMapper:\n    \"\"\"\n    Maps one PyMuPDF table into DocuMind table models.\n    This mapper:\n    - preserves row and column positions;\n    - preserves None placeholders;\n    - removes false full-width wrapper rows;\n    - recalculates the final table bounding box.\n    \"\"\"\n    FULL_WIDTH_THRESHOLD = 0.90",
         "detail": "src.mapper.table_mapper",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicMapper",
+        "kind": 6,
+        "importPath": "src.mapper.vector_graphic_mapper",
+        "description": "src.mapper.vector_graphic_mapper",
+        "peekOfCode": "class VectorGraphicMapper:\n    \"\"\"\n    Maps a PyMuPDF drawing dictionary into the DocuMind\n    VectorGraphic model.\n    \"\"\"\n    @staticmethod\n    def map(\n        drawing_data: dict,\n        page_number: int,\n        sequence_number: int,",
+        "detail": "src.mapper.vector_graphic_mapper",
         "documentation": {}
     },
     {
@@ -1875,6 +1981,15 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphic",
+        "kind": 6,
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "peekOfCode": "class VectorGraphic(BaseElement):\n    \"\"\"\n    Represents one PDF vector-drawing group.\n    A PyMuPDF drawing can contain one or more path items,\n    such as lines, rectangles, curves, and quadrilaterals.\n    \"\"\"\n    sequence_number: int\n    drawing_type: str\n    stroke_color: str | None = None\n    fill_color: str | None = None",
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
         "label": "PDFReader",
         "kind": 6,
         "importPath": "src.parser.pdf_reader",
@@ -1951,7 +2066,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf8.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"",
         "detail": "main",
         "documentation": {}
     },
@@ -1960,7 +2075,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf8.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"\n        f\"{len(page.vector_graphics)} \"",
         "detail": "main",
         "documentation": {}
     },
@@ -1969,7 +2084,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:\n                print(\n                    f\"Page {page.number}, \"\n                    f\"Cell ({cell.row_index}, \"",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"\n        f\"{len(page.vector_graphics)} \"\n        f\"vector graphics\"\n    )\n    for graphic in page.vector_graphics:",
         "detail": "main",
         "documentation": {}
     },

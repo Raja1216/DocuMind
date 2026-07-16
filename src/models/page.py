@@ -6,6 +6,7 @@ from src.models.geometry.rectangle import Rectangle
 from src.models.image import Image
 from src.models.text_block import TextBlock
 from src.models.table import Table
+from src.models.vector_graphic import VectorGraphic
 
 
 @dataclass(slots=True)
@@ -28,5 +29,8 @@ class Page:
         default_factory=list
     )
     tables: list[Table] = field(
+        default_factory=list
+    )
+    vector_graphics: list[VectorGraphic] = field(
         default_factory=list
     )

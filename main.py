@@ -11,22 +11,38 @@ from src.parser.pdf_reader import PDFReader
 reader = PDFReader()
 
 pdf = reader.open(
-    "samples/pdf/spdf3.pdf"
+    "samples/pdf/spdf8.pdf"
 )
 
 document = DocumentMapper.map(
     pdf
 )
 for page in document.pages:
-    for table in page.tables:
-        for cell in table.cells:
-            if cell.fill_color is not None:
-                print(
-                    f"Page {page.number}, "
-                    f"Cell ({cell.row_index}, "
-                    f"{cell.column_index}): "
-                    f"{cell.fill_color}"
-                )
+    print(
+        f"Page {page.number}: "
+        f"{len(page.vector_graphics)} "
+        f"vector graphics"
+    )
+
+    for graphic in page.vector_graphics:
+        print(
+            " ",
+            graphic.sequence_number,
+            graphic.drawing_type,
+            (
+                graphic.left,
+                graphic.top,
+                graphic.right,
+                graphic.bottom,
+            ),
+            "stroke:",
+            graphic.stroke_color,
+            graphic.stroke_width,
+            "fill:",
+            graphic.fill_color,
+            "items:",
+            len(graphic.items),
+        )
 
 analyzer = DocumentAnalyzer()
 

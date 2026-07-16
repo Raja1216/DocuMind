@@ -7,6 +7,13 @@ from src.mapper.table_mapper import TableMapper
 from src.models.geometry.rectangle import Rectangle
 from src.models.page import Page
 
+from src.extractor.vector_graphic_extractor import (
+    VectorGraphicExtractor,
+)
+from src.mapper.vector_graphic_mapper import (
+    VectorGraphicMapper,
+)
+
 
 class PageMapper:
 
@@ -75,6 +82,76 @@ class PageMapper:
                     pdf_page=pdf_page,
                     page_number=page.number,
                 )
-            )        
+            )
+            
+        drawing_groups = (
+            VectorGraphicExtractor.extract(
+                pdf_page
+            )
+        )
+
+        for sequence_number, drawing_data in enumerate(
+            drawing_groups,
+            start=1,
+        ):
+            vector_graphic = (
+                VectorGraphicMapper.map(
+                    drawing_data=drawing_data,
+                    page_number=page.number,
+                    sequence_number=sequence_number,
+                )
+            )
+
+            if vector_graphic is None:
+                continue
+            
+            if (
+                PageMapper
+                ._graphic_belongs_to_table(
+                    vector_graphic=vector_graphic,
+                    tables=page.tables,
+                )
+            ):
+                continue
+            
+            page.vector_graphics.append(
+                vector_graphic
+            )            
 
         return page
+    
+    @staticmethod
+    def _graphic_belongs_to_table(
+        vector_graphic,
+        tables,
+    ) -> bool:
+        """
+        Exclude drawings contained inside detected tables.
+    
+        Table borders and cell fills are already handled by the
+        table engine and must not be rendered again by the
+        vector-graphics engine.
+        """
+    
+        graphic_center_x = (
+            vector_graphic.left
+            + vector_graphic.right
+        ) / 2
+    
+        graphic_center_y = (
+            vector_graphic.top
+            + vector_graphic.bottom
+        ) / 2
+    
+        for table in tables:
+            if (
+                table.left
+                <= graphic_center_x
+                <= table.right
+                and table.top
+                <= graphic_center_y
+                <= table.bottom
+            ):
+                return True
+    
+        return False
