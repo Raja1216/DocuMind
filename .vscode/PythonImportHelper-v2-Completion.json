@@ -1869,7 +1869,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf4.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,",
         "detail": "main",
         "documentation": {}
     },
@@ -1878,7 +1878,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf4.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,\n        start=1,",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table_index, table in enumerate(\n        page.tables,\n        start=1,",
         "detail": "main",
         "documentation": {}
     },

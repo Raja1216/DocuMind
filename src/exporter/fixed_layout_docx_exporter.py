@@ -81,7 +81,11 @@ class FixedLayoutDocxExporter:
     DEFAULT_TABLE_FONT_SIZE = 9.0
     
     TABLE_LINE_TOLERANCE = 2.0
-    TABLE_ALIGNMENT_TOLERANCE = 6.0
+    TABLE_ALIGNMENT_TOLERANCE = 4.0
+
+    TABLE_CENTER_MIN_MARGIN = 4.0
+    TABLE_RIGHT_ALIGNMENT_RATIO = 0.65
+    TABLE_ALIGNMENT_REQUIRED_RATIO = 0.75
     TABLE_VERTICAL_ALIGNMENT_TOLERANCE = 3.0
 
     TABLE_VERTICAL_TOP = "top"
@@ -1174,44 +1178,163 @@ class FixedLayoutDocxExporter:
         cell_spans: list,
     ):
         """
-        Detect left, center, or right alignment from the PDF
-        coordinates of the cell text.
+        Detect horizontal table-cell alignment by analyzing
+        each visual text line separately.
+
+        The method intentionally defaults to left alignment.
+        Center or right alignment is used only when most visible
+        lines clearly support it.
         """
 
         if not cell_spans:
             return WD_ALIGN_PARAGRAPH.LEFT
 
+        span_lines = (
+            FixedLayoutDocxExporter
+            ._group_table_spans_into_lines(
+                cell_spans
+            )
+        )
+
+        if not span_lines:
+            return WD_ALIGN_PARAGRAPH.LEFT
+
+        detected_alignments = [
+            FixedLayoutDocxExporter
+            ._detect_single_table_line_alignment(
+                cell=cell,
+                span_line=span_line,
+            )
+            for span_line in span_lines
+        ]
+
+        center_count = sum(
+            alignment == WD_ALIGN_PARAGRAPH.CENTER
+            for alignment in detected_alignments
+        )
+
+        right_count = sum(
+            alignment == WD_ALIGN_PARAGRAPH.RIGHT
+            for alignment in detected_alignments
+        )
+
+        total_lines = len(
+            detected_alignments
+        )
+
+        required_ratio = (
+            FixedLayoutDocxExporter
+            .TABLE_ALIGNMENT_REQUIRED_RATIO
+        )
+
+        if (
+            center_count / total_lines
+            >= required_ratio
+        ):
+            return WD_ALIGN_PARAGRAPH.CENTER
+
+        if (
+            right_count / total_lines
+            >= required_ratio
+        ):
+            return WD_ALIGN_PARAGRAPH.RIGHT
+
+        return WD_ALIGN_PARAGRAPH.LEFT
+    
+    @staticmethod
+    def _detect_single_table_line_alignment(
+        cell,
+        span_line: list,
+    ):
+        """
+        Detect alignment for one visual line inside a table cell.
+    
+        Left alignment is preferred unless the line clearly
+        appears centered or right-aligned.
+        """
+    
+        if not span_line:
+            return WD_ALIGN_PARAGRAPH.LEFT
+    
         text_left = min(
             span.left
-            for span in cell_spans
+            for span in span_line
         )
-
+    
         text_right = max(
             span.right
-            for span in cell_spans
+            for span in span_line
         )
-
+    
+        cell_width = max(
+            cell.right - cell.left,
+            1.0,
+        )
+    
+        text_width = max(
+            text_right - text_left,
+            0.0,
+        )
+    
         left_gap = max(
             text_left - cell.left,
             0.0,
         )
-
+    
         right_gap = max(
             cell.right - text_right,
             0.0,
         )
-
+    
         tolerance = (
             FixedLayoutDocxExporter
             .TABLE_ALIGNMENT_TOLERANCE
         )
-
-        if abs(left_gap - right_gap) <= tolerance:
+    
+        minimum_center_margin = (
+            FixedLayoutDocxExporter
+            .TABLE_CENTER_MIN_MARGIN
+        )
+    
+        # A line is considered centered only when both sides have
+        # meaningful whitespace and those margins are nearly equal.
+        is_centered = (
+            left_gap >= minimum_center_margin
+            and right_gap >= minimum_center_margin
+            and abs(left_gap - right_gap) <= tolerance
+        )
+    
+        if is_centered:
             return WD_ALIGN_PARAGRAPH.CENTER
-
-        if left_gap > right_gap + tolerance:
+    
+        # Right alignment requires the text to sit substantially
+        # closer to the right boundary than the left boundary.
+        if left_gap > 0:
+            right_alignment_ratio = (
+                left_gap
+                / max(
+                    left_gap + right_gap,
+                    1.0,
+                )
+            )
+        else:
+            right_alignment_ratio = 0.0
+    
+        is_right_aligned = (
+            right_gap <= tolerance
+            and right_alignment_ratio
+            >= FixedLayoutDocxExporter
+            .TABLE_RIGHT_ALIGNMENT_RATIO
+        )
+    
+        if is_right_aligned:
             return WD_ALIGN_PARAGRAPH.RIGHT
-
+    
+        # Wide text usually represents normal left-aligned content,
+        # even when its outer bounds appear visually balanced.
+        if text_width >= cell_width * 0.60:
+            return WD_ALIGN_PARAGRAPH.LEFT
+    
         return WD_ALIGN_PARAGRAPH.LEFT
     
     @staticmethod
@@ -1222,54 +1345,54 @@ class FixedLayoutDocxExporter:
         """
         Detect whether cell text is aligned to the top,
         vertical center, or bottom.
-    
+
         The decision is based on the free PDF space above and
         below the visible text.
         """
-    
+
         if not cell_spans:
             return (
                 FixedLayoutDocxExporter
                 .TABLE_VERTICAL_TOP
             )
-    
+
         text_top = min(
             span.top
             for span in cell_spans
         )
-    
+
         text_bottom = max(
             span.bottom
             for span in cell_spans
         )
-    
+
         top_gap = max(
             text_top - cell.top,
             0.0,
         )
-    
+
         bottom_gap = max(
             cell.bottom - text_bottom,
             0.0,
         )
-    
+
         tolerance = (
             FixedLayoutDocxExporter
             .TABLE_VERTICAL_ALIGNMENT_TOLERANCE
         )
-    
+
         if abs(top_gap - bottom_gap) <= tolerance:
             return (
                 FixedLayoutDocxExporter
                 .TABLE_VERTICAL_CENTER
             )
-    
+
         if top_gap > bottom_gap + tolerance:
             return (
                 FixedLayoutDocxExporter
                 .TABLE_VERTICAL_BOTTOM
             )
-    
+
         return (
             FixedLayoutDocxExporter
             .TABLE_VERTICAL_TOP

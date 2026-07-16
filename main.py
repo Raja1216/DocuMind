@@ -11,7 +11,7 @@ from src.parser.pdf_reader import PDFReader
 reader = PDFReader()
 
 pdf = reader.open(
-    "samples/pdf/spdf4.pdf"
+    "samples/pdf/spdf3.pdf"
 )
 
 document = DocumentMapper.map(
