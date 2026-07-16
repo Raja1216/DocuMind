@@ -12,8 +12,9 @@ class ParagraphStyleAnalyzer:
     """
     Calculates paragraph layout properties from PDF geometry.
 
-    Current responsibilities:
+    Responsibilities:
     - Exact line spacing
+    - Real paragraph spacing
     - Left indentation
     - Right indentation
     - First-line indentation
@@ -21,6 +22,10 @@ class ParagraphStyleAnalyzer:
 
     DEFAULT_LINE_SPACING = 12.0
     MINIMUM_LINE_SPACING = 6.0
+
+    # Ignore very small coordinate differences caused by
+    # font bounding boxes and floating-point extraction.
+    PARAGRAPH_GAP_TOLERANCE = 1.0
 
     @staticmethod
     def analyze(document: Document) -> None:
@@ -30,7 +35,8 @@ class ParagraphStyleAnalyzer:
                 block
                 for block in page.blocks
                 if (
-                    block.block_type != BlockType.PAGE_NUMBER
+                    block.block_type
+                    != BlockType.PAGE_NUMBER
                     and ParagraphStyleAnalyzer
                     ._block_has_text(block)
                 )
@@ -49,13 +55,25 @@ class ParagraphStyleAnalyzer:
                 for block in content_blocks
             )
 
+            page_paragraphs: list[Paragraph] = []
+
             for block in content_blocks:
                 for paragraph in block.paragraphs:
+
                     ParagraphStyleAnalyzer._analyze_paragraph(
                         paragraph=paragraph,
                         content_left=content_left,
                         content_right=content_right,
                     )
+
+                    if ParagraphStyleAnalyzer._paragraph_has_text(
+                        paragraph
+                    ):
+                        page_paragraphs.append(paragraph)
+
+            ParagraphStyleAnalyzer._apply_vertical_spacing(
+                page_paragraphs
+            )
 
     @staticmethod
     def _analyze_paragraph(
@@ -64,7 +82,7 @@ class ParagraphStyleAnalyzer:
         content_right: float,
     ) -> None:
         """
-        Populate horizontal and vertical paragraph properties.
+        Populate horizontal layout and line-spacing properties.
         """
 
         visible_lines = [
@@ -111,12 +129,142 @@ class ParagraphStyleAnalyzer:
             ._calculate_line_spacing(paragraph)
         )
 
+        # Reset before calculating the actual gap.
+        paragraph.style.spacing_before = 0.0
+        paragraph.style.spacing_after = 0.0
+
+    @staticmethod
+    def _apply_vertical_spacing(
+        paragraphs: list[Paragraph],
+    ) -> None:
+        """
+        Calculate real vertical spacing between consecutive
+        PDF paragraphs.
+
+        The first paragraph starts at the page's top margin,
+        so it receives no extra spacing.
+        """
+
+        if not paragraphs:
+            return
+
+        paragraphs.sort(
+            key=ParagraphStyleAnalyzer._paragraph_top
+        )
+
+        paragraphs[0].style.spacing_before = 0.0
+
+        previous_paragraph = paragraphs[0]
+
+        for current_paragraph in paragraphs[1:]:
+
+            previous_bottom = (
+                ParagraphStyleAnalyzer._paragraph_bottom(
+                    previous_paragraph
+                )
+            )
+
+            current_top = (
+                ParagraphStyleAnalyzer._paragraph_top(
+                    current_paragraph
+                )
+            )
+
+            visible_gap = (
+                current_top - previous_bottom
+            )
+
+            if (
+                visible_gap
+                <= ParagraphStyleAnalyzer
+                .PARAGRAPH_GAP_TOLERANCE
+            ):
+                spacing_before = 0.0
+            else:
+                spacing_before = visible_gap
+
+            current_paragraph.style.spacing_before = (
+                spacing_before
+            )
+
+            previous_paragraph = current_paragraph
+
+    @staticmethod
+    def _paragraph_top(
+        paragraph: Paragraph,
+    ) -> float:
+        """
+        Return the top edge of a paragraph's visible content.
+        """
+
+        visible_spans = (
+            ParagraphStyleAnalyzer
+            ._paragraph_visible_spans(paragraph)
+        )
+
+        if not visible_spans:
+            return 0.0
+
+        return min(
+            span.top
+            for span in visible_spans
+        )
+
+    @staticmethod
+    def _paragraph_bottom(
+        paragraph: Paragraph,
+    ) -> float:
+        """
+        Return the bottom edge of a paragraph's visible content.
+        """
+
+        visible_spans = (
+            ParagraphStyleAnalyzer
+            ._paragraph_visible_spans(paragraph)
+        )
+
+        if not visible_spans:
+            return 0.0
+
+        return max(
+            span.bottom
+            for span in visible_spans
+        )
+
+    @staticmethod
+    def _paragraph_visible_spans(
+        paragraph: Paragraph,
+    ) -> list:
+        """
+        Return every visible span belonging to a paragraph.
+        """
+
+        return [
+            span
+            for line in paragraph.lines
+            for span in line.spans
+            if span.text.strip()
+        ]
+
+    @staticmethod
+    def _paragraph_has_text(
+        paragraph: Paragraph,
+    ) -> bool:
+        """
+        Return True when a paragraph contains visible text.
+        """
+
+        return bool(
+            ParagraphStyleAnalyzer
+            ._paragraph_visible_spans(paragraph)
+        )
+
     @staticmethod
     def _calculate_line_spacing(
         paragraph: Paragraph,
     ) -> float:
         """
-        Calculate the typical baseline distance between
+        Calculate typical baseline distance between
         consecutive PDF lines.
         """
 
@@ -169,7 +317,7 @@ class ParagraphStyleAnalyzer:
     @staticmethod
     def _line_left(line: Line) -> float:
         """
-        Return the left edge of visible content in a line.
+        Return the left edge of visible line content.
         """
 
         visible_spans = [
@@ -189,7 +337,7 @@ class ParagraphStyleAnalyzer:
     @staticmethod
     def _line_right(line: Line) -> float:
         """
-        Return the right edge of visible content in a line.
+        Return the right edge of visible line content.
         """
 
         visible_spans = [
@@ -209,7 +357,7 @@ class ParagraphStyleAnalyzer:
     @staticmethod
     def _line_baseline(line: Line) -> float:
         """
-        Return the median baseline of visible spans.
+        Return the median baseline of visible line spans.
         """
 
         baselines = [
@@ -260,7 +408,7 @@ class ParagraphStyleAnalyzer:
     @staticmethod
     def _line_has_text(line: Line) -> bool:
         """
-        Return True when the line contains visible text.
+        Return True when a line contains visible text.
         """
 
         return any(
@@ -271,7 +419,7 @@ class ParagraphStyleAnalyzer:
     @staticmethod
     def _block_has_text(block) -> bool:
         """
-        Return True when the block contains visible text.
+        Return True when a block contains visible text.
         """
 
         return any(

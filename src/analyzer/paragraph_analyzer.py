@@ -106,11 +106,9 @@ class ParagraphAnalyzer:
             lines
         )
 
-        paragraph.style.spacing_before = max(
-            spacing_before,
-            0.0,
-        )
-
+        # Paragraph spacing is calculated later by
+        # ParagraphStyleAnalyzer using real PDF coordinates.
+        paragraph.style.spacing_before = 0.0
         paragraph.style.spacing_after = 0.0
 
         block.paragraphs.append(paragraph)
