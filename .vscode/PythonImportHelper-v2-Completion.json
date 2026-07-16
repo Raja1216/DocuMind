@@ -1926,7 +1926,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf5.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:",
         "detail": "main",
         "documentation": {}
     },
@@ -1935,7 +1935,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf5.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:",
         "detail": "main",
         "documentation": {}
     },

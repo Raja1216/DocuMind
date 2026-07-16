@@ -72,6 +72,7 @@ class FixedLayoutDocxExporter:
     TABLE_BORDER_THICKNESS = 0.50
 
     TABLE_GRID_TOLERANCE = 0.5
+    MINIMUM_VISIBLE_TABLE_BORDER = 0.75
     TABLE_GRID_Z_INDEX = 110
     TABLE_CELL_FILL_Z_INDEX = 80
 
@@ -587,7 +588,8 @@ class FixedLayoutDocxExporter:
 
         thickness = max(
             border_thickness,
-            0.20,
+            FixedLayoutDocxExporter
+            .MINIMUM_VISIBLE_TABLE_BORDER,
         )
 
         is_horizontal = abs(
@@ -618,6 +620,26 @@ class FixedLayoutDocxExporter:
 
             adjusted_left = left - (thickness / 2)
             adjusted_top = top
+            
+        adjusted_left = round(
+            adjusted_left,
+            2,
+        )
+
+        adjusted_top = round(
+            adjusted_top,
+            2,
+        )
+
+        width = round(
+            width,
+            2,
+        )
+
+        height = round(
+            height,
+            2,
+        )    
 
         shape_id = (
             FixedLayoutDocxExporter._next_shape_id()
