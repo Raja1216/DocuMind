@@ -72,7 +72,8 @@ class FixedLayoutDocxExporter:
     TABLE_BORDER_THICKNESS = 0.50
 
     TABLE_GRID_TOLERANCE = 0.5
-    TABLE_GRID_Z_INDEX = 90
+    TABLE_GRID_Z_INDEX = 110
+    TABLE_CELL_FILL_Z_INDEX = 80
 
     TABLE_CELL_HORIZONTAL_PADDING = 2.0
     TABLE_CELL_VERTICAL_PADDING = 1.0
@@ -586,7 +587,7 @@ class FixedLayoutDocxExporter:
 
         thickness = max(
             border_thickness,
-            0.10,
+            0.20,
         )
 
         is_horizontal = abs(
@@ -776,6 +777,7 @@ class FixedLayoutDocxExporter:
                 width=width,
                 height=height,
                 vertical_alignment=vertical_alignment,
+                fill_color=cell.fill_color,
             )
         )
 
@@ -855,6 +857,7 @@ class FixedLayoutDocxExporter:
         width: float,
         height: float,
         vertical_alignment: str,
+        fill_color: str | None,
     ):
         """
         Create one bordered VML rectangle representing
@@ -878,10 +881,21 @@ class FixedLayoutDocxExporter:
             "#_x0000_t202",
         )
 
-        shape.set(
-            "filled",
-            "f",
-        )
+        if fill_color is None:
+            shape.set(
+                "filled",
+                "f",
+            )
+        else:
+            shape.set(
+                "filled",
+                "t",
+            )
+
+            shape.set(
+                "fillcolor",
+                fill_color,
+            )
 
         shape.set(
             "stroked",

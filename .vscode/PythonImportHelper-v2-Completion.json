@@ -1827,7 +1827,7 @@
         "kind": 6,
         "importPath": "src.models.table_cell",
         "description": "src.models.table_cell",
-        "peekOfCode": "class TableCell(BaseElement):\n    \"\"\"\n    Represents one detected table cell.\n    \"\"\"\n    row_index: int\n    column_index: int\n    text: str = \"\"\n    row_span: int = 1\n    column_span: int = 1\n    @property",
+        "peekOfCode": "class TableCell(BaseElement):\n    \"\"\"\n    Represents one detected table cell.\n    \"\"\"\n    row_index: int\n    column_index: int\n    text: str = \"\"\n    row_span: int = 1\n    column_span: int = 1\n    fill_color: str | None = None",
         "detail": "src.models.table_cell",
         "documentation": {}
     },
@@ -1926,7 +1926,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf5.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:",
         "detail": "main",
         "documentation": {}
     },
@@ -1935,7 +1935,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf3.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,\n        start=1,",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf5.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:",
         "detail": "main",
         "documentation": {}
     },
@@ -1944,7 +1944,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for index, table in enumerate(\n        page.tables,\n        start=1,\n    ):\n        print(\n            f\"Page {page.number}, \"",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    for table in page.tables:\n        for cell in table.cells:\n            if cell.fill_color is not None:\n                print(\n                    f\"Page {page.number}, \"\n                    f\"Cell ({cell.row_index}, \"",
         "detail": "main",
         "documentation": {}
     },

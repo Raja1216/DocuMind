@@ -44,6 +44,9 @@ class TableMapper:
 
     DEFAULT_BORDER_COLOR = "#B7B7B7"
     DEFAULT_BORDER_THICKNESS = 0.5
+    
+    CELL_FILL_MIN_COVERAGE = 0.70
+    CELL_FILL_EDGE_TOLERANCE = 1.5
 
     @staticmethod
     def map(
@@ -106,6 +109,7 @@ class TableMapper:
             table=table,
             rows=normalized_rows,
             extracted_rows=extracted_rows,
+            pdf_page=pdf_page,
             page_number=page_number,
         )
 
@@ -267,6 +271,7 @@ class TableMapper:
         table: Table,
         rows: list[_DetectedRow],
         extracted_rows: list,
+        pdf_page,
         page_number: int,
     ) -> None:
         """
@@ -302,6 +307,11 @@ class TableMapper:
                     )
                 )
 
+                fill_color = TableMapper._detect_cell_fill_color(
+                    pdf_page=pdf_page,
+                    cell_bbox=cell_bbox,
+                )
+                
                 table.cells.append(
                     TableCell(
                         page_number=page_number,
@@ -315,8 +325,115 @@ class TableMapper:
                         column_index=column_index,
 
                         text=cell_text,
+                        fill_color=fill_color,
                     )
                 )
+
+    @staticmethod
+    def _detect_cell_fill_color(
+        pdf_page,
+        cell_bbox,
+    ) -> str | None:
+        """
+        Detect a filled PDF rectangle covering most of a table cell.
+    
+        Thin line-like rectangles are ignored because they are
+        table borders, not cell backgrounds.
+        """
+    
+        cell_rect = fitz.Rect(
+            cell_bbox
+        )
+    
+        cell_area = max(
+            cell_rect.width * cell_rect.height,
+            1.0,
+        )
+    
+        candidates: list[
+            tuple[float, str]
+        ] = []
+    
+        for drawing in pdf_page.get_drawings():
+        
+            fill_color = drawing.get(
+                "fill"
+            )
+    
+            drawing_rect_value = drawing.get(
+                "rect"
+            )
+    
+            if (
+                fill_color is None
+                or drawing_rect_value is None
+            ):
+                continue
+            
+            drawing_rect = fitz.Rect(
+                drawing_rect_value
+            )
+    
+            intersection = (
+                drawing_rect & cell_rect
+            )
+    
+            if intersection.is_empty:
+                continue
+            
+            intersection_area = max(
+                intersection.width
+                * intersection.height,
+                0.0,
+            )
+    
+            coverage = (
+                intersection_area / cell_area
+            )
+    
+            if (
+                coverage
+                < TableMapper.CELL_FILL_MIN_COVERAGE
+            ):
+                continue
+            
+            # Ignore thin border rectangles.
+            shorter_side = min(
+                drawing_rect.width,
+                drawing_rect.height,
+            )
+    
+            if (
+                shorter_side
+                <= TableMapper.MAX_BORDER_THICKNESS
+            ):
+                continue
+            
+            candidates.append(
+                (
+                    coverage,
+                    TableMapper._rgb_to_hex(
+                        fill_color
+                    ),
+                )
+            )
+    
+        if not candidates:
+            return None
+    
+        candidates.sort(
+            key=lambda item: item[0],
+            reverse=True,
+        )
+    
+        detected_color = candidates[0][1]
+    
+        # White is equivalent to the page background and does
+        # not need a dedicated filled shape.
+        if detected_color == "#FFFFFF":
+            return None
+    
+        return detected_color
 
     @staticmethod
     def _get_row_cell_bbox(
@@ -599,14 +716,14 @@ class TableMapper:
         """
         Ignore white page backgrounds and white cell fills.
         """
-    
+
         if color is None or len(color) < 3:
             return False
-    
+
         red = float(color[0])
         green = float(color[1])
         blue = float(color[2])
-    
+
         return (
             red >= 0.95
             and green >= 0.95

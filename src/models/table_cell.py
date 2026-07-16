@@ -18,6 +18,8 @@ class TableCell(BaseElement):
 
     row_span: int = 1
     column_span: int = 1
+    
+    fill_color: str | None = None
 
     @property
     def width(self) -> float:
