@@ -37,12 +37,18 @@ class DocxExporter:
                         for line in para.lines:
 
                             runs = RunBuilder.build(line)
-                        
+
                             for text_run in runs:
                             
                                 run = word_paragraph.add_run(text_run.text)
-                        
+
                                 run.font.size = Pt(text_run.font_size)
+                                
+                                run.bold = text_run.bold
+                                
+                                run.italic = text_run.italic
+                                
+                                run.font.name = text_run.font_name
             if page_index < total_pages - 1:
                 doc.add_page_break()        
 
