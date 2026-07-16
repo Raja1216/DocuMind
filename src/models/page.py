@@ -1,20 +1,21 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+
+from src.models.text_block import TextBlock
+from src.models.geometry.rectangle import Rectangle
 
 
 @dataclass(slots=True)
 class Page:
     """
-    Represents a single PDF page.
+    Represents a single page in the document.
     """
 
     number: int
 
-    width: float
-    height: float
-
-    left: float
-    top: float
-    right: float
-    bottom: float
+    bbox: Rectangle
 
     rotation: int
+
+    blocks: list[TextBlock] = field(default_factory=list)

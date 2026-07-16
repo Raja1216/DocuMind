@@ -1,27 +1,20 @@
-import pprint
-
-from src.extractor.text_block_extractor import TextBlockExtractor
-from src.mapper.block_mapper import BlockMapper
+from src.mapper.document_mapper import DocumentMapper
 from src.parser.pdf_reader import PDFReader
 
 reader = PDFReader()
 
-document = reader.open("samples/pdf/spdf1.pdf")
+pdf = reader.open("samples/pdf/spdf1.pdf")
 
-page = document.load_page(0)
+document = DocumentMapper.map(pdf)
 
-data = TextBlockExtractor().extract(page)
+print("=" * 60)
+print("DOCUMENT SUMMARY")
+print("=" * 60)
 
-for block in data["blocks"]:
+print(f"Pages : {len(document.pages)}")
 
-    if block["type"] != 0:
-        continue
+for page in document.pages:
 
-    model = BlockMapper.map(
-        block,
-        page_number=1
+    print(
+        f"Page {page.number}: {len(page.blocks)} text blocks"
     )
-
-    pprint.pp(model)
-
-    break
