@@ -4,6 +4,7 @@ from docx import Document as WordDocument
 from docx.dml.color import RGBColor as WordRGBColor
 from docx.enum.section import WD_SECTION
 from docx.enum.text import WD_LINE_SPACING
+from docx.enum.text import WD_BREAK
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
@@ -65,6 +66,19 @@ class FixedLayoutDocxExporter:
 
     ANCHOR_FONT_SIZE = 1.0
     ANCHOR_LINE_SPACING = 1.0
+    
+    TABLE_BORDER_COLOR = "#000000"
+    TABLE_BORDER_WIDTH = "0.75pt"
+
+    TABLE_CELL_HORIZONTAL_PADDING = 2.0
+    TABLE_CELL_VERTICAL_PADDING = 1.0
+
+    DEFAULT_TABLE_FONT = "Arial"
+    DEFAULT_TABLE_FONT_SIZE = 9.0
+
+    TABLE_Z_INDEX = 100
+    TEXT_Z_INDEX = 251659264
+    IMAGE_Z_INDEX = 1
 
     _shape_id = 1
 
@@ -201,10 +215,12 @@ class FixedLayoutDocxExporter:
         page,
     ) -> None:
         """
-        Render every supported page element.
+        Render all supported page elements in fixed layout.
 
-        Images are rendered first so that text remains above
-        images when their bounding boxes overlap.
+        Layer order:
+        1. Images
+        2. Tables
+        3. Normal text
         """
 
         for image in page.images:
@@ -214,6 +230,13 @@ class FixedLayoutDocxExporter:
                 image=image,
             )
 
+        for table in page.tables:
+            FixedLayoutDocxExporter._render_table(
+                anchor_paragraph=anchor_paragraph,
+                page=page,
+                table=table,
+            )
+
         for block in page.blocks:
             for line in block.lines:
                 for span in line.spans:
@@ -221,10 +244,395 @@ class FixedLayoutDocxExporter:
                     if not span.text.strip():
                         continue
 
+                    if (
+                        FixedLayoutDocxExporter
+                        ._span_is_inside_any_table(
+                            span=span,
+                            tables=page.tables,
+                        )
+                    ):
+                        continue
+
                     FixedLayoutDocxExporter._add_span_textbox(
                         anchor_paragraph=anchor_paragraph,
                         span=span,
                     )
+
+    @staticmethod
+    def _render_table(
+        anchor_paragraph,
+        page,
+        table,
+    ) -> None:
+        """
+        Render every detected table cell as an absolutely
+        positioned bordered text box.
+        """
+
+        for cell in table.cells:
+
+            reference_span = (
+                FixedLayoutDocxExporter
+                ._find_reference_span_for_cell(
+                    page=page,
+                    cell=cell,
+                )
+            )
+
+            FixedLayoutDocxExporter._add_table_cell_shape(
+                anchor_paragraph=anchor_paragraph,
+                cell=cell,
+                reference_span=reference_span,
+            )
+
+    @staticmethod
+    def _add_table_cell_shape(
+        anchor_paragraph,
+        cell,
+        reference_span,
+    ) -> None:
+        """
+        Add one positioned table cell with border and text.
+        """
+
+        width = max(
+            cell.right - cell.left,
+            1.0,
+        )
+
+        height = max(
+            cell.bottom - cell.top,
+            1.0,
+        )
+
+        shape_id = (
+            FixedLayoutDocxExporter._next_shape_id()
+        )
+
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_table_cell_shape(
+                shape_id=shape_id,
+                left=cell.left,
+                top=cell.top,
+                width=width,
+                height=height,
+            )
+        )
+
+        textbox = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "textbox"
+            )
+        )
+
+        textbox.set(
+            "inset",
+            (
+                f"{FixedLayoutDocxExporter.TABLE_CELL_HORIZONTAL_PADDING}pt,"
+                f"{FixedLayoutDocxExporter.TABLE_CELL_VERTICAL_PADDING}pt,"
+                f"{FixedLayoutDocxExporter.TABLE_CELL_HORIZONTAL_PADDING}pt,"
+                f"{FixedLayoutDocxExporter.TABLE_CELL_VERTICAL_PADDING}pt"
+            ),
+        )
+
+        textbox_content = OxmlElement(
+            "w:txbxContent"
+        )
+
+        paragraph_element = OxmlElement(
+            "w:p"
+        )
+
+        textbox_content.append(
+            paragraph_element
+        )
+
+        textbox.append(
+            textbox_content
+        )
+
+        shape.append(
+            textbox
+        )
+
+        pict = OxmlElement(
+            "w:pict"
+        )
+
+        pict.append(
+            shape
+        )
+
+        anchor_run = anchor_paragraph.add_run()
+
+        anchor_run._r.append(
+            pict
+        )
+
+        text_paragraph = Paragraph(
+            paragraph_element,
+            anchor_paragraph._parent,
+        )
+
+        FixedLayoutDocxExporter._configure_table_cell_paragraph(
+            text_paragraph
+        )
+
+        FixedLayoutDocxExporter._add_table_cell_text(
+            text_paragraph=text_paragraph,
+            text=cell.text,
+            reference_span=reference_span,
+        )
+
+    @staticmethod
+    def _create_table_cell_shape(
+        shape_id: int,
+        left: float,
+        top: float,
+        width: float,
+        height: float,
+    ):
+        """
+        Create one bordered VML rectangle representing
+        a detected PDF table cell.
+        """
+
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "shape"
+            )
+        )
+
+        shape.set(
+            "id",
+            f"DocuMindTableCell{shape_id}",
+        )
+
+        shape.set(
+            "type",
+            "#_x0000_t202",
+        )
+
+        shape.set(
+            "filled",
+            "f",
+        )
+
+        shape.set(
+            "stroked",
+            "t",
+        )
+
+        shape.set(
+            "strokecolor",
+            FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
+        )
+
+        shape.set(
+            "strokeweight",
+            FixedLayoutDocxExporter.TABLE_BORDER_WIDTH,
+        )
+
+        shape.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
+                f"}}allowincell"
+            ),
+            "f",
+        )
+
+        style = (
+            "position:absolute;"
+            f"margin-left:{left:.3f}pt;"
+            f"margin-top:{top:.3f}pt;"
+            f"width:{width:.3f}pt;"
+            f"height:{height:.3f}pt;"
+            f"z-index:{FixedLayoutDocxExporter.TABLE_Z_INDEX};"
+            "mso-position-horizontal-relative:page;"
+            "mso-position-vertical-relative:page;"
+            "mso-wrap-style:none;"
+        )
+
+        shape.set(
+            "style",
+            style,
+        )
+
+        wrap = (
+            FixedLayoutDocxExporter
+            ._create_word_2003_element(
+                "wrap"
+            )
+        )
+
+        wrap.set(
+            "type",
+            "none",
+        )
+
+        shape.append(
+            wrap
+        )
+
+        return shape
+
+    @staticmethod
+    def _configure_table_cell_paragraph(
+        text_paragraph,
+    ) -> None:
+        """
+        Remove Word's default spacing inside table cells.
+        """
+
+        paragraph_format = (
+            text_paragraph.paragraph_format
+        )
+
+        paragraph_format.space_before = Pt(0)
+        paragraph_format.space_after = Pt(0)
+
+        paragraph_format.left_indent = Pt(0)
+        paragraph_format.right_indent = Pt(0)
+        paragraph_format.first_line_indent = Pt(0)
+
+        paragraph_format.line_spacing_rule = (
+            WD_LINE_SPACING.SINGLE
+        )
+
+    @staticmethod
+    def _add_table_cell_text(
+        text_paragraph,
+        text: str,
+        reference_span,
+    ) -> None:
+        """
+        Add extracted cell text while preserving the nearest
+        available PDF typography.
+        """
+
+        lines = text.splitlines()
+
+        if not lines:
+            lines = [""]
+
+        for line_index, line_text in enumerate(lines):
+
+            run = text_paragraph.add_run(
+                line_text
+            )
+
+            if reference_span is not None:
+
+                run.font.size = Pt(
+                    reference_span.font_size
+                )
+
+                FixedLayoutDocxExporter._apply_font_name(
+                    run=run,
+                    pdf_font_name=reference_span.font,
+                )
+
+                run.font.color.rgb = WordRGBColor(
+                    reference_span.color.red,
+                    reference_span.color.green,
+                    reference_span.color.blue,
+                )
+
+                run.bold = (
+                    FixedLayoutDocxExporter
+                    ._is_bold(reference_span.flags)
+                )
+
+                run.italic = (
+                    FixedLayoutDocxExporter
+                    ._is_italic(reference_span.flags)
+                )
+
+            else:
+                run.font.size = Pt(
+                    FixedLayoutDocxExporter
+                    .DEFAULT_TABLE_FONT_SIZE
+                )
+
+                FixedLayoutDocxExporter._apply_font_name(
+                    run=run,
+                    pdf_font_name=(
+                        FixedLayoutDocxExporter
+                        .DEFAULT_TABLE_FONT
+                    ),
+                )
+
+            if line_index < len(lines) - 1:
+                run.add_break(
+                    WD_BREAK.LINE
+                )
+
+    @staticmethod
+    def _find_reference_span_for_cell(
+        page,
+        cell,
+    ):
+        """
+        Find the first visible PDF span whose center lies
+        inside the detected table cell.
+        """
+
+        for block in page.blocks:
+            for line in block.lines:
+                for span in line.spans:
+
+                    if not span.text.strip():
+                        continue
+
+                    center_x = (
+                        span.left + span.right
+                    ) / 2
+
+                    center_y = (
+                        span.top + span.bottom
+                    ) / 2
+
+                    if (
+                        cell.left <= center_x <= cell.right
+                        and cell.top <= center_y <= cell.bottom
+                    ):
+                        return span
+
+        return None
+
+    @staticmethod
+    def _span_is_inside_any_table(
+        span,
+        tables,
+    ) -> bool:
+        """
+        Return True when the center of a PDF span lies inside
+        any detected table.
+
+        These spans are skipped from normal text rendering
+        because the table renderer recreates their content.
+        """
+
+        center_x = (
+            span.left + span.right
+        ) / 2
+
+        center_y = (
+            span.top + span.bottom
+        ) / 2
+
+        for table in tables:
+            if (
+                table.left <= center_x <= table.right
+                and table.top <= center_y <= table.bottom
+            ):
+                return True
+
+        return False
 
     @staticmethod
     def _add_image_shape(
@@ -362,7 +770,7 @@ class FixedLayoutDocxExporter:
             f"margin-top:{top:.3f}pt;"
             f"width:{width:.3f}pt;"
             f"height:{height:.3f}pt;"
-            "z-index:1;"
+            f"z-index:{FixedLayoutDocxExporter.IMAGE_Z_INDEX};"
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
@@ -560,7 +968,7 @@ class FixedLayoutDocxExporter:
             f"margin-top:{top:.3f}pt;"
             f"width:{width:.3f}pt;"
             f"height:{height:.3f}pt;"
-            "z-index:251659264;"
+            f"z-index:{FixedLayoutDocxExporter.TEXT_Z_INDEX};"
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
