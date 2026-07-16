@@ -5,6 +5,7 @@ from docx.dml.color import RGBColor as WordRGBColor
 from docx.enum.section import WD_SECTION
 from docx.enum.text import WD_LINE_SPACING
 from docx.enum.text import WD_BREAK
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Pt
@@ -75,6 +76,10 @@ class FixedLayoutDocxExporter:
 
     DEFAULT_TABLE_FONT = "Arial"
     DEFAULT_TABLE_FONT_SIZE = 9.0
+    
+    TABLE_LINE_TOLERANCE = 2.0
+    TABLE_ALIGNMENT_TOLERANCE = 6.0
+
 
     TABLE_Z_INDEX = 100
     TEXT_Z_INDEX = 251659264
@@ -265,15 +270,15 @@ class FixedLayoutDocxExporter:
         table,
     ) -> None:
         """
-        Render every detected table cell as an absolutely
-        positioned bordered text box.
+        Render every detected table cell using its original
+        PDF spans and formatting.
         """
 
         for cell in table.cells:
 
-            reference_span = (
+            cell_spans = (
                 FixedLayoutDocxExporter
-                ._find_reference_span_for_cell(
+                ._find_spans_for_cell(
                     page=page,
                     cell=cell,
                 )
@@ -282,14 +287,14 @@ class FixedLayoutDocxExporter:
             FixedLayoutDocxExporter._add_table_cell_shape(
                 anchor_paragraph=anchor_paragraph,
                 cell=cell,
-                reference_span=reference_span,
+                cell_spans=cell_spans,
             )
 
     @staticmethod
     def _add_table_cell_shape(
         anchor_paragraph,
         cell,
-        reference_span,
+        cell_spans: list,
     ) -> None:
         """
         Add one positioned table cell with border and text.
@@ -377,13 +382,15 @@ class FixedLayoutDocxExporter:
         )
 
         FixedLayoutDocxExporter._configure_table_cell_paragraph(
-            text_paragraph
+            text_paragraph=text_paragraph,
+            cell=cell,
+            cell_spans=cell_spans,
         )
 
-        FixedLayoutDocxExporter._add_table_cell_text(
+        FixedLayoutDocxExporter._add_table_cell_content(
             text_paragraph=text_paragraph,
-            text=cell.text,
-            reference_span=reference_span,
+            cell=cell,
+            cell_spans=cell_spans,
         )
 
     @staticmethod
@@ -483,9 +490,12 @@ class FixedLayoutDocxExporter:
     @staticmethod
     def _configure_table_cell_paragraph(
         text_paragraph,
+        cell,
+        cell_spans: list,
     ) -> None:
         """
-        Remove Word's default spacing inside table cells.
+        Remove Word defaults and apply the alignment detected
+        from the original PDF cell text.
         """
 
         paragraph_format = (
@@ -503,21 +513,74 @@ class FixedLayoutDocxExporter:
             WD_LINE_SPACING.SINGLE
         )
 
+        alignment = (
+            FixedLayoutDocxExporter
+            ._detect_table_cell_alignment(
+                cell=cell,
+                cell_spans=cell_spans,
+            )
+        )
+
+        text_paragraph.alignment = alignment
+
     @staticmethod
-    def _add_table_cell_text(
+    def _add_table_cell_content(
         text_paragraph,
-        text: str,
-        reference_span,
+        cell,
+        cell_spans: list,
     ) -> None:
         """
-        Add extracted cell text while preserving the nearest
-        available PDF typography.
+        Render original PDF spans inside the detected cell.
+
+        When no original spans are found, use the extracted
+        plain cell text as a fallback.
         """
 
-        lines = text.splitlines()
+        if not cell_spans:
+            FixedLayoutDocxExporter._add_fallback_cell_text(
+                text_paragraph=text_paragraph,
+                text=cell.text,
+            )
+            return
 
-        if not lines:
-            lines = [""]
+        span_lines = (
+            FixedLayoutDocxExporter
+            ._group_table_spans_into_lines(
+                cell_spans
+            )
+        )
+
+        for line_index, span_line in enumerate(
+            span_lines
+        ):
+            for span in span_line:
+                run = text_paragraph.add_run(
+                    span.text
+                )
+
+                FixedLayoutDocxExporter._apply_span_format(
+                    run=run,
+                    span=span,
+                )
+
+            if line_index < len(span_lines) - 1:
+                break_run = text_paragraph.add_run()
+
+                break_run.add_break(
+                    WD_BREAK.LINE
+                )
+
+    @staticmethod
+    def _add_fallback_cell_text(
+        text_paragraph,
+        text: str,
+    ) -> None:
+        """
+        Render extracted table text when no original spans
+        can be matched to the cell.
+        """
+
+        lines = text.splitlines() or [""]
 
         for line_index, line_text in enumerate(lines):
 
@@ -525,46 +588,18 @@ class FixedLayoutDocxExporter:
                 line_text
             )
 
-            if reference_span is not None:
+            run.font.size = Pt(
+                FixedLayoutDocxExporter
+                .DEFAULT_TABLE_FONT_SIZE
+            )
 
-                run.font.size = Pt(
-                    reference_span.font_size
-                )
-
-                FixedLayoutDocxExporter._apply_font_name(
-                    run=run,
-                    pdf_font_name=reference_span.font,
-                )
-
-                run.font.color.rgb = WordRGBColor(
-                    reference_span.color.red,
-                    reference_span.color.green,
-                    reference_span.color.blue,
-                )
-
-                run.bold = (
+            FixedLayoutDocxExporter._apply_font_name(
+                run=run,
+                pdf_font_name=(
                     FixedLayoutDocxExporter
-                    ._is_bold(reference_span.flags)
-                )
-
-                run.italic = (
-                    FixedLayoutDocxExporter
-                    ._is_italic(reference_span.flags)
-                )
-
-            else:
-                run.font.size = Pt(
-                    FixedLayoutDocxExporter
-                    .DEFAULT_TABLE_FONT_SIZE
-                )
-
-                FixedLayoutDocxExporter._apply_font_name(
-                    run=run,
-                    pdf_font_name=(
-                        FixedLayoutDocxExporter
-                        .DEFAULT_TABLE_FONT
-                    ),
-                )
+                    .DEFAULT_TABLE_FONT
+                ),
+            )
 
             if line_index < len(lines) - 1:
                 run.add_break(
@@ -572,14 +607,52 @@ class FixedLayoutDocxExporter:
                 )
 
     @staticmethod
-    def _find_reference_span_for_cell(
+    def _apply_span_format(
+        run,
+        span,
+    ) -> None:
+        """
+        Apply one original PDF span's typography to a Word run.
+        """
+
+        run.font.size = Pt(
+            span.font_size
+        )
+
+        FixedLayoutDocxExporter._apply_font_name(
+            run=run,
+            pdf_font_name=span.font,
+        )
+
+        run.font.color.rgb = WordRGBColor(
+            span.color.red,
+            span.color.green,
+            span.color.blue,
+        )
+
+        run.bold = (
+            FixedLayoutDocxExporter
+            ._is_bold(span.flags)
+        )
+
+        run.italic = (
+            FixedLayoutDocxExporter
+            ._is_italic(span.flags)
+        )
+    
+    @staticmethod
+    def _find_spans_for_cell(
         page,
         cell,
-    ):
+    ) -> list:
         """
-        Find the first visible PDF span whose center lies
-        inside the detected table cell.
+        Return all visible PDF spans whose centers lie inside
+        the detected table cell.
+
+        Spans are sorted by vertical and horizontal position.
         """
+
+        spans = []
 
         for block in page.blocks:
             for line in block.lines:
@@ -600,9 +673,112 @@ class FixedLayoutDocxExporter:
                         cell.left <= center_x <= cell.right
                         and cell.top <= center_y <= cell.bottom
                     ):
-                        return span
+                        spans.append(span)
 
-        return None
+        spans.sort(
+            key=lambda span: (
+                span.origin_y,
+                span.left,
+            )
+        )
+
+        return spans
+
+    @staticmethod
+    def _group_table_spans_into_lines(
+        spans: list,
+    ) -> list[list]:
+        """
+        Group cell spans into visual PDF lines using their
+        baseline coordinates.
+        """
+
+        if not spans:
+            return []
+
+        lines: list[list] = []
+
+        current_line = [spans[0]]
+        current_baseline = spans[0].origin_y
+
+        for span in spans[1:]:
+
+            if (
+                abs(
+                    span.origin_y - current_baseline
+                )
+                <= FixedLayoutDocxExporter
+                .TABLE_LINE_TOLERANCE
+            ):
+                current_line.append(span)
+                continue
+
+            current_line.sort(
+                key=lambda item: item.left
+            )
+
+            lines.append(
+                current_line
+            )
+
+            current_line = [span]
+            current_baseline = span.origin_y
+
+        current_line.sort(
+            key=lambda item: item.left
+        )
+
+        lines.append(
+            current_line
+        )
+
+        return lines
+
+    @staticmethod
+    def _detect_table_cell_alignment(
+        cell,
+        cell_spans: list,
+    ):
+        """
+        Detect left, center, or right alignment from the PDF
+        coordinates of the cell text.
+        """
+    
+        if not cell_spans:
+            return WD_ALIGN_PARAGRAPH.LEFT
+    
+        text_left = min(
+            span.left
+            for span in cell_spans
+        )
+    
+        text_right = max(
+            span.right
+            for span in cell_spans
+        )
+    
+        left_gap = max(
+            text_left - cell.left,
+            0.0,
+        )
+    
+        right_gap = max(
+            cell.right - text_right,
+            0.0,
+        )
+    
+        tolerance = (
+            FixedLayoutDocxExporter
+            .TABLE_ALIGNMENT_TOLERANCE
+        )
+    
+        if abs(left_gap - right_gap) <= tolerance:
+            return WD_ALIGN_PARAGRAPH.CENTER
+    
+        if left_gap > right_gap + tolerance:
+            return WD_ALIGN_PARAGRAPH.RIGHT
+    
+        return WD_ALIGN_PARAGRAPH.LEFT
 
     @staticmethod
     def _span_is_inside_any_table(
