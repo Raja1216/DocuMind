@@ -2,7 +2,6 @@ from collections import Counter
 
 from src.models.document import Document
 
-
 class DocumentStatisticsAnalyzer:
 
     @staticmethod
