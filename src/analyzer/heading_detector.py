@@ -1,34 +1,28 @@
 from __future__ import annotations
 
+from src.models.document import Document
 from src.models.enums.block_type import BlockType
-from src.models.page import Page
 
 
 class HeadingDetector:
     """
-    Detect headings using font size.
+    Detect headings using document statistics.
     """
 
     @staticmethod
-    def detect(page: Page) -> None:
+    def detect(document: Document) -> None:
 
-        largest_font = 0
+        body_font = document.statistics.most_common_font_size
 
-        # Find largest font size
-        for block in page.blocks:
-            for line in block.lines:
-                for span in line.spans:
-                    largest_font = max(
-                        largest_font,
-                        span.font_size,
-                    )
+        for page in document.pages:
 
-        # Mark heading blocks
-        for block in page.blocks:
+            for block in page.blocks:
 
-            for line in block.lines:
-                for span in line.spans:
+                largest = 0.0
 
-                    if span.font_size >= largest_font - 0.1:
-                        block.block_type = BlockType.HEADING
-                        break
+                for line in block.lines:
+                    for span in line.spans:
+                        largest = max(largest, span.font_size)
+
+                if largest >= body_font * 1.5:
+                    block.block_type = BlockType.HEADING

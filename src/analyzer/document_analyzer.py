@@ -18,7 +18,7 @@ class DocumentAnalyzer:
         DocumentStatisticsAnalyzer.analyze(document)
 
         for page in document.pages:
-            HeadingDetector.detect(page)
+            HeadingDetector.detect(document)
 
             for block in page.blocks:
 
