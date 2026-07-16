@@ -1,3 +1,4 @@
+from src.exporter.docx_exporter import DocxExporter
 from src.mapper.document_mapper import DocumentMapper
 from src.parser.pdf_reader import PDFReader
 
@@ -7,14 +8,9 @@ pdf = reader.open("samples/pdf/spdf1.pdf")
 
 document = DocumentMapper.map(pdf)
 
-print("=" * 60)
-print("DOCUMENT SUMMARY")
-print("=" * 60)
+DocxExporter.export(
+    document=document,
+    output_path="output/output.docx",
+)
 
-print(f"Pages : {len(document.pages)}")
-
-for page in document.pages:
-
-    print(
-        f"Page {page.number}: {len(page.blocks)} text blocks"
-    )
+print("DOCX created successfully!")
