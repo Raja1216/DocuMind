@@ -1,6 +1,5 @@
 from docx import Document as WordDocument
-from docx.enum.text import WD_BREAK
-from src.analyzer.paragraph_analyzer import ParagraphAnalyzer
+from src.models.enums.block_type import BlockType
 
 
 class DocxExporter:
@@ -25,12 +24,18 @@ class DocxExporter:
                 if not has_text:
                     continue
 
-                paragraphs = ParagraphAnalyzer.analyze(block)
-                for para in paragraphs:
+                if block.block_type == BlockType.PAGE_NUMBER:
+                    continue
+                for para in block.paragraphs:
 
-                    word_paragraph = doc.add_paragraph()
+                    if block.block_type == BlockType.HEADING:
+                        word_paragraph = doc.add_heading(level=1)
+                    else:
+                        word_paragraph = doc.add_paragraph()
 
                     word_paragraph.add_run(para.text)
+            if page_index < total_pages - 1:
+                doc.add_page_break()        
 
 
         doc.save(output_path)

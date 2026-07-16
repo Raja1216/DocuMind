@@ -3,6 +3,7 @@ from __future__ import annotations
 from src.models.paragraph import Paragraph
 from src.models.text_block import TextBlock
 from src.analyzer.line_reconstructor import LineReconstructor
+from src.analyzer.block_classifier import BlockClassifier
 
 
 class ParagraphAnalyzer:
@@ -13,14 +14,17 @@ class ParagraphAnalyzer:
     """
 
     @staticmethod
-    def analyze(block: TextBlock) -> list[Paragraph]:
+    def analyze(block: TextBlock) -> None:
+        block.block_type = BlockClassifier.classify(block)
+
+        block.paragraphs.clear()
 
         paragraph = Paragraph()
-
+        
         paragraph.lines.extend(block.lines)
         
         paragraph.text = LineReconstructor.reconstruct(
             block.lines
         )
         
-        return [paragraph]
+        block.paragraphs.append(paragraph)
