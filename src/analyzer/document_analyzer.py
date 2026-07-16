@@ -1,6 +1,8 @@
 from src.analyzer.document_statistics_analyzer import DocumentStatisticsAnalyzer
 from src.analyzer.heading_detector import HeadingDetector
 from src.analyzer.paragraph_analyzer import ParagraphAnalyzer
+from src.analyzer.paragraph_style_analyzer import ParagraphStyleAnalyzer
+from src.analyzer.alignment_analyzer import AlignmentAnalyzer
 
 
 class DocumentAnalyzer:
