@@ -69,7 +69,7 @@ class FixedLayoutDocxExporter:
     ANCHOR_LINE_SPACING = 1.0
     
     TABLE_BORDER_COLOR = "#B7B7B7"
-    TABLE_BORDER_WIDTH = "0.50pt"
+    TABLE_BORDER_THICKNESS = 0.50
 
     TABLE_GRID_TOLERANCE = 0.5
     TABLE_GRID_Z_INDEX = 90
@@ -562,49 +562,119 @@ class FixedLayoutDocxExporter:
         bottom: float,
     ) -> None:
         """
-        Add one absolutely positioned VML table-grid line.
+        Render one table border as a very thin filled VML
+        rectangle.
+
+        Rectangle shapes are more reliably rendered by Word
+        than absolutely positioned VML line elements.
         """
-    
+
+        thickness = (
+            FixedLayoutDocxExporter
+            .TABLE_BORDER_THICKNESS
+        )
+
+        is_horizontal = abs(
+            bottom - top
+        ) <= (
+            FixedLayoutDocxExporter
+            .TABLE_GRID_TOLERANCE
+        )
+
+        if is_horizontal:
+            width = max(
+                right - left,
+                thickness,
+            )
+
+            height = thickness
+
+            adjusted_left = left
+            adjusted_top = top - (thickness / 2)
+
+        else:
+            width = thickness
+
+            height = max(
+                bottom - top,
+                thickness,
+            )
+
+            adjusted_left = left - (thickness / 2)
+            adjusted_top = top
+
         shape_id = (
             FixedLayoutDocxExporter._next_shape_id()
         )
+
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_table_border_shape(
+                shape_id=shape_id,
+                left=adjusted_left,
+                top=adjusted_top,
+                width=width,
+                height=height,
+            )
+        )
+
+        pict = OxmlElement(
+            "w:pict"
+        )
+
+        pict.append(
+            shape
+        )
+
+        anchor_run = (
+            anchor_paragraph.add_run()
+        )
+
+        anchor_run._r.append(
+            pict
+        )
+        
+    @staticmethod
+    def _create_table_border_shape(
+        shape_id: int,
+        left: float,
+        top: float,
+        width: float,
+        height: float,
+    ):
+        """
+        Create one thin, filled VML rectangle used as a
+        table border.
+        """
     
-        line = (
+        shape = (
             FixedLayoutDocxExporter
             ._create_vml_element(
-                "line"
+                "rect"
             )
         )
     
-        line.set(
+        shape.set(
             "id",
-            f"DocuMindTableLine{shape_id}",
+            f"DocuMindTableBorder{shape_id}",
         )
     
-        line.set(
-            "from",
-            "0,0",
+        shape.set(
+            "filled",
+            "t",
         )
     
-        line.set(
-            "to",
-            (
-                f"{right - left:.3f}pt,"
-                f"{bottom - top:.3f}pt"
-            ),
-        )
-    
-        line.set(
-            "strokecolor",
+        shape.set(
+            "fillcolor",
             FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
         )
     
-        line.set(
-            "strokeweight",
-            FixedLayoutDocxExporter.TABLE_BORDER_WIDTH,
+        shape.set(
+            "stroked",
+            "f",
         )
     
-        line.set(
+        shape.set(
             (
                 f"{{"
                 f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
@@ -617,15 +687,15 @@ class FixedLayoutDocxExporter:
             "position:absolute;"
             f"margin-left:{left:.3f}pt;"
             f"margin-top:{top:.3f}pt;"
-            "width:1pt;"
-            "height:1pt;"
+            f"width:{width:.3f}pt;"
+            f"height:{height:.3f}pt;"
             f"z-index:{FixedLayoutDocxExporter.TABLE_GRID_Z_INDEX};"
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
         )
     
-        line.set(
+        shape.set(
             "style",
             style,
         )
@@ -642,25 +712,11 @@ class FixedLayoutDocxExporter:
             "none",
         )
     
-        line.append(
+        shape.append(
             wrap
         )
     
-        pict = OxmlElement(
-            "w:pict"
-        )
-    
-        pict.append(
-            line
-        )
-    
-        anchor_run = (
-            anchor_paragraph.add_run()
-        )
-    
-        anchor_run._r.append(
-            pict
-        )
+        return shape    
 
     @staticmethod
     def _add_table_cell_shape(
