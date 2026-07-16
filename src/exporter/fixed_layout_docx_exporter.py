@@ -16,6 +16,7 @@ from io import BytesIO
 from src.exporter.font_name_resolver import (
     FontNameResolver,
 )
+from src.exporter.text_normalizer import TextNormalizer
 
 
 class FixedLayoutDocxExporter:
@@ -64,6 +65,9 @@ class FixedLayoutDocxExporter:
 
     TEXTBOX_TOP_ADJUSTMENT = 1.5
     LINE_HEIGHT_FACTOR = 1.25
+    
+    BULLET_FONT_NAME = "Arial"
+    BULLET_SIZE_FACTOR = 1.0
 
     ANCHOR_FONT_SIZE = 1.0
     ANCHOR_LINE_SPACING = 1.0
@@ -1037,7 +1041,9 @@ class FixedLayoutDocxExporter:
         ):
             for span in span_line:
                 run = text_paragraph.add_run(
-                    span.text
+                    TextNormalizer.normalize(
+                        span.text
+                    )
                 )
 
                 FixedLayoutDocxExporter._apply_span_format(
@@ -1066,8 +1072,14 @@ class FixedLayoutDocxExporter:
 
         for line_index, line_text in enumerate(lines):
 
+            normalized_line_text = (
+                TextNormalizer.normalize(
+                    line_text
+                )
+            )
+
             run = text_paragraph.add_run(
-                line_text
+                normalized_line_text
             )
 
             run.font.size = Pt(
@@ -1075,12 +1087,17 @@ class FixedLayoutDocxExporter:
                 .DEFAULT_TABLE_FONT_SIZE
             )
 
+            fallback_font = (
+                FixedLayoutDocxExporter.BULLET_FONT_NAME
+                if TextNormalizer.contains_bullet(
+                    normalized_line_text
+                )
+                else FixedLayoutDocxExporter.DEFAULT_TABLE_FONT
+            )
+            
             FixedLayoutDocxExporter._apply_font_name(
                 run=run,
-                pdf_font_name=(
-                    FixedLayoutDocxExporter
-                    .DEFAULT_TABLE_FONT
-                ),
+                pdf_font_name=fallback_font,
             )
 
             if line_index < len(lines) - 1:
@@ -1094,17 +1111,34 @@ class FixedLayoutDocxExporter:
         span,
     ) -> None:
         """
-        Apply one original PDF span's typography to a Word run.
+        Apply original PDF typography to a Word run.
+
+        Bullet glyphs use a reliable Unicode-capable font.
         """
 
         run.font.size = Pt(
             span.font_size
         )
 
-        FixedLayoutDocxExporter._apply_font_name(
-            run=run,
-            pdf_font_name=span.font,
+        normalized_text = TextNormalizer.normalize(
+            span.text
         )
+
+        if TextNormalizer.contains_bullet(
+            normalized_text
+        ):
+            FixedLayoutDocxExporter._apply_font_name(
+                run=run,
+                pdf_font_name=(
+                    FixedLayoutDocxExporter
+                    .BULLET_FONT_NAME
+                ),
+            )
+        else:
+            FixedLayoutDocxExporter._apply_font_name(
+                run=run,
+                pdf_font_name=span.font,
+            )
 
         run.font.color.rgb = WordRGBColor(
             span.color.red,
@@ -1908,11 +1942,18 @@ class FixedLayoutDocxExporter:
         span,
     ) -> None:
         """
-        Add editable text and preserve typography.
+        Add editable text while preserving typography.
+
+        PDF-specific bullet glyphs are normalized into reliable
+        Unicode characters before being written to Word.
         """
 
-        run = text_paragraph.add_run(
+        normalized_text = TextNormalizer.normalize(
             span.text
+        )
+
+        run = text_paragraph.add_run(
+            normalized_text
         )
 
         font = run.font
@@ -1921,10 +1962,27 @@ class FixedLayoutDocxExporter:
             span.font_size
         )
 
-        FixedLayoutDocxExporter._apply_font_name(
-            run=run,
-            pdf_font_name=span.font,
-        )
+        if TextNormalizer.contains_bullet(
+            normalized_text
+        ):
+            FixedLayoutDocxExporter._apply_font_name(
+                run=run,
+                pdf_font_name=(
+                    FixedLayoutDocxExporter
+                    .BULLET_FONT_NAME
+                ),
+            )
+
+            font.size = Pt(
+                span.font_size
+                * FixedLayoutDocxExporter
+                .BULLET_SIZE_FACTOR
+            )
+        else:
+            FixedLayoutDocxExporter._apply_font_name(
+                run=run,
+                pdf_font_name=span.font,
+            )
 
         font.color.rgb = WordRGBColor(
             span.color.red,

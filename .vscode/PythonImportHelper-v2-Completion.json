@@ -288,6 +288,14 @@
         "documentation": {}
     },
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -1089,6 +1097,14 @@
         "documentation": {}
     },
     {
+        "label": "TextNormalizer",
+        "importPath": "src.exporter.text_normalizer",
+        "description": "src.exporter.text_normalizer",
+        "isExtraImport": true,
+        "detail": "src.exporter.text_normalizer",
+        "documentation": {}
+    },
+    {
         "label": "Page",
         "importPath": "src.models.page",
         "description": "src.models.page",
@@ -1559,6 +1575,15 @@
         "description": "src.exporter.font_name_resolver",
         "peekOfCode": "class FontNameResolver:\n    \"\"\"\n    Converts PDF/PostScript font names into font-family\n    names that Microsoft Word is more likely to recognize.\n    \"\"\"\n    FONT_ALIASES: dict[str, str] = {\n        \"ArialMT\": \"Arial\",\n        \"Arial-BoldMT\": \"Arial\",\n        \"Arial-ItalicMT\": \"Arial\",\n        \"Arial-BoldItalicMT\": \"Arial\",",
         "detail": "src.exporter.font_name_resolver",
+        "documentation": {}
+    },
+    {
+        "label": "TextNormalizer",
+        "kind": 6,
+        "importPath": "src.exporter.text_normalizer",
+        "description": "src.exporter.text_normalizer",
+        "peekOfCode": "class TextNormalizer:\n    \"\"\"\n    Converts PDF-specific glyphs into reliable Unicode text\n    before exporting to Word.\n    \"\"\"\n    BULLET_REPLACEMENTS: dict[str, str] = {\n        \"\\uf0b7\": \"\\u2022\",  # Wingdings private-use bullet\n        \"\\uf0a7\": \"\\u25aa\",  # Wingdings square bullet\n        \"\\uf0d8\": \"\\u25ba\",  # Wingdings right arrow\n        \"\\u2023\": \"\\u2022\",  # Triangular bullet",
+        "detail": "src.exporter.text_normalizer",
         "documentation": {}
     },
     {
