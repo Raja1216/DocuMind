@@ -10,6 +10,11 @@ from src.exporter.builders.run_builder import RunBuilder
 from src.models.enums.block_type import BlockType
 from docx.enum.text import WD_LINE_SPACING
 
+from docx.oxml.ns import qn
+from src.exporter.font_name_resolver import (
+    FontNameResolver,
+)
+
 
 class DocxExporter:
     """
@@ -245,24 +250,24 @@ class DocxExporter:
         """
         Apply reconstructed paragraph and line spacing.
         """
-    
+
         paragraph_format = (
             word_paragraph.paragraph_format
         )
-    
+
         paragraph_format.space_before = Pt(
             paragraph.style.spacing_before
         )
-    
+
         paragraph_format.space_after = Pt(
             paragraph.style.spacing_after
         )
-    
+
         if paragraph.style.line_spacing > 0:
             paragraph_format.line_spacing_rule = (
                 WD_LINE_SPACING.EXACTLY
             )
-    
+
             paragraph_format.line_spacing = Pt(
                 paragraph.style.line_spacing
             )
@@ -294,8 +299,9 @@ class DocxExporter:
                     text_run.font_size
                 )
 
-                font.name = (
-                    text_run.font_name
+                DocxExporter._apply_font_name(
+                    run=run,
+                    pdf_font_name=text_run.font_name,
                 )
 
                 font.color.rgb = WordRGBColor(
@@ -313,6 +319,50 @@ class DocxExporter:
                 word_paragraph.add_run(
                     " "
                 )
+    @staticmethod
+    def _apply_font_name(
+        run,
+        pdf_font_name: str,
+    ) -> None:
+        """
+        Resolve and apply a PDF font name to every Word
+        font slot.
+    
+        Setting only run.font.name is sometimes insufficient
+        because Word stores separate font names for different
+        character categories.
+        """
+    
+        word_font_name = FontNameResolver.resolve(
+            pdf_font_name
+        )
+    
+        run.font.name = word_font_name
+    
+        run_properties = run._element.get_or_add_rPr()
+    
+        font_properties = run_properties.get_or_add_rFonts()
+    
+        font_properties.set(
+            qn("w:ascii"),
+            word_font_name,
+        )
+    
+        font_properties.set(
+            qn("w:hAnsi"),
+            word_font_name,
+        )
+    
+        font_properties.set(
+            qn("w:eastAsia"),
+            word_font_name,
+        )
+    
+        font_properties.set(
+            qn("w:cs"),
+            word_font_name,
+        )
+
 
     @staticmethod
     def _apply_alignment(
