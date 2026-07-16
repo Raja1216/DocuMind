@@ -11,7 +11,7 @@ from src.parser.pdf_reader import PDFReader
 reader = PDFReader()
 
 pdf = reader.open(
-    "samples/pdf/spdf3.pdf"
+    "samples/pdf/spdf4.pdf"
 )
 
 document = DocumentMapper.map(
@@ -24,21 +24,32 @@ for page in document.pages:
         f"{len(page.images)} images"
     )
 
-    for image in page.images:
+    for table_index, table in enumerate(
+        page.tables,
+        start=1,
+    ):
         print(
-            "  Image:",
-            image.extension,
-            image.pixel_width,
-            "x",
-            image.pixel_height,
-            "at",
+            f"  Table {table_index}: "
+            f"{table.row_count} rows x "
+            f"{table.column_count} columns"
+        )
+
+        print(
+            "  Bounding box:",
             (
-                image.left,
-                image.top,
-                image.right,
-                image.bottom,
+                table.left,
+                table.top,
+                table.right,
+                table.bottom,
             ),
         )
+
+        for cell in table.cells:
+            print(
+                f"    [{cell.row_index}, "
+                f"{cell.column_index}] "
+                f"{cell.text!r}"
+            )
 
 analyzer = DocumentAnalyzer()
 

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from src.extractor.table_extractor import TableExtractor
 from src.mapper.block_mapper import BlockMapper
 from src.mapper.image_mapper import ImageMapper
+from src.mapper.table_mapper import TableMapper
 from src.models.geometry.rectangle import Rectangle
 from src.models.page import Page
 
@@ -61,5 +63,17 @@ class PageMapper:
                         page.number,
                     )
                 )
+        
+        detected_tables = TableExtractor.extract(
+            pdf_page
+        )
+
+        for detected_table in detected_tables:
+            page.tables.append(
+                TableMapper.map(
+                    pymupdf_table=detected_table,
+                    page_number=page.number,
+                )
+            )        
 
         return page

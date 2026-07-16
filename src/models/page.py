@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from src.models.geometry.rectangle import Rectangle
 from src.models.image import Image
 from src.models.text_block import TextBlock
+from src.models.table import Table
 
 
 @dataclass(slots=True)
@@ -24,5 +25,8 @@ class Page:
     )
 
     images: list[Image] = field(
+        default_factory=list
+    )
+    tables: list[Table] = field(
         default_factory=list
     )
