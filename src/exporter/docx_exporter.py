@@ -8,6 +8,7 @@ from docx.shared import Pt
 
 from src.exporter.builders.run_builder import RunBuilder
 from src.models.enums.block_type import BlockType
+from docx.enum.text import WD_LINE_SPACING
 
 
 class DocxExporter:
@@ -26,7 +27,6 @@ class DocxExporter:
 
             section = DocxExporter._prepare_page_section(
                 word_document=word_document,
-                page=page,
                 page_index=page_index,
             )
 
@@ -50,14 +50,13 @@ class DocxExporter:
     @staticmethod
     def _prepare_page_section(
         word_document,
-        page,
         page_index: int,
     ):
         """
-        Use the first existing section for PDF page 1.
+        Use the existing first section for PDF page 1.
 
-        For every later PDF page, create a new Word section
-        that starts on a new page.
+        For each later PDF page, create a new Word section
+        beginning on a new page.
         """
 
         if page_index == 0:
@@ -75,15 +74,16 @@ class DocxExporter:
         """
         Apply the PDF page width and height to the Word section.
 
-        PDF coordinates and Word points both use 1/72 inch,
-        so the extracted dimensions can be applied directly.
+        PDF coordinates and Word points both use 1/72 inch.
         """
 
-        page_width = page.bbox.width
-        page_height = page.bbox.height
+        section.page_width = Pt(
+            page.bbox.width
+        )
 
-        section.page_width = Pt(page_width)
-        section.page_height = Pt(page_height)
+        section.page_height = Pt(
+            page.bbox.height
+        )
 
     @staticmethod
     def _configure_page_margins(
@@ -91,19 +91,22 @@ class DocxExporter:
         page,
     ) -> None:
         """
-        Calculate Word margins from the visible text blocks
-        on the corresponding PDF page.
+        Calculate Word margins from visible text-block boundaries.
         """
 
         content_blocks = [
             block
             for block in page.blocks
-            if block.block_type != BlockType.PAGE_NUMBER
-            and DocxExporter._block_has_text(block)
+            if (
+                block.block_type != BlockType.PAGE_NUMBER
+                and DocxExporter._block_has_text(block)
+            )
         ]
 
         if not content_blocks:
-            DocxExporter._apply_default_margins(section)
+            DocxExporter._apply_default_margins(
+                section
+            )
             return
 
         left_edge = min(
@@ -146,18 +149,31 @@ class DocxExporter:
             DocxExporter.MINIMUM_MARGIN,
         )
 
-        section.left_margin = Pt(left_margin)
-        section.top_margin = Pt(top_margin)
-        section.right_margin = Pt(right_margin)
-        section.bottom_margin = Pt(bottom_margin)
+        section.left_margin = Pt(
+            left_margin
+        )
+
+        section.top_margin = Pt(
+            top_margin
+        )
+
+        section.right_margin = Pt(
+            right_margin
+        )
+
+        section.bottom_margin = Pt(
+            bottom_margin
+        )
 
     @staticmethod
     def _apply_default_margins(section) -> None:
         """
-        Apply safe fallback margins when a page has no text.
+        Apply fallback margins to pages without text blocks.
         """
 
-        margin = Pt(DocxExporter.DEFAULT_MARGIN)
+        margin = Pt(
+            DocxExporter.DEFAULT_MARGIN
+        )
 
         section.left_margin = margin
         section.top_margin = margin
@@ -170,7 +186,7 @@ class DocxExporter:
         page,
     ) -> None:
         """
-        Render every supported text block on one page.
+        Render all supported text blocks belonging to one PDF page.
         """
 
         for block in page.blocks:
@@ -182,6 +198,7 @@ class DocxExporter:
                 continue
 
             for paragraph in block.paragraphs:
+
                 word_paragraph = (
                     DocxExporter._create_word_paragraph(
                         word_document=word_document,
@@ -192,6 +209,11 @@ class DocxExporter:
                 DocxExporter._apply_alignment(
                     word_paragraph=word_paragraph,
                     alignment=paragraph.style.alignment,
+                )
+
+                DocxExporter._apply_paragraph_spacing(
+                    word_paragraph=word_paragraph,
+                    paragraph=paragraph,
                 )
 
                 DocxExporter._render_paragraph_runs(
@@ -205,13 +227,45 @@ class DocxExporter:
         block_type: BlockType,
     ):
         """
-        Create the correct Word paragraph type.
+        Create a Word heading or normal paragraph.
         """
 
         if block_type == BlockType.HEADING:
-            return word_document.add_heading(level=1)
+            return word_document.add_heading(
+                level=1
+            )
 
         return word_document.add_paragraph()
+
+    @staticmethod
+    def _apply_paragraph_spacing(
+        word_paragraph,
+        paragraph,
+    ) -> None:
+        """
+        Apply reconstructed paragraph and line spacing.
+        """
+    
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+    
+        paragraph_format.space_before = Pt(
+            paragraph.style.spacing_before
+        )
+    
+        paragraph_format.space_after = Pt(
+            paragraph.style.spacing_after
+        )
+    
+        if paragraph.style.line_spacing > 0:
+            paragraph_format.line_spacing_rule = (
+                WD_LINE_SPACING.EXACTLY
+            )
+    
+            paragraph_format.line_spacing = Pt(
+                paragraph.style.line_spacing
+            )
 
     @staticmethod
     def _render_paragraph_runs(
@@ -219,13 +273,15 @@ class DocxExporter:
         paragraph,
     ) -> None:
         """
-        Render the reconstructed paragraph while preserving
-        text typography.
+        Render reconstructed text while preserving typography.
         """
 
-        for line_index, line in enumerate(paragraph.lines):
-
-            text_runs = RunBuilder.build(line)
+        for line_index, line in enumerate(
+            paragraph.lines
+        ):
+            text_runs = RunBuilder.build(
+                line
+            )
 
             for text_run in text_runs:
                 run = word_paragraph.add_run(
@@ -238,7 +294,9 @@ class DocxExporter:
                     text_run.font_size
                 )
 
-                font.name = text_run.font_name
+                font.name = (
+                    text_run.font_name
+                )
 
                 font.color.rgb = WordRGBColor(
                     text_run.color.red,
@@ -249,8 +307,12 @@ class DocxExporter:
                 run.bold = text_run.bold
                 run.italic = text_run.italic
 
-            if line_index < len(paragraph.lines) - 1:
-                word_paragraph.add_run(" ")
+            if line_index < len(
+                paragraph.lines
+            ) - 1:
+                word_paragraph.add_run(
+                    " "
+                )
 
     @staticmethod
     def _apply_alignment(
@@ -258,7 +320,7 @@ class DocxExporter:
         alignment: str,
     ) -> None:
         """
-        Apply analyzed paragraph alignment.
+        Apply paragraph alignment.
         """
 
         if alignment == "center":
