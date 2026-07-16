@@ -220,6 +220,11 @@ class DocxExporter:
                     word_paragraph=word_paragraph,
                     paragraph=paragraph,
                 )
+                
+                DocxExporter._apply_paragraph_indentation(
+                    word_paragraph=word_paragraph,
+                    paragraph=paragraph,
+                )
 
                 DocxExporter._render_paragraph_runs(
                     word_paragraph=word_paragraph,
@@ -241,6 +246,32 @@ class DocxExporter:
             )
 
         return word_document.add_paragraph()
+
+    @staticmethod
+    def _apply_paragraph_indentation(
+        word_paragraph,
+        paragraph,
+    ) -> None:
+        """
+        Apply horizontal paragraph geometry reconstructed
+        from the PDF.
+        """
+    
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+    
+        paragraph_format.left_indent = Pt(
+            paragraph.style.left_indent
+        )
+    
+        paragraph_format.right_indent = Pt(
+            paragraph.style.right_indent
+        )
+    
+        paragraph_format.first_line_indent = Pt(
+            paragraph.style.first_line_indent
+        )
 
     @staticmethod
     def _apply_paragraph_spacing(
@@ -327,37 +358,37 @@ class DocxExporter:
         """
         Resolve and apply a PDF font name to every Word
         font slot.
-    
+
         Setting only run.font.name is sometimes insufficient
         because Word stores separate font names for different
         character categories.
         """
-    
+
         word_font_name = FontNameResolver.resolve(
             pdf_font_name
         )
-    
+
         run.font.name = word_font_name
-    
+
         run_properties = run._element.get_or_add_rPr()
-    
+
         font_properties = run_properties.get_or_add_rFonts()
-    
+
         font_properties.set(
             qn("w:ascii"),
             word_font_name,
         )
-    
+
         font_properties.set(
             qn("w:hAnsi"),
             word_font_name,
         )
-    
+
         font_properties.set(
             qn("w:eastAsia"),
             word_font_name,
         )
-    
+
         font_properties.set(
             qn("w:cs"),
             word_font_name,
