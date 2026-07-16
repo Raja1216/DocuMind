@@ -68,8 +68,11 @@ class FixedLayoutDocxExporter:
     ANCHOR_FONT_SIZE = 1.0
     ANCHOR_LINE_SPACING = 1.0
     
-    TABLE_BORDER_COLOR = "#000000"
-    TABLE_BORDER_WIDTH = "0.75pt"
+    TABLE_BORDER_COLOR = "#B7B7B7"
+    TABLE_BORDER_WIDTH = "0.50pt"
+
+    TABLE_GRID_TOLERANCE = 0.5
+    TABLE_GRID_Z_INDEX = 90
 
     TABLE_CELL_HORIZONTAL_PADDING = 2.0
     TABLE_CELL_VERTICAL_PADDING = 1.0
@@ -270,9 +273,16 @@ class FixedLayoutDocxExporter:
         table,
     ) -> None:
         """
-        Render every detected table cell using its original
-        PDF spans and formatting.
+        Render one detected table.
+
+        Grid lines are rendered only once. Cell text boxes are
+        borderless and placed above the grid.
         """
+
+        FixedLayoutDocxExporter._render_table_grid(
+            anchor_paragraph=anchor_paragraph,
+            table=table,
+        )
 
         for cell in table.cells:
 
@@ -289,6 +299,368 @@ class FixedLayoutDocxExporter:
                 cell=cell,
                 cell_spans=cell_spans,
             )
+
+    @staticmethod
+    def _render_table_grid(
+        anchor_paragraph,
+        table,
+    ) -> None:
+        """
+        Render every unique horizontal and vertical table grid
+        segment exactly once.
+        """
+
+        horizontal_segments = (
+            FixedLayoutDocxExporter
+            ._collect_horizontal_table_segments(
+                table
+            )
+        )
+
+        vertical_segments = (
+            FixedLayoutDocxExporter
+            ._collect_vertical_table_segments(
+                table
+            )
+        )
+
+        for left, right, y_position in horizontal_segments:
+            FixedLayoutDocxExporter._add_table_grid_line(
+                anchor_paragraph=anchor_paragraph,
+                left=left,
+                top=y_position,
+                right=right,
+                bottom=y_position,
+            )
+
+        for x_position, top, bottom in vertical_segments:
+            FixedLayoutDocxExporter._add_table_grid_line(
+                anchor_paragraph=anchor_paragraph,
+                left=x_position,
+                top=top,
+                right=x_position,
+                bottom=bottom,
+            )
+
+    @staticmethod
+    def _collect_horizontal_table_segments(
+        table,
+    ) -> list[tuple[float, float, float]]:
+        """
+        Collect and merge unique horizontal cell-border
+        segments.
+
+        Returned tuple:
+            left, right, y
+        """
+
+        raw_segments = []
+
+        for cell in table.cells:
+            raw_segments.append(
+                (
+                    cell.left,
+                    cell.right,
+                    cell.top,
+                )
+            )
+
+            raw_segments.append(
+                (
+                    cell.left,
+                    cell.right,
+                    cell.bottom,
+                )
+            )
+
+        return (
+            FixedLayoutDocxExporter
+            ._merge_horizontal_segments(
+                raw_segments
+            )
+        )
+
+    @staticmethod
+    def _collect_vertical_table_segments(
+        table,
+    ) -> list[tuple[float, float, float]]:
+        """
+        Collect and merge unique vertical cell-border segments.
+
+        Returned tuple:
+            x, top, bottom
+        """
+
+        raw_segments = []
+
+        for cell in table.cells:
+            raw_segments.append(
+                (
+                    cell.left,
+                    cell.top,
+                    cell.bottom,
+                )
+            )
+
+            raw_segments.append(
+                (
+                    cell.right,
+                    cell.top,
+                    cell.bottom,
+                )
+            )
+
+        return (
+            FixedLayoutDocxExporter
+            ._merge_vertical_segments(
+                raw_segments
+            )
+        )
+
+    @staticmethod
+    def _merge_horizontal_segments(
+        segments: list[tuple[float, float, float]],
+    ) -> list[tuple[float, float, float]]:
+        """
+        Merge touching or overlapping horizontal segments that
+        share approximately the same Y coordinate.
+        """
+
+        tolerance = (
+            FixedLayoutDocxExporter
+            .TABLE_GRID_TOLERANCE
+        )
+
+        grouped: list[list[float]] = []
+
+        for left, right, y_position in sorted(
+            segments,
+            key=lambda item: (
+                item[2],
+                item[0],
+            ),
+        ):
+            matching_group = None
+
+            for group in grouped:
+                if abs(group[2] - y_position) <= tolerance:
+                    matching_group = group
+                    break
+
+            if matching_group is None:
+                grouped.append(
+                    [
+                        left,
+                        right,
+                        y_position,
+                    ]
+                )
+                continue
+
+            if left <= matching_group[1] + tolerance:
+                matching_group[0] = min(
+                    matching_group[0],
+                    left,
+                )
+
+                matching_group[1] = max(
+                    matching_group[1],
+                    right,
+                )
+            else:
+                grouped.append(
+                    [
+                        left,
+                        right,
+                        y_position,
+                    ]
+                )
+
+        return [
+            (
+                float(group[0]),
+                float(group[1]),
+                float(group[2]),
+            )
+            for group in grouped
+        ]
+        
+    @staticmethod
+    def _merge_vertical_segments(
+        segments: list[tuple[float, float, float]],
+    ) -> list[tuple[float, float, float]]:
+        """
+        Merge touching or overlapping vertical segments that
+        share approximately the same X coordinate.
+        """
+
+        tolerance = (
+            FixedLayoutDocxExporter
+            .TABLE_GRID_TOLERANCE
+        )
+
+        grouped: list[list[float]] = []
+
+        for x_position, top, bottom in sorted(
+            segments,
+            key=lambda item: (
+                item[0],
+                item[1],
+            ),
+        ):
+            matching_group = None
+
+            for group in grouped:
+                if abs(group[0] - x_position) <= tolerance:
+                    matching_group = group
+                    break
+
+            if matching_group is None:
+                grouped.append(
+                    [
+                        x_position,
+                        top,
+                        bottom,
+                    ]
+                )
+                continue
+
+            if top <= matching_group[2] + tolerance:
+                matching_group[1] = min(
+                    matching_group[1],
+                    top,
+                )
+
+                matching_group[2] = max(
+                    matching_group[2],
+                    bottom,
+                )
+            else:
+                grouped.append(
+                    [
+                        x_position,
+                        top,
+                        bottom,
+                    ]
+                )
+
+        return [
+            (
+                float(group[0]),
+                float(group[1]),
+                float(group[2]),
+            )
+            for group in grouped
+        ]    
+
+    @staticmethod
+    def _add_table_grid_line(
+        anchor_paragraph,
+        left: float,
+        top: float,
+        right: float,
+        bottom: float,
+    ) -> None:
+        """
+        Add one absolutely positioned VML table-grid line.
+        """
+    
+        shape_id = (
+            FixedLayoutDocxExporter._next_shape_id()
+        )
+    
+        line = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "line"
+            )
+        )
+    
+        line.set(
+            "id",
+            f"DocuMindTableLine{shape_id}",
+        )
+    
+        line.set(
+            "from",
+            "0,0",
+        )
+    
+        line.set(
+            "to",
+            (
+                f"{right - left:.3f}pt,"
+                f"{bottom - top:.3f}pt"
+            ),
+        )
+    
+        line.set(
+            "strokecolor",
+            FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
+        )
+    
+        line.set(
+            "strokeweight",
+            FixedLayoutDocxExporter.TABLE_BORDER_WIDTH,
+        )
+    
+        line.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
+                f"}}allowincell"
+            ),
+            "f",
+        )
+    
+        style = (
+            "position:absolute;"
+            f"margin-left:{left:.3f}pt;"
+            f"margin-top:{top:.3f}pt;"
+            "width:1pt;"
+            "height:1pt;"
+            f"z-index:{FixedLayoutDocxExporter.TABLE_GRID_Z_INDEX};"
+            "mso-position-horizontal-relative:page;"
+            "mso-position-vertical-relative:page;"
+            "mso-wrap-style:none;"
+        )
+    
+        line.set(
+            "style",
+            style,
+        )
+    
+        wrap = (
+            FixedLayoutDocxExporter
+            ._create_word_2003_element(
+                "wrap"
+            )
+        )
+    
+        wrap.set(
+            "type",
+            "none",
+        )
+    
+        line.append(
+            wrap
+        )
+    
+        pict = OxmlElement(
+            "w:pict"
+        )
+    
+        pict.append(
+            line
+        )
+    
+        anchor_run = (
+            anchor_paragraph.add_run()
+        )
+    
+        anchor_run._r.append(
+            pict
+        )
 
     @staticmethod
     def _add_table_cell_shape(
@@ -430,17 +802,7 @@ class FixedLayoutDocxExporter:
 
         shape.set(
             "stroked",
-            "t",
-        )
-
-        shape.set(
-            "strokecolor",
-            FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
-        )
-
-        shape.set(
-            "strokeweight",
-            FixedLayoutDocxExporter.TABLE_BORDER_WIDTH,
+            "f",
         )
 
         shape.set(
@@ -743,41 +1105,41 @@ class FixedLayoutDocxExporter:
         Detect left, center, or right alignment from the PDF
         coordinates of the cell text.
         """
-    
+
         if not cell_spans:
             return WD_ALIGN_PARAGRAPH.LEFT
-    
+
         text_left = min(
             span.left
             for span in cell_spans
         )
-    
+
         text_right = max(
             span.right
             for span in cell_spans
         )
-    
+
         left_gap = max(
             text_left - cell.left,
             0.0,
         )
-    
+
         right_gap = max(
             cell.right - text_right,
             0.0,
         )
-    
+
         tolerance = (
             FixedLayoutDocxExporter
             .TABLE_ALIGNMENT_TOLERANCE
         )
-    
+
         if abs(left_gap - right_gap) <= tolerance:
             return WD_ALIGN_PARAGRAPH.CENTER
-    
+
         if left_gap > right_gap + tolerance:
             return WD_ALIGN_PARAGRAPH.RIGHT
-    
+
         return WD_ALIGN_PARAGRAPH.LEFT
 
     @staticmethod
