@@ -82,6 +82,11 @@ class FixedLayoutDocxExporter:
     
     TABLE_LINE_TOLERANCE = 2.0
     TABLE_ALIGNMENT_TOLERANCE = 6.0
+    TABLE_VERTICAL_ALIGNMENT_TOLERANCE = 3.0
+
+    TABLE_VERTICAL_TOP = "top"
+    TABLE_VERTICAL_CENTER = "middle"
+    TABLE_VERTICAL_BOTTOM = "bottom"
 
 
     TABLE_Z_INDEX = 100
@@ -646,34 +651,34 @@ class FixedLayoutDocxExporter:
         Create one thin, filled VML rectangle used as a
         table border.
         """
-    
+
         shape = (
             FixedLayoutDocxExporter
             ._create_vml_element(
                 "rect"
             )
         )
-    
+
         shape.set(
             "id",
             f"DocuMindTableBorder{shape_id}",
         )
-    
+
         shape.set(
             "filled",
             "t",
         )
-    
+
         shape.set(
             "fillcolor",
             FixedLayoutDocxExporter.TABLE_BORDER_COLOR,
         )
-    
+
         shape.set(
             "stroked",
             "f",
         )
-    
+
         shape.set(
             (
                 f"{{"
@@ -682,7 +687,7 @@ class FixedLayoutDocxExporter:
             ),
             "f",
         )
-    
+
         style = (
             "position:absolute;"
             f"margin-left:{left:.3f}pt;"
@@ -694,28 +699,28 @@ class FixedLayoutDocxExporter:
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
         )
-    
+
         shape.set(
             "style",
             style,
         )
-    
+
         wrap = (
             FixedLayoutDocxExporter
             ._create_word_2003_element(
                 "wrap"
             )
         )
-    
+
         wrap.set(
             "type",
             "none",
         )
-    
+
         shape.append(
             wrap
         )
-    
+
         return shape    
 
     @staticmethod
@@ -737,6 +742,14 @@ class FixedLayoutDocxExporter:
             cell.bottom - cell.top,
             1.0,
         )
+        
+        vertical_alignment = (
+            FixedLayoutDocxExporter
+            ._detect_table_cell_vertical_alignment(
+                cell=cell,
+                cell_spans=cell_spans,
+            )
+        )
 
         shape_id = (
             FixedLayoutDocxExporter._next_shape_id()
@@ -750,6 +763,7 @@ class FixedLayoutDocxExporter:
                 top=cell.top,
                 width=width,
                 height=height,
+                vertical_alignment=vertical_alignment,
             )
         )
 
@@ -828,6 +842,7 @@ class FixedLayoutDocxExporter:
         top: float,
         width: float,
         height: float,
+        vertical_alignment: str,
     ):
         """
         Create one bordered VML rectangle representing
@@ -880,6 +895,7 @@ class FixedLayoutDocxExporter:
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"
+            f"v-text-anchor:{vertical_alignment};"
         )
 
         shape.set(
@@ -1197,6 +1213,67 @@ class FixedLayoutDocxExporter:
             return WD_ALIGN_PARAGRAPH.RIGHT
 
         return WD_ALIGN_PARAGRAPH.LEFT
+    
+    @staticmethod
+    def _detect_table_cell_vertical_alignment(
+        cell,
+        cell_spans: list,
+    ) -> str:
+        """
+        Detect whether cell text is aligned to the top,
+        vertical center, or bottom.
+    
+        The decision is based on the free PDF space above and
+        below the visible text.
+        """
+    
+        if not cell_spans:
+            return (
+                FixedLayoutDocxExporter
+                .TABLE_VERTICAL_TOP
+            )
+    
+        text_top = min(
+            span.top
+            for span in cell_spans
+        )
+    
+        text_bottom = max(
+            span.bottom
+            for span in cell_spans
+        )
+    
+        top_gap = max(
+            text_top - cell.top,
+            0.0,
+        )
+    
+        bottom_gap = max(
+            cell.bottom - text_bottom,
+            0.0,
+        )
+    
+        tolerance = (
+            FixedLayoutDocxExporter
+            .TABLE_VERTICAL_ALIGNMENT_TOLERANCE
+        )
+    
+        if abs(top_gap - bottom_gap) <= tolerance:
+            return (
+                FixedLayoutDocxExporter
+                .TABLE_VERTICAL_CENTER
+            )
+    
+        if top_gap > bottom_gap + tolerance:
+            return (
+                FixedLayoutDocxExporter
+                .TABLE_VERTICAL_BOTTOM
+            )
+    
+        return (
+            FixedLayoutDocxExporter
+            .TABLE_VERTICAL_TOP
+        )
 
     @staticmethod
     def _span_is_inside_any_table(
