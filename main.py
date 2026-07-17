@@ -50,6 +50,10 @@ for page in document.pages:
                 region.bottom,
             )
         )
+        print(
+            "   Image:",
+            region.image_path,
+        )
 analyzer = DocumentAnalyzer()
 
 analyzer.analyze(

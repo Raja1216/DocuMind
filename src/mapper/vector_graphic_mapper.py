@@ -111,6 +111,7 @@ class VectorGraphicMapper:
                     []
                 )
             ),
+            source_drawing=drawing_data,
         )
 
     @staticmethod

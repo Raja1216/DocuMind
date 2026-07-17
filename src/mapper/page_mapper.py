@@ -19,6 +19,11 @@ from src.analyzer.vector_graphic_classifier import (
 from src.analyzer.vector_graphic_grouper import (
     VectorGraphicGrouper,
 )
+from pathlib import Path
+
+from src.renderer.vector_graphic_region_renderer import (
+    VectorGraphicRegionRenderer,
+)
 
 
 class PageMapper:
@@ -129,6 +134,13 @@ class PageMapper:
         )
         VectorGraphicGrouper.group(
             page
+        )
+        VectorGraphicRegionRenderer.render_page_regions(
+            page=page,
+            output_directory=Path(
+                "debug_output"
+            ) / "vector_regions",
+            dpi=300,
         )
         
         return page

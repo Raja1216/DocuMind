@@ -41,6 +41,8 @@ class VectorGraphic(BaseElement):
     
     category: str = "unknown"
     should_render: bool = True
+    
+    source_drawing: dict | None = None
 
     @property
     def width(self) -> float:
