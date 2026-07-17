@@ -18,6 +18,9 @@ from src.exporter.font_name_resolver import (
     FontNameResolver,
 )
 
+from collections import Counter
+from statistics import median
+
 
 class DocxExporter:
     """
@@ -99,42 +102,43 @@ class DocxExporter:
         page,
     ) -> None:
         """
-        Calculate Word margins from visible text-block boundaries.
+        Calculate margins from the editable paragraph regions.
+
+        The first paragraph begins at the original PDF content
+        boundary, while later paragraph positions are reproduced
+        using paragraph spacing and indentation.
         """
 
-        content_blocks = [
-            block
-            for block in page.blocks
-            if (
-                block.block_type != BlockType.PAGE_NUMBER
-                and DocxExporter._block_has_text(block)
-            )
+        regions = [
+            region
+            for region in page.paragraph_regions
+            if region.text.strip()
         ]
 
-        if not content_blocks:
+        if not regions:
             DocxExporter._apply_default_margins(
                 section
             )
             return
 
         left_edge = min(
-            block.left
-            for block in content_blocks
+            region.left
+            for region in regions
         )
 
         top_edge = min(
-            block.top
-            for block in content_blocks
+            region.top
+            for region in regions
         )
 
         right_edge = max(
-            block.right
-            for block in content_blocks
+            region.right
+            for region in regions
         )
 
         bottom_edge = max(
-            block.bottom
-            for block in content_blocks
+            region.bottom
+            for region in regions
         )
 
         left_margin = max(
@@ -173,6 +177,10 @@ class DocxExporter:
             bottom_margin
         )
 
+        section.header_distance = Pt(0)
+        section.footer_distance = Pt(0)
+        section.gutter = Pt(0)
+
     @staticmethod
     def _apply_default_margins(section) -> None:
         """
@@ -194,45 +202,364 @@ class DocxExporter:
         page,
     ) -> None:
         """
-        Render all supported text blocks belonging to one PDF page.
+        Render one PDF page using normal editable Word
+        paragraphs.
+
+        No VML textbox or absolutely positioned text shape is
+        created here.
         """
 
-        for block in page.blocks:
+        regions = sorted(
+            [
+                region
+                for region in page.paragraph_regions
+                if region.text.strip()
+            ],
+            key=lambda region: (
+                region.top,
+                region.left,
+            ),
+        )
 
-            if not DocxExporter._block_has_text(block):
+        if not regions:
+            return
+
+        content_left = min(
+            region.left
+            for region in regions
+        )
+
+        content_right = max(
+            region.right
+            for region in regions
+        )
+
+        previous_region = None
+
+        for region in regions:
+            word_paragraph = (
+                word_document.add_paragraph()
+            )
+
+            is_heading = (
+                DocxExporter._region_is_heading(
+                    page=page,
+                    region=region,
+                )
+            )
+
+            DocxExporter._apply_region_layout(
+                word_paragraph=word_paragraph,
+                page=page,
+                region=region,
+                previous_region=previous_region,
+                content_left=content_left,
+                content_right=content_right,
+                is_heading=is_heading,
+            )
+
+            DocxExporter._render_paragraph_runs(
+                word_paragraph=word_paragraph,
+                paragraph=region,
+            )
+
+            previous_region = region
+
+    @staticmethod
+    def _apply_region_layout(
+        word_paragraph,
+        page,
+        region,
+        previous_region,
+        content_left: float,
+        content_right: float,
+        is_heading: bool,
+    ) -> None:
+        """
+        Reconstruct paragraph indentation, vertical spacing,
+        alignment and line spacing using the PDF coordinates.
+        """
+
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+
+        left_indent = max(
+            region.left - content_left,
+            0.0,
+        )
+
+        right_indent = max(
+            content_right - region.right,
+            0.0,
+        )
+
+        first_line_indent = (
+            DocxExporter
+            ._calculate_first_line_indent(
+                region
+            )
+        )
+
+        paragraph_format.left_indent = Pt(
+            left_indent
+        )
+
+        paragraph_format.right_indent = Pt(
+            right_indent
+        )
+
+        paragraph_format.first_line_indent = Pt(
+            first_line_indent
+        )
+
+        if previous_region is None:
+            spacing_before = 0.0
+        else:
+            spacing_before = max(
+                region.top
+                - previous_region.bottom,
+                0.0,
+            )
+
+        paragraph_format.space_before = Pt(
+            spacing_before
+        )
+
+        paragraph_format.space_after = Pt(0)
+
+        line_spacing = (
+            DocxExporter
+            ._estimate_region_line_spacing(
+                region
+            )
+        )
+
+        paragraph_format.line_spacing_rule = (
+            WD_LINE_SPACING.EXACTLY
+        )
+
+        paragraph_format.line_spacing = Pt(
+            line_spacing
+        )
+
+        alignment = (
+            DocxExporter
+            ._resolve_region_alignment(
+                page=page,
+                region=region,
+            )
+        )
+
+        DocxExporter._apply_alignment(
+            word_paragraph=word_paragraph,
+            alignment=alignment,
+        )
+
+        paragraph_format.keep_together = True
+        paragraph_format.widow_control = False
+
+        if is_heading:
+            paragraph_format.keep_with_next = True
+
+    @staticmethod
+    def _calculate_first_line_indent(
+        region,
+    ) -> float:
+        """
+        Calculate first-line indentation from the first visible
+        line of the region.
+        """
+
+        for line in region.lines:
+            visible_spans = [
+                span
+                for span in line.spans
+                if span.text.strip()
+            ]
+
+            if not visible_spans:
                 continue
 
-            if block.block_type == BlockType.PAGE_NUMBER:
+            first_line_left = min(
+                span.left
+                for span in visible_spans
+            )
+
+            return (
+                first_line_left
+                - region.left
+            )
+
+        return 0.0
+
+    @staticmethod
+    def _estimate_region_line_spacing(
+        region,
+    ) -> float:
+        """
+        Estimate line spacing using the original PDF line
+        positions.
+
+        For multiline regions, baseline movement between lines is
+        preferred. For single-line regions, the extracted text
+        height is used.
+        """
+
+        visible_lines = []
+
+        for line in region.lines:
+            visible_spans = [
+                span
+                for span in line.spans
+                if span.text.strip()
+            ]
+
+            if not visible_spans:
+                continue
+
+            line_top = min(
+                span.top
+                for span in visible_spans
+            )
+
+            line_bottom = max(
+                span.bottom
+                for span in visible_spans
+            )
+
+            visible_lines.append({
+                "top": line_top,
+                "bottom": line_bottom,
+                "height": max(
+                    line_bottom - line_top,
+                    1.0,
+                ),
+            })
+
+        if not visible_lines:
+            return 12.0
+
+        line_advances = [
+            current["top"] - previous["top"]
+
+            for previous, current in zip(
+                visible_lines,
+                visible_lines[1:],
+            )
+
+            if (
+                current["top"]
+                - previous["top"]
+            ) > 1.0
+        ]
+
+        if line_advances:
+            return max(
+                float(
+                    median(
+                        line_advances
+                    )
+                ),
+                1.0,
+            )
+
+        line_heights = [
+            line["height"]
+            for line in visible_lines
+        ]
+
+        return max(
+            float(
+                median(
+                    line_heights
+                )
+            ),
+            1.0,
+        )
+
+    @staticmethod
+    def _resolve_region_alignment(
+        page,
+        region,
+    ) -> str:
+        """
+        Reuse alignment calculated for the source block
+        paragraphs.
+
+        A region can combine multiple PDF blocks, so the most
+        frequently detected alignment is selected.
+        """
+
+        source_numbers = set(
+            region.source_block_numbers
+        )
+
+        alignments: list[str] = []
+
+        for block in page.blocks:
+            if (
+                block.block_number
+                not in source_numbers
+            ):
                 continue
 
             for paragraph in block.paragraphs:
+                if not paragraph.text.strip():
+                    continue
 
-                word_paragraph = (
-                    DocxExporter._create_word_paragraph(
-                        word_document=word_document,
-                        block_type=block.block_type,
-                    )
-                )
-
-                DocxExporter._apply_alignment(
-                    word_paragraph=word_paragraph,
-                    alignment=paragraph.style.alignment,
+                alignment = (
+                    paragraph.style.alignment
+                    or "left"
                 )
 
-                DocxExporter._apply_paragraph_spacing(
-                    word_paragraph=word_paragraph,
-                    paragraph=paragraph,
-                )
-                
-                DocxExporter._apply_paragraph_indentation(
-                    word_paragraph=word_paragraph,
-                    paragraph=paragraph,
+                alignments.append(
+                    str(alignment).lower()
                 )
 
-                DocxExporter._render_paragraph_runs(
-                    word_paragraph=word_paragraph,
-                    paragraph=paragraph,
+        if alignments:
+            return (
+                Counter(
+                    alignments
                 )
+                .most_common(1)[0][0]
+            )
+
+        return str(
+            getattr(
+                region.style,
+                "alignment",
+                "left",
+            )
+            or "left"
+        ).lower()
+
+    @staticmethod
+    def _region_is_heading(
+        page,
+        region,
+    ) -> bool:
+        """
+        Determine whether a paragraph region originated from a
+        heading or subtitle block.
+        """
+    
+        source_numbers = set(
+            region.source_block_numbers
+        )
+    
+        return any(
+            block.block_number
+            in source_numbers
+    
+            and block.block_type
+            in {
+                BlockType.HEADING,
+                BlockType.SUBTITLE,
+            }
+    
+            for block in page.blocks
+        )
 
     @staticmethod
     def _create_word_paragraph(

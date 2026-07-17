@@ -6,6 +6,9 @@ from src.exporter.fixed_layout_docx_exporter import (
 )
 from src.mapper.document_mapper import DocumentMapper
 from src.parser.pdf_reader import PDFReader
+from src.exporter.docx_exporter import (
+    DocxExporter,
+)
 
 
 reader = PDFReader()
@@ -112,6 +115,16 @@ FixedLayoutDocxExporter.export(
     output_path="output/output.docx",
 )
 
+DocxExporter.export(
+    document=document,
+    output_path="output/editable.docx",
+)
+
 print(
     "Fixed-layout DOCX created successfully!"
+)
+
+print(
+    "Editable DOCX created:",
+    "output/editable.docx",
 )
