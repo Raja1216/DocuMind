@@ -142,8 +142,18 @@ class ParagraphRegionAnalyzer:
     FONT_SIZE_TOLERANCE = 0.75
 
     CONTINUATION_LEFT_TOLERANCE = 8.0
-    CONTINUATION_GAP_FACTOR = 0.80
-    MINIMUM_CONTINUATION_GAP = 8.0
+
+    MINIMUM_LINE_ADVANCE = 2.0
+    MAXIMUM_LINE_ADVANCE_FACTOR = 1.80
+
+    CHART_HORIZONTAL_MARGIN = 45.0
+    CHART_TOP_MARGIN = 30.0
+    CHART_BOTTOM_MARGIN = 45.0
+
+    FIGURE_CAPTION_PATTERN = re.compile(
+        r"^\(\s*Figure\b",
+        re.IGNORECASE,
+    )
 
     TEXTUAL_LIST_PATTERN = re.compile(
         r"^(?P<marker>"
@@ -228,6 +238,12 @@ class ParagraphRegionAnalyzer:
                     tables=page.tables,
                 ):
                     continue
+                
+                if cls._line_is_inside_chart(
+                    spans=visible_spans,
+                    vector_graphics=page.vector_graphics,
+                ):
+                    continue
 
                 records.append(
                     _LineRecord(
@@ -295,6 +311,114 @@ class ParagraphRegionAnalyzer:
             <= center_y
             <= table.bottom
             for table in tables
+        )
+
+    @classmethod
+    def _line_is_inside_chart(
+        cls,
+        spans: list,
+        vector_graphics: list,
+    ) -> bool:
+        """
+        Exclude chart legends, axis values and category labels
+        from normal paragraph reconstruction.
+    
+        Figure captions remain normal editable paragraphs.
+        """
+    
+        chart_graphics = [
+            graphic
+            for graphic in vector_graphics
+            if graphic.category == "chart"
+        ]
+    
+        if not chart_graphics:
+            return False
+    
+        visible_spans = [
+            span
+            for span in spans
+            if span.text.strip()
+        ]
+    
+        if not visible_spans:
+            return False
+    
+        line_text = "".join(
+            span.text
+            for span in sorted(
+                visible_spans,
+                key=lambda item: item.left,
+            )
+        ).strip()
+    
+        # Preserve captions such as:
+        # (Figure 1: Market Growth Over the Past Five Years)
+        if cls.FIGURE_CAPTION_PATTERN.match(
+            line_text
+        ):
+            return False
+    
+        line_left = min(
+            span.left
+            for span in visible_spans
+        )
+    
+        line_top = min(
+            span.top
+            for span in visible_spans
+        )
+    
+        line_right = max(
+            span.right
+            for span in visible_spans
+        )
+    
+        line_bottom = max(
+            span.bottom
+            for span in visible_spans
+        )
+    
+        chart_left = (
+            min(
+                graphic.left
+                for graphic in chart_graphics
+            )
+            - cls.CHART_HORIZONTAL_MARGIN
+        )
+    
+        chart_top = (
+            min(
+                graphic.top
+                for graphic in chart_graphics
+            )
+            - cls.CHART_TOP_MARGIN
+        )
+    
+        chart_right = (
+            max(
+                graphic.right
+                for graphic in chart_graphics
+            )
+            + cls.CHART_HORIZONTAL_MARGIN
+        )
+    
+        chart_bottom = (
+            max(
+                graphic.bottom
+                for graphic in chart_graphics
+            )
+            + cls.CHART_BOTTOM_MARGIN
+        )
+    
+        # Use rectangle intersection instead of only checking the
+        # line center. Axis labels may partially sit outside the
+        # chart's original vector bounds.
+        return not (
+            line_right < chart_left
+            or line_left > chart_right
+            or line_bottom < chart_top
+            or line_top > chart_bottom
         )
 
     @classmethod
@@ -499,6 +623,11 @@ class ParagraphRegionAnalyzer:
         group: list[_LineRecord],
         current: _LineRecord,
     ) -> bool:
+        """
+        Determine whether the current visual line continues the
+        previous logical paragraph.
+        """
+
         previous = group[-1]
 
         if (
@@ -510,33 +639,20 @@ class ParagraphRegionAnalyzer:
         ):
             return False
 
-        vertical_gap = (
-            current.top
-            - previous.bottom
-        )
-
-        maximum_gap = max(
-            max(
-                previous.font_size,
-                current.font_size,
-            )
-            * cls.CONTINUATION_GAP_FACTOR,
-            cls.MINIMUM_CONTINUATION_GAP,
-        )
-
-        if vertical_gap > maximum_gap:
-            return False
-
-        if vertical_gap < -2.0:
-            return False
-
         current_text = (
             current.text.strip()
         )
 
-        if cls._extract_textual_marker(
-            current_text
-        ) is not None:
+        if not current_text:
+            return False
+
+        # A new textual marker always starts another list item.
+        if (
+            cls._extract_textual_marker(
+                current_text
+            )
+            is not None
+        ):
             return False
 
         expected_left = (
@@ -554,13 +670,46 @@ class ParagraphRegionAnalyzer:
         ):
             return False
 
-        # Lines from the same original PDF block should remain
-        # together even when the previous line ends a sentence.
+        # Use line-top advancement rather than bbox bottom/top gap.
+        #
+        # PDF font bounding boxes often overlap vertically, which
+        # makes current.top - previous.bottom negative even when
+        # the lines are perfectly normal consecutive lines.
+        line_advance = (
+            current.top
+            - previous.top
+        )
+
+        if (
+            line_advance
+            < cls.MINIMUM_LINE_ADVANCE
+        ):
+            return False
+
+        reference_font_size = max(
+            previous.font_size,
+            current.font_size,
+            1.0,
+        )
+
+        maximum_line_advance = (
+            reference_font_size
+            * cls.MAXIMUM_LINE_ADVANCE_FACTOR
+        )
+
+        if (
+            line_advance
+            > maximum_line_advance
+        ):
+            return False
+
         same_source_block = bool(
             previous.block_numbers
             & current.block_numbers
         )
 
+        # Consecutive lines from the same PyMuPDF text block are
+        # normally part of the same paragraph.
         if same_source_block:
             return True
 
@@ -571,14 +720,12 @@ class ParagraphRegionAnalyzer:
         if not previous_text:
             return False
 
-        # A hyphen explicitly indicates that the word or phrase
-        # continues onto the next line.
+        # A trailing hyphen explicitly indicates continuation.
         if previous_text.endswith("-"):
             return True
 
-        # Across different PDF blocks, sentence-ending
-        # punctuation usually indicates a new paragraph or list
-        # item.
+        # Across different PDF blocks, sentence-ending punctuation
+        # usually means that the next line starts a new paragraph.
         if previous_text.endswith(
             cls.TERMINAL_PARAGRAPH_CHARACTERS
         ):

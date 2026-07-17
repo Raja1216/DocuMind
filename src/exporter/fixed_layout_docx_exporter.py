@@ -18,7 +18,9 @@ from src.exporter.font_name_resolver import (
     FontNameResolver,
 )
 from src.exporter.text_normalizer import TextNormalizer
+import re
 
+from statistics import median
 
 class FixedLayoutDocxExporter:
     """
@@ -66,6 +68,17 @@ class FixedLayoutDocxExporter:
 
     TEXTBOX_TOP_ADJUSTMENT = 1.5
     LINE_HEIGHT_FACTOR = 1.25
+    
+    PARAGRAPH_TEXTBOX_WIDTH_PADDING = 8.0
+    PARAGRAPH_TEXTBOX_HEIGHT_PADDING = 5.0
+    PARAGRAPH_TEXTBOX_TOP_ADJUSTMENT = 1.0
+
+    PARAGRAPH_LINE_HEIGHT_FACTOR = 1.20
+
+    SPAN_SPACE_MINIMUM_GAP = 0.50
+    SPAN_SPACE_GAP_FACTOR = 0.04
+
+    BROKEN_WORD_PREFIX_MAX_LENGTH = 2
     
     BULLET_FONT_NAME = "Arial"
     BULLET_SIZE_FACTOR = 1.0
@@ -271,26 +284,11 @@ class FixedLayoutDocxExporter:
                 table=table,
             )
 
-        for block in page.blocks:
-            for line in block.lines:
-                for span in line.spans:
-
-                    if not span.text.strip():
-                        continue
-
-                    if (
-                        FixedLayoutDocxExporter
-                        ._span_is_inside_any_table(
-                            span=span,
-                            tables=page.tables,
-                        )
-                    ):
-                        continue
-
-                    FixedLayoutDocxExporter._add_span_textbox(
-                        anchor_paragraph=anchor_paragraph,
-                        span=span,
-                    )
+        for region in page.paragraph_regions:
+            FixedLayoutDocxExporter._add_paragraph_region_textbox(
+                anchor_paragraph=anchor_paragraph,
+                region=region,
+            )
 
     @staticmethod
     def _render_table(
@@ -1814,6 +1812,615 @@ class FixedLayoutDocxExporter:
         return shape
 
     @staticmethod
+    def _add_paragraph_region_textbox(
+        anchor_paragraph,
+        region,
+    ) -> None:
+        """
+        Create one absolutely positioned Word textbox for one
+        logical PDF paragraph.
+    
+        Individual PDF spans become formatted Word runs inside
+        the same editable textbox.
+        """
+    
+        prepared_lines = (
+            FixedLayoutDocxExporter
+            ._prepare_paragraph_region_lines(
+                region
+            )
+        )
+    
+        if not prepared_lines:
+            return
+    
+        line_spacing = (
+            FixedLayoutDocxExporter
+            ._estimate_paragraph_line_spacing(
+                region
+            )
+        )
+    
+        left = region.left
+    
+        top = max(
+            region.top
+            - FixedLayoutDocxExporter
+            .PARAGRAPH_TEXTBOX_TOP_ADJUSTMENT,
+            0.0,
+        )
+    
+        width = max(
+            region.width
+            + FixedLayoutDocxExporter
+            .PARAGRAPH_TEXTBOX_WIDTH_PADDING,
+            1.0,
+        )
+    
+        estimated_text_height = (
+            line_spacing
+            * len(prepared_lines)
+        )
+    
+        height = max(
+            region.height
+            + FixedLayoutDocxExporter
+            .PARAGRAPH_TEXTBOX_HEIGHT_PADDING,
+    
+            estimated_text_height
+            + FixedLayoutDocxExporter
+            .PARAGRAPH_TEXTBOX_HEIGHT_PADDING,
+        )
+    
+        shape_id = (
+            FixedLayoutDocxExporter
+            ._next_shape_id()
+        )
+    
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_textbox_shape(
+                shape_id=shape_id,
+                left=left,
+                top=top,
+                width=width,
+                height=height,
+            )
+        )
+    
+        textbox = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "textbox"
+            )
+        )
+    
+        textbox.set(
+            "inset",
+            "0,0,0,0",
+        )
+    
+        textbox_content = OxmlElement(
+            "w:txbxContent"
+        )
+    
+        text_paragraph_element = OxmlElement(
+            "w:p"
+        )
+    
+        textbox_content.append(
+            text_paragraph_element
+        )
+    
+        textbox.append(
+            textbox_content
+        )
+    
+        shape.append(
+            textbox
+        )
+    
+        pict = OxmlElement(
+            "w:pict"
+        )
+    
+        pict.append(
+            shape
+        )
+    
+        anchor_run = (
+            anchor_paragraph.add_run()
+        )
+    
+        anchor_run._r.append(
+            pict
+        )
+    
+        text_paragraph = Paragraph(
+            text_paragraph_element,
+            anchor_paragraph._parent,
+        )
+    
+        FixedLayoutDocxExporter._configure_region_paragraph(
+            text_paragraph=text_paragraph,
+            region=region,
+            line_spacing=line_spacing,
+        )
+    
+        for line_index, fragments in enumerate(
+            prepared_lines
+        ):
+            if line_index > 0:
+                break_run = (
+                    text_paragraph.add_run()
+                )
+    
+                break_run.add_break(
+                    WD_BREAK.LINE
+                )
+    
+            (
+                FixedLayoutDocxExporter
+                ._add_region_line_runs(
+                    text_paragraph=text_paragraph,
+                    fragments=fragments,
+                )
+            )
+
+    @classmethod
+    def _prepare_paragraph_region_lines(
+        cls,
+        region,
+    ) -> list[list[dict]]:
+        """
+        Convert ParagraphRegion lines into exportable formatted
+        fragments.
+
+        Leading and trailing spaces are recorded separately so
+        missing spaces between differently formatted PDF spans
+        can be restored.
+        """
+
+        prepared_lines: list[
+            list[dict]
+        ] = []
+
+        for line in region.lines:
+            fragments: list[dict] = []
+
+            for span in sorted(
+                line.spans,
+                key=lambda item: item.left,
+            ):
+                raw_text = TextNormalizer.normalize(
+                    span.text
+                )
+
+                if not raw_text:
+                    continue
+
+                visible_text = raw_text.strip()
+
+                if not visible_text:
+                    continue
+
+                fragments.append({
+                    "span": span,
+                    "text": visible_text,
+
+                    "leading_space": bool(
+                        raw_text[:1].isspace()
+                    ),
+
+                    "trailing_space": bool(
+                        raw_text[-1:].isspace()
+                    ),
+                })
+
+            if fragments:
+                prepared_lines.append(
+                    fragments
+                )
+
+        cls._repair_cross_line_word_fragments(
+            prepared_lines
+        )
+
+        return [
+            line
+            for line in prepared_lines
+            if line
+        ]
+
+    @classmethod
+    def _repair_cross_line_word_fragments(
+        cls,
+        prepared_lines: list[list[dict]],
+    ) -> None:
+        """
+        Repair words incorrectly divided between extracted PDF
+        lines.
+
+        Example:
+
+            "dapibu" + "s diam"
+            becomes
+            "dapibus" + "diam"
+
+        This rule is deliberately conservative. It only moves a
+        one- or two-letter lowercase prefix from the next line.
+        """
+
+        for line_index in range(
+            len(prepared_lines) - 1
+        ):
+            current_line = prepared_lines[
+                line_index
+            ]
+
+            next_line = prepared_lines[
+                line_index + 1
+            ]
+
+            if not current_line or not next_line:
+                continue
+
+            previous_fragment = (
+                current_line[-1]
+            )
+
+            next_fragment = (
+                next_line[0]
+            )
+
+            previous_text = (
+                previous_fragment["text"]
+                .rstrip()
+            )
+
+            next_text = (
+                next_fragment["text"]
+                .lstrip()
+            )
+
+            if not previous_text or not next_text:
+                continue
+
+            if not cls._spans_have_matching_style(
+                previous_fragment["span"],
+                next_fragment["span"],
+            ):
+                continue
+
+            previous_word_match = re.search(
+                r"([A-Za-z]{2,})$",
+                previous_text,
+            )
+
+            next_prefix_match = re.match(
+                (
+                    r"^([a-z]{1,"
+                    f"{cls.BROKEN_WORD_PREFIX_MAX_LENGTH}"
+                    r"})(?=\s|$)"
+                ),
+                next_text,
+            )
+
+            if (
+                previous_word_match is None
+                or next_prefix_match is None
+            ):
+                continue
+
+            prefix = next_prefix_match.group(
+                1
+            )
+
+            previous_fragment["text"] = (
+                previous_text
+                + prefix
+            )
+
+            previous_fragment[
+                "trailing_space"
+            ] = False
+
+            remainder = next_text[
+                len(prefix):
+            ].lstrip()
+
+            if remainder:
+                next_fragment["text"] = (
+                    remainder
+                )
+
+                next_fragment[
+                    "leading_space"
+                ] = False
+            else:
+                next_line.pop(0)
+                
+    @staticmethod
+    def _spans_have_matching_style(
+        first,
+        second,
+    ) -> bool:
+        """
+        Check whether two fragments can safely be treated as parts
+        of the same word.
+        """
+
+        return (
+            first.font == second.font
+
+            and abs(
+                first.font_size
+                - second.font_size
+            ) <= 0.25
+
+            and first.flags == second.flags
+
+            and first.color == second.color
+        )   
+        
+    @classmethod
+    def _add_region_line_runs(
+        cls,
+        text_paragraph,
+        fragments: list[dict],
+    ) -> None:
+        """
+        Add all formatted fragments belonging to one visual line.
+        """
+
+        previous_fragment = None
+
+        for fragment in fragments:
+            if (
+                previous_fragment is not None
+                and cls._needs_space_between_fragments(
+                    previous_fragment,
+                    fragment,
+                )
+            ):
+                cls._add_formatted_run(
+                    text_paragraph=text_paragraph,
+                    span=previous_fragment["span"],
+                    text_override=" ",
+                )
+
+            cls._add_formatted_run(
+                text_paragraph=text_paragraph,
+                span=fragment["span"],
+                text_override=fragment["text"],
+            )
+
+            previous_fragment = fragment             
+
+    @classmethod
+    def _needs_space_between_fragments(
+        cls,
+        previous_fragment: dict,
+        current_fragment: dict,
+    ) -> bool:
+        """
+        Restore spaces that disappear when PDF text switches
+        between bold, italic or regular spans.
+        """
+
+        previous_text = (
+            previous_fragment["text"]
+        )
+
+        current_text = (
+            current_fragment["text"]
+        )
+
+        if not previous_text or not current_text:
+            return False
+
+        if (
+            previous_fragment["trailing_space"]
+            or current_fragment["leading_space"]
+        ):
+            return True
+
+        if current_text[0] in (
+            ".",
+            ",",
+            ";",
+            ":",
+            "!",
+            "?",
+            "%",
+            ")",
+            "]",
+            "}",
+        ):
+            return False
+
+        if previous_text[-1] in (
+            "(",
+            "[",
+            "{",
+            "/",
+            "\\",
+            "–",
+            "—",
+        ):
+            return False
+
+        previous_span = (
+            previous_fragment["span"]
+        )
+
+        current_span = (
+            current_fragment["span"]
+        )
+
+        horizontal_gap = (
+            current_span.left
+            - previous_span.right
+        )
+
+        if horizontal_gap <= 0:
+            return False
+
+        reference_font_size = max(
+            min(
+                previous_span.font_size,
+                current_span.font_size,
+            ),
+            1.0,
+        )
+
+        spacing_threshold = max(
+            cls.SPAN_SPACE_MINIMUM_GAP,
+            (
+                reference_font_size
+                * cls.SPAN_SPACE_GAP_FACTOR
+            ),
+        )
+
+        return (
+            horizontal_gap
+            >= spacing_threshold
+        )
+
+    @classmethod
+    def _estimate_paragraph_line_spacing(
+        cls,
+        region,
+    ) -> float:
+        """
+        Estimate Word line spacing from the original PDF line-top
+        positions.
+
+        Using PDF line advancement is more accurate than applying
+        a generic multiplier to every line.
+        """
+
+        line_tops: list[float] = []
+        line_heights: list[float] = []
+
+        for line in region.lines:
+            visible_spans = [
+                span
+                for span in line.spans
+                if span.text.strip()
+            ]
+
+            if not visible_spans:
+                continue
+
+            line_tops.append(
+                min(
+                    span.top
+                    for span in visible_spans
+                )
+            )
+
+            line_heights.append(
+                max(
+                    max(
+                        span.bottom - span.top,
+                        span.font_size
+                        * cls.PARAGRAPH_LINE_HEIGHT_FACTOR,
+                    )
+                    for span in visible_spans
+                )
+            )
+
+        if not line_heights:
+            return 12.0
+
+        normal_height = float(
+            median(
+                line_heights
+            )
+        )
+
+        line_advances = [
+            current_top - previous_top
+
+            for previous_top, current_top in zip(
+                line_tops,
+                line_tops[1:],
+            )
+
+            if (
+                current_top - previous_top
+            ) > 1.0
+        ]
+
+        if not line_advances:
+            return normal_height
+
+        normal_advance = float(
+            median(
+                line_advances
+            )
+        )
+
+        return max(
+            normal_height,
+            normal_advance,
+        )
+
+    @staticmethod
+    def _configure_region_paragraph(
+        text_paragraph,
+        region,
+        line_spacing: float,
+    ) -> None:
+        """
+        Configure one editable Word paragraph inside the
+        positioned textbox.
+        """
+
+        paragraph_format = (
+            text_paragraph.paragraph_format
+        )
+
+        paragraph_format.space_before = Pt(0)
+        paragraph_format.space_after = Pt(0)
+
+        paragraph_format.left_indent = Pt(0)
+        paragraph_format.right_indent = Pt(0)
+        paragraph_format.first_line_indent = Pt(0)
+
+        paragraph_format.line_spacing_rule = (
+            WD_LINE_SPACING.EXACTLY
+        )
+
+        paragraph_format.line_spacing = Pt(
+            max(
+                line_spacing,
+                1.0,
+            )
+        )
+
+        alignment = getattr(
+            region.style,
+            "alignment",
+            "left",
+        )
+
+        alignment_map = {
+            "left": WD_ALIGN_PARAGRAPH.LEFT,
+            "center": WD_ALIGN_PARAGRAPH.CENTER,
+            "right": WD_ALIGN_PARAGRAPH.RIGHT,
+            "justify": WD_ALIGN_PARAGRAPH.JUSTIFY,
+        }
+
+        text_paragraph.alignment = (
+            alignment_map.get(
+                str(alignment).lower(),
+                WD_ALIGN_PARAGRAPH.LEFT,
+            )
+        )
+
+    @staticmethod
     def _add_span_textbox(
         anchor_paragraph,
         span,
@@ -2082,6 +2689,7 @@ class FixedLayoutDocxExporter:
     def _add_formatted_run(
         text_paragraph,
         span,
+        text_override: str | None = None,
     ) -> None:
         """
         Add editable text while preserving typography.
@@ -2090,8 +2698,14 @@ class FixedLayoutDocxExporter:
         Unicode characters before being written to Word.
         """
 
-        normalized_text = TextNormalizer.normalize(
+        source_text = (
             span.text
+            if text_override is None
+            else text_override
+        )
+        
+        normalized_text = TextNormalizer.normalize(
+            source_text
         )
 
         run = text_paragraph.add_run(
