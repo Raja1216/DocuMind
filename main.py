@@ -12,22 +12,49 @@ reader = PDFReader()
 
 pdf = reader.open(
     "samples/pdf/spdf8.pdf"
+    # "samples/BirlaPDF/Class-4-Print31 1.pdf"
 )
 
 document = DocumentMapper.map(
     pdf
 )
 for page in document.pages:
+
+    renderable_graphics = [
+        graphic
+        for graphic in page.vector_graphics
+        if graphic.should_render
+    ]
+
     print(
         f"Page {page.number}: "
-        f"{len(page.vector_graphics)} "
-        f"vector graphics"
+        f"{len(page.vector_graphics)} extracted, "
+        f"{len(renderable_graphics)} renderable"
     )
 
+    category_counts = {}
+
     for graphic in page.vector_graphics:
+        category_counts[
+            graphic.category
+        ] = (
+            category_counts.get(
+                graphic.category,
+                0,
+            )
+            + 1
+        )
+
+    print(
+        "  Categories:",
+        category_counts,
+    )
+
+    for graphic in renderable_graphics:
         print(
             " ",
             graphic.sequence_number,
+            graphic.category,
             graphic.drawing_type,
             (
                 graphic.left,
@@ -35,13 +62,10 @@ for page in document.pages:
                 graphic.right,
                 graphic.bottom,
             ),
-            "stroke:",
-            graphic.stroke_color,
-            graphic.stroke_width,
             "fill:",
             graphic.fill_color,
-            "items:",
-            len(graphic.items),
+            "stroke:",
+            graphic.stroke_color,
         )
 
 analyzer = DocumentAnalyzer()

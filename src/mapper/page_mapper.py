@@ -13,6 +13,9 @@ from src.extractor.vector_graphic_extractor import (
 from src.mapper.vector_graphic_mapper import (
     VectorGraphicMapper,
 )
+from src.analyzer.vector_graphic_classifier import (
+    VectorGraphicClassifier,
+)
 
 
 class PageMapper:
@@ -118,6 +121,10 @@ class PageMapper:
                 vector_graphic
             )            
 
+        VectorGraphicClassifier.analyze_page(
+            page
+        )
+        
         return page
     
     @staticmethod

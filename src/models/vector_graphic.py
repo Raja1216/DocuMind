@@ -38,6 +38,9 @@ class VectorGraphic(BaseElement):
     items: list[Any] = field(
         default_factory=list
     )
+    
+    category: str = "unknown"
+    should_render: bool = True
 
     @property
     def width(self) -> float:
