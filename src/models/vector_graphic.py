@@ -43,6 +43,10 @@ class VectorGraphic(BaseElement):
     should_render: bool = True
     
     source_drawing: dict | None = None
+    
+    active_clips: list[dict] = field(
+        default_factory=list
+    )
 
     @property
     def width(self) -> float:

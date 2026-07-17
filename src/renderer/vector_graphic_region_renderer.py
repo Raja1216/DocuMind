@@ -164,37 +164,84 @@ class VectorGraphicRegionRenderer:
             temporary_document.close()
 
     @classmethod
-    def _render_graphic(
+    def _apply_clip_path(
         cls,
-        page: pymupdf.Page,
-        graphic: VectorGraphic,
+        shape,
+        clip_drawing: dict,
         offset_x: float,
         offset_y: float,
     ) -> bool:
         """
-        Replay one PyMuPDF drawing dictionary onto a new page.
+        Add one PDF clipping path to the current Shape.
+
+        The PDF W/W* operators apply the path as a clipping
+        boundary. Subsequent graphics are restricted to the
+        intersection of all active clips.
         """
 
-        drawing = graphic.source_drawing
+        clip_items = clip_drawing.get(
+            "items"
+        ) or []
 
-        if not drawing:
+        if not clip_items:
             return False
 
-        items = drawing.get("items") or []
+        drawn_items = cls._draw_items(
+            shape=shape,
+            items=clip_items,
+            offset_x=offset_x,
+            offset_y=offset_y,
+        )
 
-        if not items:
+        if drawn_items == 0:
             return False
 
-        shape = page.new_shape()
+        if bool(
+            clip_drawing.get(
+                "closePath",
+                False,
+            )
+        ):
+            shape.draw_cont += "h\n"
 
+        if bool(
+            clip_drawing.get(
+                "even_odd",
+                False,
+            )
+        ):
+            shape.draw_cont += "W* n\n"
+        else:
+            shape.draw_cont += "W n\n"
+
+        # The clipping operator clears the current PDF path.
+        # Reset PyMuPDF's remembered last point as well.
+        shape.last_point = None
+
+        return True
+
+    @classmethod
+    def _draw_items(
+        cls,
+        shape,
+        items,
+        offset_x: float,
+        offset_y: float,
+    ) -> int:
+        """
+        Replay a collection of PyMuPDF path items.
+    
+        Returns the number of successfully drawn commands.
+        """
+    
         drawn_items = 0
-
+    
         for item in items:
             if not item:
                 continue
-
+            
             operation = item[0]
-
+    
             try:
                 if operation == "l":
                     cls._draw_line(
@@ -203,7 +250,7 @@ class VectorGraphicRegionRenderer:
                         offset_x,
                         offset_y,
                     )
-
+    
                 elif operation == "c":
                     cls._draw_curve(
                         shape,
@@ -211,7 +258,7 @@ class VectorGraphicRegionRenderer:
                         offset_x,
                         offset_y,
                     )
-
+    
                 elif operation == "re":
                     cls._draw_rectangle(
                         shape,
@@ -219,7 +266,7 @@ class VectorGraphicRegionRenderer:
                         offset_x,
                         offset_y,
                     )
-
+    
                 elif operation == "qu":
                     cls._draw_quad(
                         shape,
@@ -227,16 +274,63 @@ class VectorGraphicRegionRenderer:
                         offset_x,
                         offset_y,
                     )
-
+    
                 else:
                     continue
-
+                
                 drawn_items += 1
-
-            except (TypeError, ValueError, IndexError):
-                # One malformed command should not prevent the
-                # remaining vector paths from being rendered.
+    
+            except (
+                TypeError,
+                ValueError,
+                IndexError,
+                AttributeError,
+            ):
                 continue
+            
+        return drawn_items
+
+    @classmethod
+    def _render_graphic(
+        cls,
+        page: pymupdf.Page,
+        graphic: VectorGraphic,
+        offset_x: float,
+        offset_y: float,
+    ) -> bool:
+        """
+        Replay one PyMuPDF drawing dictionary while preserving
+        all clipping paths that apply to it.
+        """
+
+        drawing = graphic.source_drawing
+
+        if not drawing:
+            return False
+
+        items = drawing.get(
+            "items"
+        ) or []
+
+        if not items:
+            return False
+
+        shape = page.new_shape()
+
+        for clip_drawing in graphic.active_clips:
+            cls._apply_clip_path(
+                shape=shape,
+                clip_drawing=clip_drawing,
+                offset_x=offset_x,
+                offset_y=offset_y,
+            )
+
+        drawn_items = cls._draw_items(
+            shape=shape,
+            items=items,
+            offset_x=offset_x,
+            offset_y=offset_y,
+        )
 
         if drawn_items == 0:
             return False
@@ -245,25 +339,40 @@ class VectorGraphicRegionRenderer:
             color=cls._normalise_color(
                 drawing.get("color")
             ),
+
             fill=cls._normalise_color(
                 drawing.get("fill")
             ),
+
             dashes=cls._normalise_dashes(
                 drawing.get("dashes")
             ),
+
             even_odd=bool(
-                drawing.get("even_odd", False)
+                drawing.get(
+                    "even_odd",
+                    False,
+                )
             ),
+
             closePath=bool(
-                drawing.get("closePath", False)
+                drawing.get(
+                    "closePath",
+                    False,
+                )
             ),
-            lineJoin=cls._safe_number(
-                drawing.get("lineJoin"),
-                default=0.0,
+
+            lineJoin=int(
+                cls._safe_number(
+                    drawing.get("lineJoin"),
+                    default=0.0,
+                )
             ),
+
             lineCap=cls._normalise_line_cap(
                 drawing.get("lineCap")
             ),
+
             width=max(
                 cls._safe_number(
                     drawing.get("width"),
@@ -271,11 +380,17 @@ class VectorGraphicRegionRenderer:
                 ),
                 0.0,
             ),
+
             stroke_opacity=cls._safe_opacity(
-                drawing.get("stroke_opacity")
+                drawing.get(
+                    "stroke_opacity"
+                )
             ),
+
             fill_opacity=cls._safe_opacity(
-                drawing.get("fill_opacity")
+                drawing.get(
+                    "fill_opacity"
+                )
             ),
         )
 

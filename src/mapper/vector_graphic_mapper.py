@@ -112,6 +112,13 @@ class VectorGraphicMapper:
                 )
             ),
             source_drawing=drawing_data,
+            
+            active_clips=list(
+                drawing_data.get(
+                    "_documind_active_clips",
+                    [],
+                )
+            ),
         )
 
     @staticmethod
