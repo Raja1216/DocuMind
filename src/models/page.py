@@ -11,6 +11,9 @@ from src.models.vector_graphic import VectorGraphic
 from src.models.vector_graphic_region import (
     VectorGraphicRegion,
 )
+from src.models.paragraph_region import (
+    ParagraphRegion,
+)
 
 
 @dataclass(slots=True)
@@ -39,5 +42,8 @@ class Page:
         default_factory=list
     )
     vector_regions: list[VectorGraphicRegion] = field(
+        default_factory=list
+    )
+    paragraph_regions: list[ParagraphRegion] = field(
         default_factory=list
     )
