@@ -31,29 +31,32 @@ class VectorGraphicClassifier:
     THIN_LINE_MAX_THICKNESS = 5.0
 
     CHART_MIN_COMPONENTS = 8
-    CHART_CLUSTER_DISTANCE = 25.0
+    CHART_CLUSTER_DISTANCE = 55.0
     
     CHART_PAGE_EDGE_MARGIN = 40.0
     CHART_MIN_CLUSTER_WIDTH = 120.0
-    CHART_MIN_CLUSTER_HEIGHT = 80.0
+    CHART_MIN_CLUSTER_HEIGHT = 70.0
 
-    CHART_MAX_PAGE_COVERAGE = 0.65
+    CHART_MAX_PAGE_COVERAGE = 0.70
     CHART_MIN_LONG_LINES = 2
     CHART_MIN_MARKERS_OR_BARS = 3
 
     @staticmethod
     def analyze_page(page) -> None:
         """
-        Classify page vector graphics in two passes.
+        Classify vector graphics in three passes.
 
         Pass 1:
-        Detect obvious backgrounds, bullets, noise,
-        separators, and decorative edge graphics.
+        Remove definite backgrounds, decorative edge artwork,
+        and tiny noise.
 
         Pass 2:
-        Run chart detection only on the remaining unknown
-        graphics. This prevents full-page backgrounds and
-        decorative artwork from joining chart clusters.
+        Detect chart regions using all remaining drawings,
+        including possible bullets and separator lines.
+
+        Pass 3:
+        Classify remaining non-chart drawings as bullets,
+        separators, or unknown graphics.
         """
 
         graphics = page.vector_graphics
@@ -61,44 +64,57 @@ class VectorGraphicClassifier:
         if not graphics:
             return
 
-        # First classify obvious, non-chart graphics.
         chart_candidates: list[VectorGraphic] = []
 
+        # Pass 1: classify only graphics that are safe to identify
+        # before chart-region analysis.
         for graphic in graphics:
 
-            category = (
-                VectorGraphicClassifier
-                ._classify_individual_graphic(
-                    page=page,
-                    graphic=graphic,
-                )
-            )
-
-            graphic.category = category
-
-            if category == (
-                VectorGraphicClassifier
-                .CATEGORY_UNKNOWN
+            if VectorGraphicClassifier._is_page_background(
+                page=page,
+                graphic=graphic,
             ):
-                chart_candidates.append(
-                    graphic
+                graphic.category = (
+                    VectorGraphicClassifier
+                    .CATEGORY_BACKGROUND
                 )
+                graphic.should_render = False
                 continue
 
-            graphic.should_render = (
-                category
-                not in {
+            if VectorGraphicClassifier._is_noise(
+                graphic
+            ):
+                graphic.category = (
                     VectorGraphicClassifier
-                    .CATEGORY_BACKGROUND,
+                    .CATEGORY_NOISE
+                )
+                graphic.should_render = False
+                continue
+
+            if VectorGraphicClassifier._is_decorative(
+                page=page,
+                graphic=graphic,
+            ):
+                graphic.category = (
                     VectorGraphicClassifier
-                    .CATEGORY_BULLET,
-                    VectorGraphicClassifier
-                    .CATEGORY_NOISE,
-                }
+                    .CATEGORY_DECORATIVE
+                )
+                graphic.should_render = True
+                continue
+
+            # Do not classify bullets or separators yet.
+            # They may be chart markers or chart grid lines.
+            graphic.category = (
+                VectorGraphicClassifier
+                .CATEGORY_UNKNOWN
+            )
+            graphic.should_render = True
+
+            chart_candidates.append(
+                graphic
             )
 
-        # Detect charts only among graphics not already identified
-        # as backgrounds, decorations, bullets, or separators.
+        # Pass 2: identify complete chart clusters.
         chart_graphics = (
             VectorGraphicClassifier
             ._detect_chart_components(
@@ -112,6 +128,7 @@ class VectorGraphicClassifier:
             for graphic in chart_graphics
         }
 
+        # Pass 3: finalize all remaining objects.
         for graphic in chart_candidates:
 
             if id(graphic) in chart_ids:
@@ -119,16 +136,33 @@ class VectorGraphicClassifier:
                     VectorGraphicClassifier
                     .CATEGORY_CHART
                 )
-
-                # The dedicated Chart Engine will process these.
                 graphic.should_render = False
+                continue
+
+            if VectorGraphicClassifier._is_bullet(
+                graphic
+            ):
+                graphic.category = (
+                    VectorGraphicClassifier
+                    .CATEGORY_BULLET
+                )
+                graphic.should_render = False
+                continue
+
+            if VectorGraphicClassifier._is_separator(
+                graphic
+            ):
+                graphic.category = (
+                    VectorGraphicClassifier
+                    .CATEGORY_SEPARATOR
+                )
+                graphic.should_render = True
                 continue
 
             graphic.category = (
                 VectorGraphicClassifier
                 .CATEGORY_UNKNOWN
             )
-
             graphic.should_render = True
 
     @staticmethod
@@ -351,11 +385,16 @@ class VectorGraphicClassifier:
         graphics: list[VectorGraphic],
     ) -> list[VectorGraphic]:
         """
-        Detect dense drawing clusters that resemble charts.
+        Detect dense groups of vector drawings that represent
+        charts.
 
-        Only previously unclassified graphics are provided to
-        this method. Decorative edge graphics and full-page
-        backgrounds must never be considered chart candidates.
+        Candidates may include:
+        - grid lines;
+        - axes;
+        - bars;
+        - line-series segments;
+        - data-point markers;
+        - legend symbols.
         """
 
         candidates = [
@@ -391,9 +430,11 @@ class VectorGraphicClassifier:
 
         for graphic in candidates:
 
-            matching_cluster = None
+            matching_clusters = []
 
-            for cluster in clusters:
+            for cluster_index, cluster in enumerate(
+                clusters
+            ):
                 if (
                     VectorGraphicClassifier
                     ._graphic_near_cluster(
@@ -401,17 +442,32 @@ class VectorGraphicClassifier:
                         cluster=cluster,
                     )
                 ):
-                    matching_cluster = cluster
-                    break
+                    matching_clusters.append(
+                        cluster_index
+                    )
 
-            if matching_cluster is None:
+            if not matching_clusters:
                 clusters.append(
                     [graphic]
                 )
-            else:
-                matching_cluster.append(
-                    graphic
+                continue
+
+            primary_index = matching_clusters[0]
+
+            clusters[primary_index].append(
+                graphic
+            )
+
+            # Merge clusters when the new graphic connects
+            # multiple nearby groups.
+            for merge_index in reversed(
+                matching_clusters[1:]
+            ):
+                clusters[primary_index].extend(
+                    clusters[merge_index]
                 )
+
+                del clusters[merge_index]
 
         chart_graphics: list[
             VectorGraphic
@@ -426,23 +482,23 @@ class VectorGraphicClassifier:
                 continue
 
             cluster_left = min(
-                graphic.left
-                for graphic in cluster
+                item.left
+                for item in cluster
             )
 
             cluster_top = min(
-                graphic.top
-                for graphic in cluster
+                item.top
+                for item in cluster
             )
 
             cluster_right = max(
-                graphic.right
-                for graphic in cluster
+                item.right
+                for item in cluster
             )
 
             cluster_bottom = max(
-                graphic.bottom
-                for graphic in cluster
+                item.bottom
+                for item in cluster
             )
 
             cluster_width = (
@@ -489,38 +545,24 @@ class VectorGraphicClassifier:
                 continue
 
             long_line_count = sum(
-                (
-                    graphic.width
-                    >= VectorGraphicClassifier
-                    .LONG_LINE_MIN_LENGTH
-                    or graphic.height
-                    >= VectorGraphicClassifier
-                    .LONG_LINE_MIN_LENGTH
-                )
-                for graphic in cluster
+                VectorGraphicClassifier
+                ._is_chart_long_line(item)
+                for item in cluster
             )
 
             marker_or_bar_count = sum(
-                (
-                    graphic.drawing_type
-                    in {
-                        "curve",
-                        "rectangle",
-                        "compound",
-                    }
-                    and graphic.width <= 100.0
-                    and graphic.height <= 220.0
-                )
-                for graphic in cluster
+                VectorGraphicClassifier
+                ._is_chart_marker_or_bar(item)
+                for item in cluster
             )
 
             colors = {
-                graphic.stroke_color
-                or graphic.fill_color
-                for graphic in cluster
+                item.stroke_color
+                or item.fill_color
+                for item in cluster
                 if (
-                    graphic.stroke_color
-                    or graphic.fill_color
+                    item.stroke_color
+                    or item.fill_color
                 )
             }
 
@@ -528,13 +570,21 @@ class VectorGraphicClassifier:
                 len(colors) >= 2
             )
 
-            if (
+            has_grid_structure = (
                 long_line_count
                 >= VectorGraphicClassifier
                 .CHART_MIN_LONG_LINES
-                and marker_or_bar_count
+            )
+
+            has_data_graphics = (
+                marker_or_bar_count
                 >= VectorGraphicClassifier
                 .CHART_MIN_MARKERS_OR_BARS
+            )
+
+            if (
+                has_grid_structure
+                and has_data_graphics
                 and has_multiple_colors
             ):
                 chart_graphics.extend(
@@ -542,6 +592,61 @@ class VectorGraphicClassifier:
                 )
 
         return chart_graphics
+
+    @staticmethod
+    def _is_chart_long_line(
+        graphic: VectorGraphic,
+    ) -> bool:
+        """
+        Return True for likely chart axes, grid lines, or long
+        series segments.
+        """
+
+        return (
+            graphic.width
+            >= VectorGraphicClassifier
+            .LONG_LINE_MIN_LENGTH
+            or graphic.height
+            >= VectorGraphicClassifier
+            .LONG_LINE_MIN_LENGTH
+        )
+
+    @staticmethod
+    def _is_chart_marker_or_bar(
+        graphic: VectorGraphic,
+    ) -> bool:
+        """
+        Detect bars, legend markers, circular data points, and
+        short line-series components.
+        """
+    
+        if graphic.drawing_type in {
+            "curve",
+            "rectangle",
+            "compound",
+        }:
+            return (
+                graphic.width <= 110.0
+                and graphic.height <= 230.0
+            )
+    
+        if graphic.drawing_type == "line":
+            has_visible_stroke = (
+                graphic.stroke_color is not None
+                and graphic.stroke_width >= 1.5
+            )
+    
+            is_series_segment = (
+                graphic.width <= 130.0
+                and graphic.height <= 180.0
+            )
+    
+            return (
+                has_visible_stroke
+                and is_series_segment
+            )
+    
+        return False
 
     @staticmethod
     def _touches_page_edge(
