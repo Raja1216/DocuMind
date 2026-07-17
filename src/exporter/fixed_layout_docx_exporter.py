@@ -12,6 +12,7 @@ from docx.shared import Pt
 from docx.text.paragraph import Paragraph
 from lxml import etree
 from io import BytesIO
+from pathlib import Path
 
 from src.exporter.font_name_resolver import (
     FontNameResolver,
@@ -102,6 +103,7 @@ class FixedLayoutDocxExporter:
     TABLE_Z_INDEX = 100
     TEXT_Z_INDEX = 251659264
     IMAGE_Z_INDEX = 1
+    VECTOR_GRAPHIC_Z_INDEX = 0
 
     _shape_id = 1
 
@@ -245,7 +247,16 @@ class FixedLayoutDocxExporter:
         2. Tables
         3. Normal text
         """
-
+        for region in page.vector_regions:
+            if not region.image_path:
+                continue
+            
+            FixedLayoutDocxExporter._add_vector_region_shape(
+                document_part=word_document.part,
+                anchor_paragraph=anchor_paragraph,
+                region=region,
+            )
+        
         for image in page.images:
             FixedLayoutDocxExporter._add_image_shape(
                 document_part=word_document.part,
@@ -1507,6 +1518,130 @@ class FixedLayoutDocxExporter:
         return False
 
     @staticmethod
+    def _add_vector_region_shape(
+        document_part,
+        anchor_paragraph,
+        region,
+    ) -> None:
+        """
+        Add one rendered vector-graphics region as an absolutely
+        positioned transparent Word VML image.
+        """
+
+        if not region.image_path:
+            return
+
+        image_path = Path(
+            region.image_path
+        )
+
+        if not image_path.is_file():
+            return
+
+        image_bytes = image_path.read_bytes()
+
+        if not image_bytes:
+            return
+
+        relationship_id, _ = (
+            document_part.get_or_add_image(
+                BytesIO(image_bytes)
+            )
+        )
+
+        left = (
+            region.image_left
+            if region.image_left is not None
+            else region.left
+        )
+
+        top = (
+            region.image_top
+            if region.image_top is not None
+            else region.top
+        )
+
+        width = max(
+            region.image_width
+            if region.image_width is not None
+            else region.width,
+            1.0,
+        )
+
+        height = max(
+            region.image_height
+            if region.image_height is not None
+            else region.height,
+            1.0,
+        )
+
+        shape_id = (
+            FixedLayoutDocxExporter
+            ._next_shape_id()
+        )
+
+        shape = (
+            FixedLayoutDocxExporter
+            ._create_image_shape(
+                shape_id=shape_id,
+                left=left,
+                top=top,
+                width=width,
+                height=height,
+                z_index=(
+                    FixedLayoutDocxExporter
+                    .VECTOR_GRAPHIC_Z_INDEX
+                ),
+                shape_name="DocuMindVector",
+            )
+        )
+
+        image_data = (
+            FixedLayoutDocxExporter
+            ._create_vml_element(
+                "imagedata"
+            )
+        )
+
+        image_data.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.RELATIONSHIPS_NAMESPACE}"
+                f"}}id"
+            ),
+            relationship_id,
+        )
+
+        image_data.set(
+            (
+                f"{{"
+                f"{FixedLayoutDocxExporter.OFFICE_NAMESPACE}"
+                f"}}title"
+            ),
+            "",
+        )
+
+        shape.append(
+            image_data
+        )
+
+        pict = OxmlElement(
+            "w:pict"
+        )
+
+        pict.append(
+            shape
+        )
+
+        anchor_run = (
+            anchor_paragraph.add_run()
+        )
+
+        anchor_run._r.append(
+            pict
+        )
+
+    @staticmethod
     def _add_image_shape(
         document_part,
         anchor_paragraph,
@@ -1600,6 +1735,8 @@ class FixedLayoutDocxExporter:
         top: float,
         width: float,
         height: float,
+        z_index: int | None = None,
+        shape_name: str = "DocuMindImage",
     ):
         """
         Create an absolutely positioned VML image shape.
@@ -1614,7 +1751,7 @@ class FixedLayoutDocxExporter:
     
         shape.set(
             "id",
-            f"DocuMindImage{shape_id}",
+            f"{shape_name}{shape_id}",
         )
     
         shape.set(
@@ -1636,13 +1773,18 @@ class FixedLayoutDocxExporter:
             "f",
         )
     
+        effective_z_index = (
+            FixedLayoutDocxExporter.IMAGE_Z_INDEX
+            if z_index is None
+            else z_index
+        )
         style = (
             "position:absolute;"
             f"margin-left:{left:.3f}pt;"
             f"margin-top:{top:.3f}pt;"
             f"width:{width:.3f}pt;"
             f"height:{height:.3f}pt;"
-            f"z-index:{FixedLayoutDocxExporter.IMAGE_Z_INDEX};"
+            f"z-index:{effective_z_index};"
             "mso-position-horizontal-relative:page;"
             "mso-position-vertical-relative:page;"
             "mso-wrap-style:none;"

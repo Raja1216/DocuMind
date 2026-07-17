@@ -90,6 +90,17 @@ class VectorGraphicRegionRenderer:
 
         canvas_width = region_width + padding * 2
         canvas_height = region_height + padding * 2
+        
+        region.image_left = (
+            region.left - padding
+        )
+        
+        region.image_top = (
+            region.top - padding
+        )
+        
+        region.image_width = canvas_width
+        region.image_height = canvas_height
 
         temporary_document = pymupdf.open()
 

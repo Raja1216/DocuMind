@@ -24,6 +24,12 @@ class VectorGraphicRegion(BaseElement):
     )
 
     image_path: str | None = None
+    
+    image_left: float | None = None
+    image_top: float | None = None
+    
+    image_width: float | None = None
+    image_height: float | None = None
 
     @property
     def width(self) -> float:
