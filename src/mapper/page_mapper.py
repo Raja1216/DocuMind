@@ -16,6 +16,9 @@ from src.mapper.vector_graphic_mapper import (
 from src.analyzer.vector_graphic_classifier import (
     VectorGraphicClassifier,
 )
+from src.analyzer.vector_graphic_grouper import (
+    VectorGraphicGrouper,
+)
 
 
 class PageMapper:
@@ -122,6 +125,9 @@ class PageMapper:
             )            
 
         VectorGraphicClassifier.analyze_page(
+            page
+        )
+        VectorGraphicGrouper.group(
             page
         )
         

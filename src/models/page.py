@@ -8,6 +8,10 @@ from src.models.text_block import TextBlock
 from src.models.table import Table
 from src.models.vector_graphic import VectorGraphic
 
+from src.models.vector_graphic_region import (
+    VectorGraphicRegion,
+)
+
 
 @dataclass(slots=True)
 class Page:
@@ -32,5 +36,8 @@ class Page:
         default_factory=list
     )
     vector_graphics: list[VectorGraphic] = field(
+        default_factory=list
+    )
+    vector_regions: list[VectorGraphicRegion] = field(
         default_factory=list
     )
