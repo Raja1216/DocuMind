@@ -59,6 +59,24 @@ class FontNameResolver:
         "Times-Bold": "Times New Roman",
         "Times-Italic": "Times New Roman",
         "Times-BoldItalic": "Times New Roman",
+        
+        "DMSans": "DM Sans",
+        "DMSans-Regular": "DM Sans",
+        "DMSans-Medium": "DM Sans",
+        "DMSans-SemiBold": "DM Sans",
+        "DMSans-Bold": "DM Sans",
+        "DMSans-ExtraBold": "DM Sans",
+        "DMSans-Italic": "DM Sans",
+        "DMSans-BoldItalic": "DM Sans",
+        
+        "DM Sans": "DM Sans",
+        "DM Sans Regular": "DM Sans",
+        "DM Sans Medium": "DM Sans",
+        "DM Sans Bold": "DM Sans",
+
+        "Repo-ExtraBold": "Arial Black",
+        "RepoExtraBold": "Arial Black",
+        "Repo": "Arial Black",
     }
 
     STYLE_SUFFIXES: tuple[str, ...] = (
@@ -70,6 +88,15 @@ class FontNameResolver:
         ",BoldItalic",
         ",Bold",
         ",Italic",
+        "-ExtraBoldItalic",
+        "-ExtraBold",
+        "-SemiBoldItalic",
+        "-SemiBold",
+        "-MediumItalic",
+        "-Medium",
+        "-Regular",
+        "-LightItalic",
+        "-Light",
     )
 
     @staticmethod

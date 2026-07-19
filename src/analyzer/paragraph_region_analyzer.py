@@ -169,6 +169,12 @@ class ParagraphRegionAnalyzer:
         ";",
         ":",
     )
+    
+    VECTOR_BULLET_MAXIMUM_GAP = 36.0
+    VECTOR_BULLET_MINIMUM_GAP = -3.0
+
+    VECTOR_BULLET_MINIMUM_VERTICAL_TOLERANCE = 5.0
+    VECTOR_BULLET_VERTICAL_TOLERANCE_FACTOR = 0.75
 
     @classmethod
     def analyze_page(
@@ -207,6 +213,187 @@ class ParagraphRegionAnalyzer:
                     region_number=region_number,
                 )
             )
+        cls._attach_vector_bullets(
+            page
+        ) 
+        
+    @classmethod
+    def _attach_vector_bullets(
+        cls,
+        page: Page,
+    ) -> None:
+        """
+        Match classified vector bullet shapes with the paragraph
+        beginning immediately to their right.
+        """
+    
+        bullets = [
+            graphic
+            for graphic in page.vector_graphics
+            if graphic.category == "bullet"
+        ]
+    
+        if not bullets:
+            return
+    
+        used_bullet_ids: set[int] = set()
+    
+        for region in page.paragraph_regions:
+            # Textual numbers such as "1." have already been
+            # detected and should not become bullets.
+            if region.list_type is not None:
+                continue
+            
+            first_line_bounds = (
+                cls._first_visible_line_bounds(
+                    region
+                )
+            )
+    
+            if first_line_bounds is None:
+                continue
+            
+            (
+                line_left,
+                line_top,
+                _,
+                line_bottom,
+            ) = first_line_bounds
+    
+            line_center_y = (
+                line_top + line_bottom
+            ) / 2
+    
+            line_height = max(
+                line_bottom - line_top,
+                1.0,
+            )
+    
+            vertical_tolerance = max(
+                cls.VECTOR_BULLET_MINIMUM_VERTICAL_TOLERANCE,
+                (
+                    line_height
+                    * cls.VECTOR_BULLET_VERTICAL_TOLERANCE_FACTOR
+                ),
+            )
+    
+            best_bullet = None
+            best_score = None
+    
+            for bullet in bullets:
+                if id(bullet) in used_bullet_ids:
+                    continue
+                
+                bullet_center_y = (
+                    bullet.top + bullet.bottom
+                ) / 2
+    
+                vertical_difference = abs(
+                    bullet_center_y - line_center_y
+                )
+    
+                if (
+                    vertical_difference
+                    > vertical_tolerance
+                ):
+                    continue
+                
+                horizontal_gap = (
+                    line_left - bullet.right
+                )
+    
+                if (
+                    horizontal_gap
+                    < cls.VECTOR_BULLET_MINIMUM_GAP
+                    or horizontal_gap
+                    > cls.VECTOR_BULLET_MAXIMUM_GAP
+                ):
+                    continue
+                
+                score = (
+                    vertical_difference
+                    + max(
+                        horizontal_gap,
+                        0.0,
+                    ) * 0.10
+                )
+    
+                if (
+                    best_score is None
+                    or score < best_score
+                ):
+                    best_score = score
+                    best_bullet = bullet
+    
+            if best_bullet is None:
+                continue
+            
+            region.list_type = "bullet"
+            region.list_marker = "•"
+            region.list_level = 0
+    
+            region.content_left = line_left
+    
+            region.list_marker_left = (
+                best_bullet.left
+            )
+    
+            region.list_marker_right = (
+                best_bullet.right
+            )
+    
+            used_bullet_ids.add(
+                id(best_bullet)
+            )
+    
+    
+    @staticmethod
+    def _first_visible_line_bounds(
+        region: ParagraphRegion,
+    ) -> tuple[
+        float,
+        float,
+        float,
+        float,
+    ] | None:
+        """
+        Return the bounding rectangle of the first visible
+        paragraph line.
+        """
+    
+        for line in region.lines:
+            visible_spans = [
+                span
+                for span in line.spans
+                if span.text.strip()
+            ]
+    
+            if not visible_spans:
+                continue
+            
+            return (
+                min(
+                    span.left
+                    for span in visible_spans
+                ),
+    
+                min(
+                    span.top
+                    for span in visible_spans
+                ),
+    
+                max(
+                    span.right
+                    for span in visible_spans
+                ),
+    
+                max(
+                    span.bottom
+                    for span in visible_spans
+                ),
+            )
+    
+        return None       
 
     @classmethod
     def _collect_line_records(
@@ -818,6 +1005,18 @@ class ParagraphRegionAnalyzer:
             )
         )
 
+        first_line_spans = sorted(
+            records[0].visible_spans,
+            key=lambda span: span.left,
+        )
+
+        marker_span = (
+            first_line_spans[0]
+            if list_marker is not None
+            and first_line_spans
+            else None
+        )
+        
         return ParagraphRegion(
             page_number=page.number,
 
@@ -863,6 +1062,18 @@ class ParagraphRegionAnalyzer:
             list_level=0,
 
             content_left=content_left,
+            
+            list_marker_left=(
+                marker_span.left
+                if marker_span is not None
+                else None
+            ),
+
+            list_marker_right=(
+                marker_span.right
+                if marker_span is not None
+                else None
+            ),
         )
 
     @classmethod

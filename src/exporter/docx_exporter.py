@@ -21,6 +21,22 @@ from src.exporter.font_name_resolver import (
 from collections import Counter
 from statistics import median
 
+import re
+
+from docx.oxml import OxmlElement
+
+from src.exporter.word_numbering_manager import (
+    WordNumberingManager,
+)
+from src.models.text_run import TextRun
+import math
+from docx.enum.text import (
+    WD_ALIGN_PARAGRAPH,
+    WD_BREAK,
+    WD_LINE_SPACING,
+    WD_TAB_ALIGNMENT,
+)
+
 
 class DocxExporter:
     """
@@ -29,10 +45,55 @@ class DocxExporter:
 
     DEFAULT_MARGIN = 36.0
     MINIMUM_MARGIN = 18.0
+    
+    INLINE_SPACE_MINIMUM_GAP = 0.5
+    INLINE_SPACE_GAP_FACTOR = 0.04
+
+    BROKEN_WORD_MINIMUM_PREVIOUS_LENGTH = 3
+    BROKEN_WORD_LINE_FILL_RATIO = 0.80
+
+    COMMON_COMPLETE_WORDS = {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "he",
+        "in",
+        "is",
+        "it",
+        "of",
+        "on",
+        "or",
+        "that",
+        "the",
+        "this",
+        "to",
+        "was",
+        "were",
+        "with",
+    }
+    
+    EDITABLE_RIGHT_MARGIN = 36.0
+    EDITABLE_BOTTOM_MARGIN = 36.0
+
+    MAXIMUM_BODY_SPACING_BEFORE = 42.0
+    MAXIMUM_COVER_SPACING_BEFORE = 144.0
+
+    CAPTION_SPACING_BEFORE = 12.0
 
     @staticmethod
     def export(document, output_path: str) -> None:
         word_document = WordDocument()
+        numbering_manager = WordNumberingManager(
+            word_document
+        )
         
         for page_index, page in enumerate(document.pages):
 
@@ -54,6 +115,7 @@ class DocxExporter:
             DocxExporter._render_page(
                 word_document=word_document,
                 page=page,
+                numbering_manager=numbering_manager,
             )
 
         word_document.save(output_path)
@@ -102,11 +164,12 @@ class DocxExporter:
         page,
     ) -> None:
         """
-        Calculate margins from the editable paragraph regions.
+        Configure margins suitable for a reflowing editable Word
+        document.
 
-        The first paragraph begins at the original PDF content
-        boundary, while later paragraph positions are reproduced
-        using paragraph spacing and indentation.
+        Left and top margins follow the PDF content origin.
+        Right and bottom margins remain stable so extracted text
+        widths do not restrict Word paragraph wrapping.
         """
 
         regions = [
@@ -131,50 +194,28 @@ class DocxExporter:
             for region in regions
         )
 
-        right_edge = max(
-            region.right
-            for region in regions
-        )
-
-        bottom_edge = max(
-            region.bottom
-            for region in regions
-        )
-
-        left_margin = max(
-            left_edge,
-            DocxExporter.MINIMUM_MARGIN,
-        )
-
-        top_margin = max(
-            top_edge,
-            DocxExporter.MINIMUM_MARGIN,
-        )
-
-        right_margin = max(
-            page.bbox.width - right_edge,
-            DocxExporter.MINIMUM_MARGIN,
-        )
-
-        bottom_margin = max(
-            page.bbox.height - bottom_edge,
-            DocxExporter.MINIMUM_MARGIN,
-        )
-
         section.left_margin = Pt(
-            left_margin
+            max(
+                left_edge,
+                DocxExporter.MINIMUM_MARGIN,
+            )
         )
 
         section.top_margin = Pt(
-            top_margin
+            max(
+                top_edge,
+                DocxExporter.MINIMUM_MARGIN,
+            )
         )
 
+        # Do not derive these margins from the last extracted
+        # character. Editable paragraphs need room to reflow.
         section.right_margin = Pt(
-            right_margin
+            DocxExporter.EDITABLE_RIGHT_MARGIN
         )
 
         section.bottom_margin = Pt(
-            bottom_margin
+            DocxExporter.EDITABLE_BOTTOM_MARGIN
         )
 
         section.header_distance = Pt(0)
@@ -200,6 +241,7 @@ class DocxExporter:
     def _render_page(
         word_document,
         page,
+        numbering_manager: WordNumberingManager,
     ) -> None:
         """
         Render one PDF page using normal editable Word
@@ -233,7 +275,9 @@ class DocxExporter:
             region.right
             for region in regions
         )
-
+        
+        active_list_type = None
+        active_number_id = None
         previous_region = None
 
         for region in regions:
@@ -258,12 +302,385 @@ class DocxExporter:
                 is_heading=is_heading,
             )
 
+            is_list_item = (
+                region.list_type
+                in {
+                    "bullet",
+                    "number",
+                }
+            )
+
+            if is_list_item:
+                continues_list = (
+                    DocxExporter
+                    ._continues_previous_list(
+                        previous_region=previous_region,
+                        current_region=region,
+                    )
+                )
+
+                if (
+                    not continues_list
+                    or active_list_type
+                    != region.list_type
+                    or active_number_id is None
+                ):
+                    start_at = (
+                        DocxExporter
+                        ._extract_list_start_number(
+                            region.list_marker
+                        )
+                    )
+
+                    (
+                        marker_font_name,
+                        marker_font_size,
+                    ) = (
+                        DocxExporter
+                        ._resolve_list_marker_style(
+                            region
+                        )
+                    )
+
+                    active_number_id = (
+                        numbering_manager
+                        .create_list(
+                            list_type=region.list_type,
+                            start_at=start_at,
+                            marker_font_name=(
+                                marker_font_name
+                            ),
+                            marker_font_size=(
+                                marker_font_size
+                            ),
+                        )
+                    )
+
+                    active_list_type = (
+                        region.list_type
+                    )
+
+                DocxExporter._apply_list_numbering(
+                    word_paragraph=word_paragraph,
+                    number_id=active_number_id,
+                    level=region.list_level,
+                )
+
+                DocxExporter._apply_list_indentation(
+                    word_paragraph=word_paragraph,
+                    region=region,
+                    content_left=content_left,
+                )
+
+            else:
+                active_list_type = None
+                active_number_id = None
+
             DocxExporter._render_paragraph_runs(
                 word_paragraph=word_paragraph,
                 paragraph=region,
+                strip_textual_list_marker=(
+                    region.list_type == "number"
+                ),
+
+                # Preserve intentional cover-page breaks such as:
+                #
+                # Sample
+                # PDF
+                #
+                # Normal content pages should reflow.
+                preserve_line_breaks=(
+                    page.number == 1
+                ),
             )
 
             previous_region = region
+
+    @staticmethod
+    def _resolve_list_marker_style(
+        region,
+    ) -> tuple[str, float]:
+        """
+        Use the first line's text style for the Word bullet or
+        number marker.
+        """
+
+        for line in region.lines:
+            visible_spans = sorted(
+                [
+                    span
+                    for span in line.spans
+                    if span.text.strip()
+                ],
+                key=lambda span: span.left,
+            )
+
+            if not visible_spans:
+                continue
+
+            marker_span = visible_spans[0]
+
+            return (
+                FontNameResolver.resolve(
+                    marker_span.font
+                ),
+                DocxExporter._round_word_font_size(
+                    marker_span.font_size
+                ),
+            )
+
+        return (
+            "Arial",
+            11.0,
+        )
+
+
+    @staticmethod
+    def _round_word_font_size(
+        pdf_font_size: float,
+    ) -> float:
+        """
+        Word supports half-point font-size increments.
+
+        python-docx truncates values such as:
+
+            18.43 → 18.0
+            41.48 → 41.0
+
+        Round explicitly before assigning the font size.
+        """
+
+        size = max(
+            float(pdf_font_size),
+            0.5,
+        )
+
+        return (
+            math.floor(
+                size * 2.0 + 0.5
+            )
+            / 2.0
+        )
+
+    @staticmethod
+    def _continues_previous_list(
+        previous_region,
+        current_region,
+    ) -> bool:
+        """
+        Determine whether two consecutive regions belong to the
+        same Word list sequence.
+        """
+
+        if previous_region is None:
+            return False
+
+        if (
+            previous_region.list_type
+            != current_region.list_type
+        ):
+            return False
+
+        previous_content_left = (
+            previous_region.content_left
+            if previous_region.content_left is not None
+            else previous_region.left
+        )
+
+        current_content_left = (
+            current_region.content_left
+            if current_region.content_left is not None
+            else current_region.left
+        )
+
+        if (
+            abs(
+                previous_content_left
+                - current_content_left
+            )
+            > 18.0
+        ):
+            return False
+
+        vertical_gap = (
+            current_region.top
+            - previous_region.bottom
+        )
+
+        if vertical_gap > 42.0:
+            return False
+
+        if current_region.list_type == "number":
+            previous_number = (
+                DocxExporter
+                ._extract_list_start_number(
+                    previous_region.list_marker
+                )
+            )
+
+            current_number = (
+                DocxExporter
+                ._extract_list_start_number(
+                    current_region.list_marker
+                )
+            )
+
+            if (
+                current_number
+                != previous_number + 1
+            ):
+                return False
+
+        return True
+
+    @staticmethod
+    def _extract_list_start_number(
+        marker: str | None,
+    ) -> int:
+        if not marker:
+            return 1
+
+        match = re.match(
+            r"^\s*(\d+)",
+            marker,
+        )
+
+        if match is None:
+            return 1
+
+        try:
+            return max(
+                int(
+                    match.group(1)
+                ),
+                1,
+            )
+
+        except ValueError:
+            return 1
+
+    @staticmethod
+    def _apply_list_numbering(
+        word_paragraph,
+        number_id: int,
+        level: int,
+    ) -> None:
+        """
+        Attach a genuine Word numbering definition to a
+        paragraph.
+        """
+
+        paragraph_properties = (
+            word_paragraph
+            ._p
+            .get_or_add_pPr()
+        )
+
+        existing_number_properties = (
+            paragraph_properties.find(
+                qn("w:numPr")
+            )
+        )
+
+        if existing_number_properties is not None:
+            paragraph_properties.remove(
+                existing_number_properties
+            )
+
+        number_properties = OxmlElement(
+            "w:numPr"
+        )
+
+        indentation_level = OxmlElement(
+            "w:ilvl"
+        )
+
+        indentation_level.set(
+            qn("w:val"),
+            str(
+                max(
+                    level,
+                    0,
+                )
+            ),
+        )
+
+        number_identifier = OxmlElement(
+            "w:numId"
+        )
+
+        number_identifier.set(
+            qn("w:val"),
+            str(number_id),
+        )
+
+        number_properties.append(
+            indentation_level
+        )
+
+        number_properties.append(
+            number_identifier
+        )
+
+        paragraph_properties.insert(
+            0,
+            number_properties,
+        )
+
+    @staticmethod
+    def _apply_list_indentation(
+        word_paragraph,
+        region,
+        content_left: float,
+    ) -> None:
+        """
+        Reconstruct list marker and text positions from the
+        original PDF geometry.
+        """
+
+        text_left = (
+            region.content_left
+            if region.content_left is not None
+            else region.left
+        )
+
+        marker_left = (
+            region.list_marker_left
+            if region.list_marker_left is not None
+            else text_left - 18.0
+        )
+
+        left_indent = max(
+            text_left - content_left,
+            12.0,
+        )
+
+        hanging_indent = max(
+            text_left - marker_left,
+            12.0,
+        )
+
+        hanging_indent = min(
+            hanging_indent,
+            left_indent,
+        )
+
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+
+        paragraph_format.left_indent = Pt(
+            left_indent
+        )
+
+        paragraph_format.first_line_indent = Pt(
+            -hanging_indent
+        )
+        
+        paragraph_format.tab_stops.add_tab_stop(
+            Pt(left_indent),
+            WD_TAB_ALIGNMENT.LEFT,
+        )
 
     @staticmethod
     def _apply_region_layout(
@@ -289,11 +706,6 @@ class DocxExporter:
             0.0,
         )
 
-        right_indent = max(
-            content_right - region.right,
-            0.0,
-        )
-
         first_line_indent = (
             DocxExporter
             ._calculate_first_line_indent(
@@ -305,9 +717,9 @@ class DocxExporter:
             left_indent
         )
 
-        paragraph_format.right_indent = Pt(
-            right_indent
-        )
+        # The extracted right edge represents the original glyph
+        # width, not the intended Word paragraph boundary.
+        paragraph_format.right_indent = Pt(0)
 
         paragraph_format.first_line_indent = Pt(
             first_line_indent
@@ -315,12 +727,40 @@ class DocxExporter:
 
         if previous_region is None:
             spacing_before = 0.0
+
         else:
-            spacing_before = max(
+            raw_spacing_before = max(
                 region.top
                 - previous_region.bottom,
                 0.0,
             )
+
+            if DocxExporter._region_is_caption(
+                region
+            ):
+                # Tables and charts will later be inserted before their
+                # captions. Do not preserve their empty PDF area as
+                # paragraph spacing.
+                spacing_before = (
+                    DocxExporter
+                    .CAPTION_SPACING_BEFORE
+                )
+
+            else:
+                maximum_spacing = (
+                    DocxExporter
+                    .MAXIMUM_COVER_SPACING_BEFORE
+
+                    if page.number == 1
+
+                    else DocxExporter
+                    .MAXIMUM_BODY_SPACING_BEFORE
+                )
+
+                spacing_before = min(
+                    raw_spacing_before,
+                    maximum_spacing,
+                )
 
         paragraph_format.space_before = Pt(
             spacing_before
@@ -335,13 +775,14 @@ class DocxExporter:
             )
         )
 
+        # Editable Word paragraphs should reflow naturally.
+        # Exact PDF line spacing can clip text after editing or font
+        # substitution.
         paragraph_format.line_spacing_rule = (
-            WD_LINE_SPACING.EXACTLY
+            WD_LINE_SPACING.SINGLE
         )
 
-        paragraph_format.line_spacing = Pt(
-            line_spacing
-        )
+        paragraph_format.line_spacing = 1.0
 
         alignment = (
             DocxExporter
@@ -361,6 +802,24 @@ class DocxExporter:
 
         if is_heading:
             paragraph_format.keep_with_next = True
+
+    @staticmethod
+    def _region_is_caption(
+        region,
+    ) -> bool:
+        """
+        Detect table and figure caption paragraphs.
+        """
+
+        text = region.text.strip()
+
+        return bool(
+            re.match(
+                r"^\(\s*(?:Table|Figure)\b",
+                text,
+                flags=re.IGNORECASE,
+            )
+        )
 
     @staticmethod
     def _calculate_first_line_indent(
@@ -484,55 +943,81 @@ class DocxExporter:
         region,
     ) -> str:
         """
-        Reuse alignment calculated for the source block
-        paragraphs.
-
-        A region can combine multiple PDF blocks, so the most
-        frequently detected alignment is selected.
+        Detect alignment using page geometry instead of trusting
+        only the source block classification.
         """
 
-        source_numbers = set(
-            region.source_block_numbers
+        if region.list_type in {
+            "bullet",
+            "number",
+        }:
+            return "left"
+
+        visible_regions = [
+            item
+            for item in page.paragraph_regions
+            if item.text.strip()
+        ]
+
+        if not visible_regions:
+            return "left"
+
+        frame_left = min(
+            item.left
+            for item in visible_regions
         )
 
-        alignments: list[str] = []
+        frame_right = max(
+            item.right
+            for item in visible_regions
+        )
 
-        for block in page.blocks:
-            if (
-                block.block_number
-                not in source_numbers
-            ):
-                continue
+        frame_width = max(
+            frame_right - frame_left,
+            1.0,
+        )
 
-            for paragraph in block.paragraphs:
-                if not paragraph.text.strip():
-                    continue
+        region_center = (
+            region.left + region.right
+        ) / 2.0
 
-                alignment = (
-                    paragraph.style.alignment
-                    or "left"
-                )
+        frame_center = (
+            frame_left + frame_right
+        ) / 2.0
 
-                alignments.append(
-                    str(alignment).lower()
-                )
+        tolerance = max(
+            8.0,
+            frame_width * 0.03,
+        )
 
-        if alignments:
-            return (
-                Counter(
-                    alignments
-                )
-                .most_common(1)[0][0]
+        left_gap = (
+            region.left - frame_left
+        )
+
+        right_gap = (
+            frame_right - region.right
+        )
+
+        # A short region with balanced left/right gaps is centered.
+        if (
+            abs(
+                region_center - frame_center
             )
+            <= tolerance
+            and region.width
+            < frame_width * 0.90
+        ):
+            return "center"
 
-        return str(
-            getattr(
-                region.style,
-                "alignment",
-                "left",
-            )
-            or "left"
-        ).lower()
+        # Region touching the frame's right side while being well
+        # away from its left side is right-aligned.
+        if (
+            abs(right_gap) <= tolerance
+            and left_gap > tolerance * 2.0
+        ):
+            return "right"
+
+        return "left"
 
     @staticmethod
     def _region_is_heading(
@@ -633,63 +1118,771 @@ class DocxExporter:
                 paragraph.style.line_spacing
             )
 
-    @staticmethod
+    @classmethod
     def _render_paragraph_runs(
+        cls,
         word_paragraph,
         paragraph,
+        strip_textual_list_marker: bool = False,
+        preserve_line_breaks: bool = False,
     ) -> None:
         """
-        Render text while preserving original PDF line
-        boundaries and typography.
+        Render an editable Word paragraph.
 
-        PDF lines remain in one Word paragraph and are
-        separated using soft line breaks.
+        Normal PDF line boundaries are converted to spaces so
+        Word can reflow the paragraph. Intentional cover-page
+        line breaks may be preserved.
+        """
+
+        run_plan = cls._build_reflow_run_plan(
+            paragraph=paragraph,
+            strip_textual_list_marker=(
+                strip_textual_list_marker
+            ),
+            preserve_line_breaks=(
+                preserve_line_breaks
+            ),
+        )
+
+        for item in run_plan:
+            if item is None:
+                break_run = (
+                    word_paragraph.add_run()
+                )
+
+                break_run.add_break(
+                    WD_BREAK.LINE
+                )
+
+                continue
+
+            if not item.text:
+                continue
+
+            run = word_paragraph.add_run(
+                item.text
+            )
+
+            font = run.font
+
+            font.size = Pt(
+                cls._round_word_font_size(
+                    item.font_size
+                )
+            )
+
+            cls._apply_font_name(
+                run=run,
+                pdf_font_name=item.font_name,
+            )
+
+            font.color.rgb = WordRGBColor(
+                item.color.red,
+                item.color.green,
+                item.color.blue,
+            )
+
+            run.bold = item.bold
+            run.italic = item.italic
+    
+    @classmethod
+    def _build_reflow_run_plan(
+        cls,
+        paragraph,
+        strip_textual_list_marker: bool,
+        preserve_line_breaks: bool,
+    ) -> list[TextRun | None]:
+        """
+        Build formatted runs for one editable paragraph.
+
+        Body-page line endings become normal spaces. Page 1 may
+        retain intentional cover-layout line breaks.
         """
 
         visible_lines = [
             line
             for line in paragraph.lines
-            if DocxExporter._line_has_text(line)
+            if cls._line_has_text(line)
         ]
+
+        plan: list[
+            TextRun | None
+        ] = []
+
+        marker_remaining = (
+            paragraph.list_marker
+            if strip_textual_list_marker
+            else None
+        )
+
+        previous_line = None
 
         for line_index, line in enumerate(
             visible_lines
         ):
-            text_runs = RunBuilder.build(
-                line
+            line_runs = (
+                cls._build_editable_line_runs(
+                    line
+                )
             )
 
-            for text_run in text_runs:
-                run = word_paragraph.add_run(
-                    text_run.text
+            if not line_runs:
+                continue
+
+            if (
+                line_index == 0
+                and marker_remaining
+            ):
+                marker_remaining = (
+                    cls._strip_marker_from_text_runs(
+                        runs=line_runs,
+                        marker_remaining=(
+                            marker_remaining
+                        ),
+                    )
                 )
 
-                font = run.font
+                line_runs = [
+                    run
+                    for run in line_runs
+                    if run.text
+                ]
 
-                font.size = Pt(
-                    text_run.font_size
+            if not line_runs:
+                previous_line = line
+                continue
+
+            if plan and previous_line is not None:
+                if preserve_line_breaks:
+                    plan.append(None)
+                else:
+                    cls._append_reflow_boundary(
+                        plan=plan,
+                        next_runs=line_runs,
+                        previous_line=previous_line,
+                        current_line=line,
+                        paragraph=paragraph,
+                    )
+
+            for text_run in line_runs:
+                cls._append_text_run(
+                    plan=plan,
+                    text_run=text_run,
                 )
 
-                DocxExporter._apply_font_name(
-                    run=run,
-                    pdf_font_name=text_run.font_name,
+            previous_line = line
+
+        return plan
+    
+    @classmethod
+    def _build_editable_line_runs(
+        cls,
+        line,
+    ) -> list[TextRun]:
+        """
+        Convert PDF spans into Word runs while restoring spaces
+        between separately formatted spans.
+        """
+
+        spans = sorted(
+            [
+                span
+                for span in line.spans
+                if span.text
+            ],
+            key=lambda span: span.left,
+        )
+
+        runs: list[TextRun] = []
+
+        previous_span = None
+        previous_raw_text = None
+
+        for span in spans:
+            raw_text = (
+                cls._normalize_inline_text(
+                    span.text
+                )
+            )
+
+            visible_text = (
+                raw_text.strip()
+            )
+
+            if not visible_text:
+                continue
+
+            if (
+                previous_span is not None
+                and cls._needs_space_between_spans(
+                    previous_span=previous_span,
+                    current_span=span,
+                    previous_raw_text=(
+                        previous_raw_text or ""
+                    ),
+                    current_raw_text=raw_text,
+                )
+            ):
+                cls._append_text_run(
+                    plan=runs,
+                    text_run=cls._text_run_from_span(
+                        span=previous_span,
+                        text=" ",
+                    ),
                 )
 
-                font.color.rgb = WordRGBColor(
-                    text_run.color.red,
-                    text_run.color.green,
-                    text_run.color.blue,
+            cls._append_text_run(
+                plan=runs,
+                text_run=cls._text_run_from_span(
+                    span=span,
+                    text=visible_text,
+                ),
+            )
+
+            previous_span = span
+            previous_raw_text = raw_text
+
+        return runs
+    
+    @staticmethod
+    def _normalize_inline_text(
+        text: str,
+    ) -> str:
+        """
+        Normalize PDF whitespace without removing meaningful
+        spaces between words.
+        """
+
+        normalized = (
+            text
+            .replace(
+                "\u00a0",
+                " ",
+            )
+            .replace(
+                "\u2007",
+                " ",
+            )
+            .replace(
+                "\u202f",
+                " ",
+            )
+        )
+
+        normalized = re.sub(
+            r"[\t\r\n\f\v]+",
+            " ",
+            normalized,
+        )
+
+        normalized = re.sub(
+            r" {2,}",
+            " ",
+            normalized,
+        )
+
+        return normalized
+    
+    @classmethod
+    def _needs_space_between_spans(
+        cls,
+        previous_span,
+        current_span,
+        previous_raw_text: str,
+        current_raw_text: str,
+    ) -> bool:
+        """
+        Restore a missing space between adjacent PDF spans.
+
+        This commonly occurs where bold text changes to regular
+        text.
+        """
+
+        if not previous_raw_text or not current_raw_text:
+            return False
+
+        if (
+            previous_raw_text[-1:].isspace()
+            or current_raw_text[:1].isspace()
+        ):
+            return True
+
+        previous_visible = (
+            previous_raw_text.rstrip()
+        )
+
+        current_visible = (
+            current_raw_text.lstrip()
+        )
+
+        if not previous_visible or not current_visible:
+            return False
+
+        if current_visible[0] in {
+            ".",
+            ",",
+            ";",
+            ":",
+            "!",
+            "?",
+            "%",
+            ")",
+            "]",
+            "}",
+        }:
+            return False
+
+        if previous_visible[-1] in {
+            "(",
+            "[",
+            "{",
+            "/",
+            "\\",
+            "–",
+            "—",
+        }:
+            return False
+
+        horizontal_gap = (
+            current_span.left
+            - previous_span.right
+        )
+
+        if horizontal_gap <= 0:
+            return False
+
+        reference_font_size = max(
+            min(
+                previous_span.font_size,
+                current_span.font_size,
+            ),
+            1.0,
+        )
+
+        threshold = max(
+            cls.INLINE_SPACE_MINIMUM_GAP,
+            (
+                reference_font_size
+                * cls.INLINE_SPACE_GAP_FACTOR
+            ),
+        )
+
+        return horizontal_gap >= threshold
+    
+    @classmethod
+    def _append_reflow_boundary(
+        cls,
+        plan: list[TextRun | None],
+        next_runs: list[TextRun],
+        previous_line,
+        current_line,
+        paragraph,
+    ) -> None:
+        """
+        Join two visual PDF lines into one editable Word
+        paragraph.
+
+        Normally a space is inserted. A conservative broken-word
+        rule joins clear one-letter fragments without a space.
+        """
+
+        previous_run = next(
+            (
+                item
+                for item in reversed(plan)
+                if isinstance(
+                    item,
+                    TextRun,
                 )
+            ),
+            None,
+        )
 
-                run.bold = text_run.bold
-                run.italic = text_run.italic
+        if previous_run is None or not next_runs:
+            return
 
-            if line_index < len(visible_lines) - 1:
-                break_run = word_paragraph.add_run()
+        first_next_run = next_runs[0]
 
-                break_run.add_break(
-                    WD_BREAK.LINE
+        previous_run.text = (
+            previous_run.text.rstrip()
+        )
+
+        first_next_run.text = (
+            first_next_run.text.lstrip()
+        )
+
+        if not previous_run.text:
+            return
+
+        if not first_next_run.text:
+            return
+
+        broken_prefix = (
+            cls._extract_broken_word_prefix(
+                previous_run=previous_run,
+                next_run=first_next_run,
+                previous_line=previous_line,
+                paragraph=paragraph,
+            )
+        )
+
+        if broken_prefix is not None:
+            # Append the fragment without a space:
+            #
+            # dapibu + s → dapibus
+            # ant + e    → ante
+            prefix_run = cls._copy_text_run(
+                source=first_next_run,
+                text=broken_prefix,
+            )
+
+            cls._append_text_run(
+                plan=plan,
+                text_run=prefix_run,
+            )
+
+            remainder = (
+                first_next_run.text[
+                    len(broken_prefix):
+                ]
+                .lstrip()
+            )
+
+            if remainder:
+                first_next_run.text = (
+                    " " + remainder
                 )
+            else:
+                next_runs.pop(0)
+
+                if next_runs:
+                    next_runs[0].text = (
+                        " "
+                        + next_runs[0]
+                        .text
+                        .lstrip()
+                    )
+
+            return
+
+        # Preserve an explicit line-ending hyphen.
+        if previous_run.text.endswith("-"):
+            return
+
+        if first_next_run.text[0] in {
+            ".",
+            ",",
+            ";",
+            ":",
+            "!",
+            "?",
+            "%",
+            ")",
+            "]",
+            "}",
+        }:
+            return
+
+        cls._append_text_run(
+            plan=plan,
+            text_run=cls._copy_text_run(
+                source=previous_run,
+                text=" ",
+            ),
+        )
+    
+    @classmethod
+    def _extract_broken_word_prefix(
+        cls,
+        previous_run: TextRun,
+        next_run: TextRun,
+        previous_line,
+        paragraph,
+    ) -> str | None:
+        """
+        Detect obvious one-character fragments moved onto the
+        next PDF line.
+
+        The rule is intentionally conservative because a normal
+        line may legitimately begin with words such as "a".
+        """
+
+        previous_match = re.search(
+            r"([A-Za-z]+)$",
+            previous_run.text,
+        )
+
+        next_match = re.match(
+            r"^([a-z])(?=\s|$)",
+            next_run.text,
+        )
+
+        if (
+            previous_match is None
+            or next_match is None
+        ):
+            return None
+
+        previous_word = (
+            previous_match
+            .group(1)
+        )
+
+        if (
+            len(previous_word)
+            < cls.BROKEN_WORD_MINIMUM_PREVIOUS_LENGTH
+        ):
+            return None
+
+        if (
+            previous_word.lower()
+            in cls.COMMON_COMPLETE_WORDS
+        ):
+            return None
+
+        visible_spans = [
+            span
+            for span in previous_line.spans
+            if span.text.strip()
+        ]
+
+        if not visible_spans:
+            return None
+
+        previous_line_right = max(
+            span.right
+            for span in visible_spans
+        )
+
+        available_width = max(
+            paragraph.right
+            - paragraph.left,
+            1.0,
+        )
+
+        used_width_ratio = (
+            previous_line_right
+            - paragraph.left
+        ) / available_width
+
+        if (
+            used_width_ratio
+            < cls.BROKEN_WORD_LINE_FILL_RATIO
+        ):
+            return None
+
+        return next_match.group(1)
+    
+    @classmethod
+    def _strip_marker_from_text_runs(
+        cls,
+        runs: list[TextRun],
+        marker_remaining: str,
+    ) -> str | None:
+        """
+        Remove textual numbering because Word now generates the
+        list number itself.
+        """
+
+        remaining: str | None = (
+            marker_remaining
+        )
+
+        for text_run in runs:
+            if not remaining:
+                break
+
+            (
+                cleaned_text,
+                remaining,
+            ) = cls._remove_textual_list_marker(
+                text=text_run.text,
+                marker_remaining=remaining,
+            )
+
+            text_run.text = cleaned_text
+
+        return remaining
+    
+    @staticmethod
+    def _text_run_from_span(
+        span,
+        text: str,
+    ) -> TextRun:
+        font_name_lower = (
+            span.font or ""
+        ).lower()
+
+        bold = (
+            bool(
+                span.flags
+                & (1 << 4)
+            )
+            or "bold" in font_name_lower
+            or "semibold" in font_name_lower
+            or "extrabold" in font_name_lower
+        )
+
+        italic = (
+            bool(
+                span.flags
+                & (1 << 1)
+            )
+            or "italic" in font_name_lower
+            or "oblique" in font_name_lower
+        )
+
+        return TextRun(
+            text=text,
+            font_name=span.font,
+            font_size=span.font_size,
+            color=span.color,
+            bold=bold,
+            italic=italic,
+        )
+
+
+    @staticmethod
+    def _copy_text_run(
+        source: TextRun,
+        text: str,
+    ) -> TextRun:
+        return TextRun(
+            text=text,
+            font_name=source.font_name,
+            font_size=source.font_size,
+            color=source.color,
+            bold=source.bold,
+            italic=source.italic,
+        )
+    
+    @classmethod
+    def _append_text_run(
+        cls,
+        plan,
+        text_run: TextRun,
+    ) -> None:
+        """
+        Add a run, merging it with the previous run when both
+        have identical formatting.
+        """
+
+        if not text_run.text:
+            return
+
+        previous = (
+            plan[-1]
+            if plan
+            else None
+        )
+
+        if (
+            isinstance(
+                previous,
+                TextRun,
+            )
+            and cls._text_runs_have_same_style(
+                previous,
+                text_run,
+            )
+        ):
+            previous.text += (
+                text_run.text
+            )
+            return
+
+        plan.append(
+            text_run
+        )
+
+
+    @staticmethod
+    def _text_runs_have_same_style(
+        first: TextRun,
+        second: TextRun,
+    ) -> bool:
+        return (
+            first.font_name
+            == second.font_name
+
+            and abs(
+                first.font_size
+                - second.font_size
+            ) <= 0.01
+
+            and first.color
+            == second.color
+
+            and first.bold
+            == second.bold
+
+            and first.italic
+            == second.italic
+        )
+    
+    @staticmethod
+    def _remove_textual_list_marker(
+        text: str,
+        marker_remaining: str,
+    ) -> tuple[str, str | None]:
+        """
+        Remove a textual marker such as "1." because Word now
+        generates the number itself.
+        """
+
+        if not text:
+            return text, marker_remaining
+
+        leading_length = (
+            len(text)
+            - len(text.lstrip())
+        )
+
+        visible_text = text.lstrip()
+
+        if visible_text.startswith(
+            marker_remaining
+        ):
+            visible_text = visible_text[
+                len(marker_remaining):
+            ]
+
+            return (
+                visible_text.lstrip(),
+                None,
+            )
+
+        if marker_remaining.startswith(
+            visible_text
+        ):
+            remaining = marker_remaining[
+                len(visible_text):
+            ]
+
+            return (
+                "",
+                remaining or None,
+            )
+
+        # Marker and content may have been combined unexpectedly.
+        marker_pattern = re.compile(
+            r"^\s*"
+            + re.escape(
+                marker_remaining
+            )
+            + r"\s*"
+        )
+
+        cleaned_text = marker_pattern.sub(
+            "",
+            text,
+            count=1,
+        )
+
+        if cleaned_text != text:
+            return cleaned_text, None
+
+        return text, marker_remaining
                 
     @staticmethod
     def _apply_font_name(

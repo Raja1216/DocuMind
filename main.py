@@ -14,7 +14,7 @@ from src.exporter.docx_exporter import (
 reader = PDFReader()
 
 pdf = reader.open(
-    "samples/pdf/spdf8.pdf"
+    "samples/pdf/spdf1.pdf"
     # "samples/BirlaPDF/Class-4-Print31 1.pdf"
 )
 
@@ -79,6 +79,17 @@ for page in document.pages:
                 " | ",
             )
         )
+
+        if region.list_type:
+            print(
+                "   List:",
+                region.list_type,
+                region.list_marker,
+                (
+                    region.list_marker_left,
+                    region.content_left,
+                ),
+            )
 
         if len(preview) > 100:
             preview = (

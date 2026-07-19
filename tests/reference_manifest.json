@@ -1,0 +1,208 @@
+{
+  "name": "DocuMind PDF Reference Corpus",
+  "purpose": "Regression and generalization corpus for PDF-to-DOCX layout, alignment, list, table, image, chart, OCR, and document-structure engines.",
+  "principles": [
+    "Do not tune alignment or layout rules for one sample PDF.",
+    "Use geometry, typography, reading order, and structural evidence.",
+    "Run regression tests across all corpus categories after every engine change.",
+    "Keep fixed-layout and editable/reflow modes separate."
+  ],
+  "documents": [
+    {
+      "file": "spdf7.pdf",
+      "category": "Designed report - US Letter",
+      "reference_focus": [
+        "cover page",
+        "mixed headings and body text",
+        "bullets and numbered lists",
+        "table and charts",
+        "US Letter page size"
+      ]
+    },
+    {
+      "file": "spdf8(4).pdf",
+      "category": "Designed report - custom tall page",
+      "reference_focus": [
+        "same logical content as spdf7",
+        "different page aspect ratio",
+        "layout scaling and alignment comparison"
+      ]
+    },
+    {
+      "file": "spdf9.pdf",
+      "category": "Long structured digital document",
+      "reference_focus": [
+        "50 pages",
+        "table of contents",
+        "headings",
+        "lists",
+        "tables",
+        "links",
+        "headers and footers"
+      ]
+    },
+    {
+      "file": "spdf10.pdf",
+      "category": "Large image-only PDF",
+      "reference_focus": [
+        "100 scanned/image pages",
+        "OCR routing",
+        "memory and batch-processing",
+        "cover-page alignment"
+      ]
+    },
+    {
+      "file": "spdf11.pdf",
+      "category": "Form-style document",
+      "reference_focus": [
+        "labels and input areas",
+        "checkbox/radio-style controls",
+        "form layout reconstruction"
+      ]
+    },
+    {
+      "file": "spdf12.pdf",
+      "category": "Feature-rich developer sample",
+      "reference_focus": [
+        "styled text",
+        "bullet and numbered lists",
+        "tables",
+        "images",
+        "hyperlinks",
+        "headers and footers"
+      ]
+    },
+    {
+      "file": "spdf13(1).pdf",
+      "category": "Small-page text and watermark sample",
+      "reference_focus": [
+        "non-standard page size",
+        "dense paragraphs",
+        "watermark-related content"
+      ]
+    },
+    {
+      "file": "spdf1(8).pdf",
+      "category": "Long-form simple text",
+      "reference_focus": [
+        "multi-page paragraphs",
+        "basic heading",
+        "reflow accuracy"
+      ]
+    },
+    {
+      "file": "spdf2(2).pdf",
+      "category": "Single-page dense text",
+      "reference_focus": [
+        "simple typography",
+        "paragraph reconstruction",
+        "line wrapping"
+      ]
+    },
+    {
+      "file": "spdf3(3).pdf",
+      "category": "Bookmark and form-layout sample",
+      "reference_focus": [
+        "header/footer",
+        "bookmarks",
+        "structured labels",
+        "mixed page content"
+      ]
+    },
+    {
+      "file": "spdf4(7).pdf",
+      "category": "Mixed document with charts and bullets",
+      "reference_focus": [
+        "paragraphs",
+        "bullet lists",
+        "charts",
+        "table-like data"
+      ]
+    },
+    {
+      "file": "spdf5(1).pdf",
+      "category": "Accessible and complex tables",
+      "reference_focus": [
+        "11 pages",
+        "row and column headers",
+        "financial tables",
+        "footnotes",
+        "irregular table structures"
+      ]
+    },
+    {
+      "file": "spdf6.pdf",
+      "category": "Dense project-estimate document",
+      "reference_focus": [
+        "tables",
+        "emoji and symbols",
+        "numbered sections",
+        "mixed typography"
+      ]
+    },
+    {
+      "file": "I40_RTC 1.pdf",
+      "category": "Legal response document",
+      "reference_focus": [
+        "mixed portrait and landscape pages",
+        "headers and footers",
+        "numbered comment responses",
+        "narrow columns"
+      ]
+    },
+    {
+      "file": "i40Today-MediaKit-2023 1 (1).pdf",
+      "category": "Magazine and media-kit layout",
+      "reference_focus": [
+        "square pages",
+        "multi-column text",
+        "large typography",
+        "full-page graphics",
+        "marketing layout"
+      ]
+    },
+    {
+      "file": "QR code printer setup (1).pdf",
+      "category": "Screenshot/instruction PDF",
+      "reference_focus": [
+        "image-heavy instructions",
+        "minimal parsed text",
+        "OCR and image placement"
+      ]
+    },
+    {
+      "file": "20150805-Model MDO Contract (3).pdf",
+      "category": "Large legal contract",
+      "reference_focus": [
+        "220 pages",
+        "scanned cover plus digital text",
+        "table of contents",
+        "nested numbering",
+        "mixed page sizes",
+        "headers and footers"
+      ]
+    },
+    {
+      "file": "Class-4-Print31 1.pdf",
+      "category": "Educational textbook",
+      "reference_focus": [
+        "51 pages",
+        "decorative cover",
+        "images",
+        "colored text",
+        "tables and teaching content"
+      ]
+    },
+    {
+      "file": "guidelineforpreparationproject-estimatesforrivervalleyprojects (1).pdf",
+      "category": "Historical scanned/hybrid technical manual",
+      "reference_focus": [
+        "141 pages",
+        "scanned and OCR text",
+        "old typography",
+        "photographs",
+        "variable page dimensions"
+      ]
+    }
+  ]
+}

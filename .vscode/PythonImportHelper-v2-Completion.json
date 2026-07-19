@@ -320,7 +320,79 @@
         "documentation": {}
     },
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -464,22 +536,6 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
         "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -521,6 +577,54 @@
     },
     {
         "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -769,14 +873,6 @@
         "documentation": {}
     },
     {
-        "label": "ParagraphStyleAnalyzer",
-        "importPath": "src.analyzer.paragraph_style_analyzer",
-        "description": "src.analyzer.paragraph_style_analyzer",
-        "isExtraImport": true,
-        "detail": "src.analyzer.paragraph_style_analyzer",
-        "documentation": {}
-    },
-    {
         "label": "AlignmentAnalyzer",
         "importPath": "src.analyzer.alignment_analyzer",
         "description": "src.analyzer.alignment_analyzer",
@@ -785,6 +881,22 @@
         "documentation": {}
     },
     {
+        "label": "ParagraphRegionAnalyzer",
+        "importPath": "src.analyzer.paragraph_region_analyzer",
+        "description": "src.analyzer.paragraph_region_analyzer",
+        "isExtraImport": true,
+        "detail": "src.analyzer.paragraph_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
         "label": "Counter",
         "importPath": "collections",
         "description": "collections",
@@ -854,6 +966,46 @@
         "description": "src.models.line",
         "isExtraImport": true,
         "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "median",
+        "importPath": "statistics",
+        "description": "statistics",
+        "isExtraImport": true,
+        "detail": "statistics",
+        "documentation": {}
+    },
+    {
+        "label": "median",
+        "importPath": "statistics",
+        "description": "statistics",
+        "isExtraImport": true,
+        "detail": "statistics",
+        "documentation": {}
+    },
+    {
+        "label": "median",
+        "importPath": "statistics",
+        "description": "statistics",
+        "isExtraImport": true,
+        "detail": "statistics",
         "documentation": {}
     },
     {
@@ -921,11 +1073,123 @@
         "documentation": {}
     },
     {
-        "label": "Span",
-        "importPath": "src.models.span",
-        "description": "src.models.span",
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
         "isExtraImport": true,
-        "detail": "src.models.span",
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "ParagraphRegion",
+        "importPath": "src.models.paragraph_region",
+        "description": "src.models.paragraph_region",
+        "isExtraImport": true,
+        "detail": "src.models.paragraph_region",
+        "documentation": {}
+    },
+    {
+        "label": "ParagraphRegion",
+        "importPath": "src.models.paragraph_region",
+        "description": "src.models.paragraph_region",
+        "isExtraImport": true,
+        "detail": "src.models.paragraph_region",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphic",
+        "importPath": "src.models.vector_graphic",
+        "description": "src.models.vector_graphic",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicRegion",
+        "importPath": "src.models.vector_graphic_region",
+        "description": "src.models.vector_graphic_region",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic_region",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicRegion",
+        "importPath": "src.models.vector_graphic_region",
+        "description": "src.models.vector_graphic_region",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic_region",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicRegion",
+        "importPath": "src.models.vector_graphic_region",
+        "description": "src.models.vector_graphic_region",
+        "isExtraImport": true,
+        "detail": "src.models.vector_graphic_region",
         "documentation": {}
     },
     {
@@ -942,6 +1206,22 @@
         "description": "src.models.span",
         "isExtraImport": true,
         "detail": "src.models.span",
+        "documentation": {}
+    },
+    {
+        "label": "Span",
+        "importPath": "src.models.span",
+        "description": "src.models.span",
+        "isExtraImport": true,
+        "detail": "src.models.span",
+        "documentation": {}
+    },
+    {
+        "label": "TextRun",
+        "importPath": "src.models.text_run",
+        "description": "src.models.text_run",
+        "isExtraImport": true,
+        "detail": "src.models.text_run",
         "documentation": {}
     },
     {
@@ -1049,6 +1329,38 @@
         "documentation": {}
     },
     {
+        "label": "WD_ALIGN_PARAGRAPH",
+        "importPath": "docx.enum.text",
+        "description": "docx.enum.text",
+        "isExtraImport": true,
+        "detail": "docx.enum.text",
+        "documentation": {}
+    },
+    {
+        "label": "WD_BREAK",
+        "importPath": "docx.enum.text",
+        "description": "docx.enum.text",
+        "isExtraImport": true,
+        "detail": "docx.enum.text",
+        "documentation": {}
+    },
+    {
+        "label": "WD_LINE_SPACING",
+        "importPath": "docx.enum.text",
+        "description": "docx.enum.text",
+        "isExtraImport": true,
+        "detail": "docx.enum.text",
+        "documentation": {}
+    },
+    {
+        "label": "WD_TAB_ALIGNMENT",
+        "importPath": "docx.enum.text",
+        "description": "docx.enum.text",
+        "isExtraImport": true,
+        "detail": "docx.enum.text",
+        "documentation": {}
+    },
+    {
         "label": "WD_LINE_SPACING",
         "importPath": "docx.enum.text",
         "description": "docx.enum.text",
@@ -1070,6 +1382,14 @@
         "description": "docx.enum.text",
         "isExtraImport": true,
         "detail": "docx.enum.text",
+        "documentation": {}
+    },
+    {
+        "label": "qn",
+        "importPath": "docx.oxml.ns",
+        "description": "docx.oxml.ns",
+        "isExtraImport": true,
+        "detail": "docx.oxml.ns",
         "documentation": {}
     },
     {
@@ -1113,6 +1433,39 @@
         "documentation": {}
     },
     {
+        "label": "OxmlElement",
+        "importPath": "docx.oxml",
+        "description": "docx.oxml",
+        "isExtraImport": true,
+        "detail": "docx.oxml",
+        "documentation": {}
+    },
+    {
+        "label": "OxmlElement",
+        "importPath": "docx.oxml",
+        "description": "docx.oxml",
+        "isExtraImport": true,
+        "detail": "docx.oxml",
+        "documentation": {}
+    },
+    {
+        "label": "WordNumberingManager",
+        "importPath": "src.exporter.word_numbering_manager",
+        "description": "src.exporter.word_numbering_manager",
+        "isExtraImport": true,
+        "detail": "src.exporter.word_numbering_manager",
+        "documentation": {}
+    },
+    {
+        "label": "math",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
+        "documentation": {}
+    },
+    {
         "label": "Paragraph",
         "importPath": "docx.text.paragraph",
         "description": "docx.text.paragraph",
@@ -1137,35 +1490,35 @@
         "documentation": {}
     },
     {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "TextNormalizer",
         "importPath": "src.exporter.text_normalizer",
         "description": "src.exporter.text_normalizer",
         "isExtraImport": true,
         "detail": "src.exporter.text_normalizer",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
         "documentation": {}
     },
     {
@@ -1281,6 +1634,30 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphicClassifier",
+        "importPath": "src.analyzer.vector_graphic_classifier",
+        "description": "src.analyzer.vector_graphic_classifier",
+        "isExtraImport": true,
+        "detail": "src.analyzer.vector_graphic_classifier",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicGrouper",
+        "importPath": "src.analyzer.vector_graphic_grouper",
+        "description": "src.analyzer.vector_graphic_grouper",
+        "isExtraImport": true,
+        "detail": "src.analyzer.vector_graphic_grouper",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicRegionRenderer",
+        "importPath": "src.renderer.vector_graphic_region_renderer",
+        "description": "src.renderer.vector_graphic_region_renderer",
+        "isExtraImport": true,
+        "detail": "src.renderer.vector_graphic_region_renderer",
+        "documentation": {}
+    },
+    {
         "label": "RGBColor",
         "importPath": "src.models.color.rgb_color",
         "description": "src.models.color.rgb_color",
@@ -1362,27 +1739,27 @@
         "documentation": {}
     },
     {
-        "label": "VectorGraphic",
-        "importPath": "src.models.vector_graphic",
-        "description": "src.models.vector_graphic",
-        "isExtraImport": true,
-        "detail": "src.models.vector_graphic",
-        "documentation": {}
-    },
-    {
-        "label": "VectorGraphic",
-        "importPath": "src.models.vector_graphic",
-        "description": "src.models.vector_graphic",
-        "isExtraImport": true,
-        "detail": "src.models.vector_graphic",
-        "documentation": {}
-    },
-    {
         "label": "Enum",
         "importPath": "enum",
         "description": "enum",
         "isExtraImport": true,
         "detail": "enum",
+        "documentation": {}
+    },
+    {
+        "label": "BaseElement",
+        "importPath": "src.models.base_element",
+        "description": "src.models.base_element",
+        "isExtraImport": true,
+        "detail": "src.models.base_element",
+        "documentation": {}
+    },
+    {
+        "label": "BaseElement",
+        "importPath": "src.models.base_element",
+        "description": "src.models.base_element",
+        "isExtraImport": true,
+        "detail": "src.models.base_element",
         "documentation": {}
     },
     {
@@ -1442,6 +1819,14 @@
         "documentation": {}
     },
     {
+        "label": "ParagraphStyle",
+        "importPath": "src.models.paragraph_style",
+        "description": "src.models.paragraph_style",
+        "isExtraImport": true,
+        "detail": "src.models.paragraph_style",
+        "documentation": {}
+    },
+    {
         "label": "Block",
         "importPath": "src.models.block",
         "description": "src.models.block",
@@ -1455,6 +1840,23 @@
         "description": "typing",
         "isExtraImport": true,
         "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "pymupdf",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pymupdf",
+        "description": "pymupdf",
+        "detail": "pymupdf",
         "documentation": {}
     },
     {
@@ -1522,6 +1924,14 @@
         "documentation": {}
     },
     {
+        "label": "DocxExporter",
+        "importPath": "src.exporter.docx_exporter",
+        "description": "src.exporter.docx_exporter",
+        "isExtraImport": true,
+        "detail": "src.exporter.docx_exporter",
+        "documentation": {}
+    },
+    {
         "label": "RawSpan",
         "kind": 6,
         "importPath": "src.adapters.pymupdf.raw_span",
@@ -1562,7 +1972,7 @@
         "kind": 6,
         "importPath": "src.analyzer.document_analyzer",
         "description": "src.analyzer.document_analyzer",
-        "peekOfCode": "class DocumentAnalyzer:\n    @staticmethod\n    def analyze(document):\n        DocumentStatisticsAnalyzer.analyze(document)\n        HeadingDetector.detect(document)\n        for page in document.pages:\n            for block in page.blocks:\n                ParagraphAnalyzer.analyze(block)\n        ParagraphStyleAnalyzer.analyze(document)",
+        "peekOfCode": "class DocumentAnalyzer:\n    @staticmethod\n    def analyze(document):\n        DocumentStatisticsAnalyzer.analyze(document)\n        HeadingDetector.detect(document)\n        for page in document.pages:\n            for block in page.blocks:\n                ParagraphAnalyzer.analyze(block)\n            ParagraphRegionAnalyzer.analyze_page(\n                page",
         "detail": "src.analyzer.document_analyzer",
         "documentation": {}
     },
@@ -1612,6 +2022,24 @@
         "documentation": {}
     },
     {
+        "label": "_LineRecord",
+        "kind": 6,
+        "importPath": "src.analyzer.paragraph_region_analyzer",
+        "description": "src.analyzer.paragraph_region_analyzer",
+        "peekOfCode": "class _LineRecord:\n    \"\"\"\n    Internal representation of one visual PDF line.\n    A visual line may combine fragments originating from\n    multiple PyMuPDF blocks.\n    \"\"\"\n    spans: list = field(\n        default_factory=list\n    )\n    block_numbers: set[int] = field(",
+        "detail": "src.analyzer.paragraph_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "ParagraphRegionAnalyzer",
+        "kind": 6,
+        "importPath": "src.analyzer.paragraph_region_analyzer",
+        "description": "src.analyzer.paragraph_region_analyzer",
+        "peekOfCode": "class ParagraphRegionAnalyzer:\n    \"\"\"\n    Builds page-level logical paragraphs.\n    Unlike ParagraphAnalyzer, this analyzer can join wrapped\n    lines that PyMuPDF placed in different text blocks.\n    \"\"\"\n    SAME_LINE_CENTER_TOLERANCE = 3.0\n    SAME_LINE_MINIMUM_OVERLAP = 0.60\n    SAME_LINE_MAXIMUM_GAP = 24.0\n    FONT_SIZE_TOLERANCE = 0.75",
+        "detail": "src.analyzer.paragraph_region_analyzer",
+        "documentation": {}
+    },
+    {
         "label": "ParagraphStyleAnalyzer",
         "kind": 6,
         "importPath": "src.analyzer.paragraph_style_analyzer",
@@ -1630,6 +2058,24 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphicClassifier",
+        "kind": 6,
+        "importPath": "src.analyzer.vector_graphic_classifier",
+        "description": "src.analyzer.vector_graphic_classifier",
+        "peekOfCode": "class VectorGraphicClassifier:\n    \"\"\"\n    Classifies PDF vector drawings and determines whether\n    they should remain in the general vector-graphics engine.\n    \"\"\"\n    CATEGORY_BACKGROUND = \"background\"\n    CATEGORY_DECORATIVE = \"decorative\"\n    CATEGORY_BULLET = \"bullet\"\n    CATEGORY_CHART = \"chart\"\n    CATEGORY_SEPARATOR = \"separator\"",
+        "detail": "src.analyzer.vector_graphic_classifier",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicGrouper",
+        "kind": 6,
+        "importPath": "src.analyzer.vector_graphic_grouper",
+        "description": "src.analyzer.vector_graphic_grouper",
+        "peekOfCode": "class VectorGraphicGrouper:\n    \"\"\"\n    Groups nearby renderable vector graphics into logical\n    visual regions.\n    The grouping rules intentionally avoid transitive merging\n    of unrelated artwork across the entire page.\n    \"\"\"\n    GROUP_DISTANCE = 12.0\n    MAX_REGION_WIDTH_RATIO = 0.90\n    MAX_REGION_HEIGHT_RATIO = 0.55",
+        "detail": "src.analyzer.vector_graphic_grouper",
+        "documentation": {}
+    },
+    {
         "label": "RunBuilder",
         "kind": 6,
         "importPath": "src.exporter.builders.run_builder",
@@ -1643,7 +2089,7 @@
         "kind": 6,
         "importPath": "src.exporter.docx_exporter",
         "description": "src.exporter.docx_exporter",
-        "peekOfCode": "class DocxExporter:\n    \"\"\"\n    Exports the analyzed DocuMind document model to DOCX.\n    \"\"\"\n    DEFAULT_MARGIN = 36.0\n    MINIMUM_MARGIN = 18.0\n    @staticmethod\n    def export(document, output_path: str) -> None:\n        word_document = WordDocument()\n        for page_index, page in enumerate(document.pages):",
+        "peekOfCode": "class DocxExporter:\n    \"\"\"\n    Exports the analyzed DocuMind document model to DOCX.\n    \"\"\"\n    DEFAULT_MARGIN = 36.0\n    MINIMUM_MARGIN = 18.0\n    INLINE_SPACE_MINIMUM_GAP = 0.5\n    INLINE_SPACE_GAP_FACTOR = 0.04\n    BROKEN_WORD_MINIMUM_PREVIOUS_LENGTH = 3\n    BROKEN_WORD_LINE_FILL_RATIO = 0.80",
         "detail": "src.exporter.docx_exporter",
         "documentation": {}
     },
@@ -1672,6 +2118,15 @@
         "description": "src.exporter.text_normalizer",
         "peekOfCode": "class TextNormalizer:\n    \"\"\"\n    Converts PDF-specific glyphs into reliable Unicode text\n    before exporting to Word.\n    \"\"\"\n    BULLET_REPLACEMENTS: dict[str, str] = {\n        \"\\uf0b7\": \"\\u2022\",  # Wingdings private-use bullet\n        \"\\uf0a7\": \"\\u25aa\",  # Wingdings square bullet\n        \"\\uf0d8\": \"\\u25ba\",  # Wingdings right arrow\n        \"\\u2023\": \"\\u2022\",  # Triangular bullet",
         "detail": "src.exporter.text_normalizer",
+        "documentation": {}
+    },
+    {
+        "label": "WordNumberingManager",
+        "kind": 6,
+        "importPath": "src.exporter.word_numbering_manager",
+        "description": "src.exporter.word_numbering_manager",
+        "peekOfCode": "class WordNumberingManager:\n    \"\"\"\n    Creates valid Word bullet and decimal-numbering\n    definitions.\n    Important WordprocessingML ordering rule:\n        abstractNum*\n        num*\n    All abstract definitions must appear before all numbering\n    instances. Interleaving them can cause Microsoft Word to\n    repair the document and connect unrelated lists.",
+        "detail": "src.exporter.word_numbering_manager",
         "documentation": {}
     },
     {
@@ -1724,7 +2179,7 @@
         "kind": 6,
         "importPath": "src.extractor.vector_graphic_extractor",
         "description": "src.extractor.vector_graphic_extractor",
-        "peekOfCode": "class VectorGraphicExtractor:\n    \"\"\"\n    Extracts vector drawing groups from one PyMuPDF page.\n    \"\"\"\n    @staticmethod\n    def extract(pdf_page) -> list[dict]:\n        \"\"\"\n        Return normalized PyMuPDF drawing dictionaries.\n        \"\"\"\n        drawings = pdf_page.get_drawings()",
+        "peekOfCode": "class VectorGraphicExtractor:\n    \"\"\"\n    Extracts paintable vector drawing paths from one\n    PyMuPDF page while preserving active clipping paths.\n    \"\"\"\n    PAINT_TYPES = {\n        \"f\",\n        \"s\",\n        \"fs\",\n    }",
         "detail": "src.extractor.vector_graphic_extractor",
         "documentation": {}
     },
@@ -1918,6 +2373,15 @@
         "documentation": {}
     },
     {
+        "label": "ParagraphRegion",
+        "kind": 6,
+        "importPath": "src.models.paragraph_region",
+        "description": "src.models.paragraph_region",
+        "peekOfCode": "class ParagraphRegion(BaseElement):\n    \"\"\"\n    Represents one logical, editable paragraph positioned on\n    a PDF page.\n    A region may contain lines originating from multiple\n    PyMuPDF text blocks.\n    \"\"\"\n    region_number: int\n    lines: list[Line] = field(\n        default_factory=list",
+        "detail": "src.models.paragraph_region",
+        "documentation": {}
+    },
+    {
         "label": "ParagraphStyle",
         "kind": 6,
         "importPath": "src.models.paragraph_style",
@@ -1990,12 +2454,30 @@
         "documentation": {}
     },
     {
+        "label": "VectorGraphicRegion",
+        "kind": 6,
+        "importPath": "src.models.vector_graphic_region",
+        "description": "src.models.vector_graphic_region",
+        "peekOfCode": "class VectorGraphicRegion(BaseElement):\n    \"\"\"\n    Represents one logical region containing multiple\n    nearby vector graphics.\n    During Step 61 this only stores grouped vectors.\n    Later it will also contain a rendered transparent PNG.\n    \"\"\"\n    region_number: int\n    graphics: list[VectorGraphic] = field(\n        default_factory=list",
+        "detail": "src.models.vector_graphic_region",
+        "documentation": {}
+    },
+    {
         "label": "PDFReader",
         "kind": 6,
         "importPath": "src.parser.pdf_reader",
         "description": "src.parser.pdf_reader",
         "peekOfCode": "class PDFReader:\n    \"\"\"\n    Responsible only for opening PDF documents.\n    \"\"\"\n    def open(self, pdf_path: str):\n        \"\"\"\n        Open a PDF file and return the PyMuPDF document object.\n        \"\"\"\n        document = fitz.open(pdf_path)\n        return document",
         "detail": "src.parser.pdf_reader",
+        "documentation": {}
+    },
+    {
+        "label": "VectorGraphicRegionRenderer",
+        "kind": 6,
+        "importPath": "src.renderer.vector_graphic_region_renderer",
+        "description": "src.renderer.vector_graphic_region_renderer",
+        "peekOfCode": "class VectorGraphicRegionRenderer:\n    \"\"\"\n    Renders grouped PDF vector drawings into isolated,\n    transparent PNG images.\n    Text, raster images, and unrelated page content are not\n    included because only the original drawing commands are\n    replayed.\n    \"\"\"\n    DEFAULT_DPI = 300\n    DEFAULT_PADDING = 2.0",
+        "detail": "src.renderer.vector_graphic_region_renderer",
         "documentation": {}
     },
     {
@@ -2066,7 +2548,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf8.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(",
         "detail": "main",
         "documentation": {}
     },
@@ -2075,7 +2557,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf8.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"\n        f\"{len(page.vector_graphics)} \"",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"",
         "detail": "main",
         "documentation": {}
     },
@@ -2084,7 +2566,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"Page {page.number}: \"\n        f\"{len(page.vector_graphics)} \"\n        f\"vector graphics\"\n    )\n    for graphic in page.vector_graphics:",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"\n    )\n    print(\n        \" Renderable vectors:\",\n        sum(",
         "detail": "main",
         "documentation": {}
     },
@@ -2093,7 +2575,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "analyzer = DocumentAnalyzer()\nanalyzer.analyze(\n    document\n)\nFixedLayoutDocxExporter.export(\n    document=document,\n    output_path=\"output/output.docx\",\n)\nprint(\n    \"Fixed-layout DOCX created successfully!\"",
+        "peekOfCode": "analyzer = DocumentAnalyzer()\nanalyzer.analyze(\n    document\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number} paragraphs:\",\n        len(page.paragraph_regions),\n    )\n    for region in page.paragraph_regions:",
         "detail": "main",
         "documentation": {}
     }

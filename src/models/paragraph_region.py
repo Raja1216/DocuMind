@@ -40,6 +40,8 @@ class ParagraphRegion(BaseElement):
     # Left position where the actual list-item content starts,
     # excluding a number such as "1.".
     content_left: float | None = None
+    list_marker_left: float | None = None
+    list_marker_right: float | None = None
 
     @property
     def width(self) -> float:
