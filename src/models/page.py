@@ -14,7 +14,9 @@ from src.models.vector_graphic_region import (
 from src.models.paragraph_region import (
     ParagraphRegion,
 )
-from src.models.page_profile import PageProfile
+from src.models.page_profile import (
+    PageProfile,
+)
 
 
 @dataclass(slots=True)
@@ -48,4 +50,33 @@ class Page:
     paragraph_regions: list[ParagraphRegion] = field(
         default_factory=list
     )
-    profile: PageProfile | None = None
+    profile: PageProfile = field(
+        init=False
+    )
+    def __post_init__(self) -> None:
+        """
+        Initialize the basic profile immediately when a Page is
+        created.
+    
+        Content metrics and classification are filled later by
+        PageProfileAnalyzer.
+        """
+    
+        self.profile = PageProfile(
+            page_number=self.number,
+    
+            page_width=max(
+                float(self.bbox.width),
+                0.0,
+            ),
+    
+            page_height=max(
+                float(self.bbox.height),
+                0.0,
+            ),
+    
+            rotation=(
+                int(self.rotation)
+                % 360
+            ),
+        )

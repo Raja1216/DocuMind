@@ -21,6 +21,28 @@ pdf = reader.open(
 document = DocumentMapper.map(
     pdf
 )
+
+print(
+    "\nInitial profile models"
+)
+
+print(
+    "Document profile:",
+    document.profile
+)
+
+for page in document.pages:
+    print(
+        (
+            f"Page {page.number}: "
+            f"{page.profile.page_width:.2f} × "
+            f"{page.profile.page_height:.2f}, "
+            f"rotation={page.profile.rotation}, "
+            f"type={page.profile.page_type.value}, "
+            f"mode={page.profile.recommended_mode.value}"
+        )
+    )
+
 for page in document.pages:
 
     print(

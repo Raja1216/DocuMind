@@ -20,4 +20,6 @@ class Document:
     statistics: DocumentStatistics = field(
         default_factory=DocumentStatistics
     )
-    profile: DocumentProfile | None = None
+    profile: DocumentProfile = field(
+        default_factory=DocumentProfile
+    )

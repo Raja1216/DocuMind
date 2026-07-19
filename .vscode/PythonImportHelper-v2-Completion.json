@@ -392,107 +392,11 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -536,7 +440,7 @@
         "documentation": {}
     },
     {
-        "label": "field",
+        "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -552,23 +456,7 @@
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -585,22 +473,6 @@
     },
     {
         "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -693,6 +565,150 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
         "documentation": {}
     },
     {
@@ -741,6 +757,14 @@
         "description": "src.adapters.pymupdf.raw_span",
         "isExtraImport": true,
         "detail": "src.adapters.pymupdf.raw_span",
+        "documentation": {}
+    },
+    {
+        "label": "Document",
+        "importPath": "src.models.document",
+        "description": "src.models.document",
+        "isExtraImport": true,
+        "detail": "src.models.document",
         "documentation": {}
     },
     {
@@ -1118,6 +1142,14 @@
         "description": "src.models.paragraph",
         "isExtraImport": true,
         "detail": "src.models.paragraph",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
         "documentation": {}
     },
     {
@@ -1610,6 +1642,14 @@
         "documentation": {}
     },
     {
+        "label": "PDFMetadata",
+        "importPath": "src.models.metadata",
+        "description": "src.models.metadata",
+        "isExtraImport": true,
+        "detail": "src.models.metadata",
+        "documentation": {}
+    },
+    {
         "label": "Image",
         "importPath": "src.models.image",
         "description": "src.models.image",
@@ -1899,6 +1939,22 @@
         "documentation": {}
     },
     {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
         "label": "ParagraphStyle",
         "importPath": "src.models.paragraph_style",
         "description": "src.models.paragraph_style",
@@ -1985,6 +2041,15 @@
         "description": "src.parser.pdf_reader",
         "isExtraImport": true,
         "detail": "src.parser.pdf_reader",
+        "documentation": {}
+    },
+    {
+        "label": "unittest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "unittest",
+        "description": "unittest",
+        "detail": "unittest",
         "documentation": {}
     },
     {
@@ -2402,7 +2467,7 @@
         "kind": 6,
         "importPath": "src.models.document",
         "description": "src.models.document",
-        "peekOfCode": "class Document:\n    \"\"\"\n    Complete document.\n    \"\"\"\n    metadata: PDFMetadata\n    pages: list[Page] = field(default_factory=list)\n    statistics: DocumentStatistics = field(\n        default_factory=DocumentStatistics\n    )\n    profile: DocumentProfile | None = None",
+        "peekOfCode": "class Document:\n    \"\"\"\n    Complete document.\n    \"\"\"\n    metadata: PDFMetadata\n    pages: list[Page] = field(default_factory=list)\n    statistics: DocumentStatistics = field(\n        default_factory=DocumentStatistics\n    )\n    profile: DocumentProfile = field(",
         "detail": "src.models.document",
         "documentation": {}
     },
@@ -2411,7 +2476,7 @@
         "kind": 6,
         "importPath": "src.models.document_profile",
         "description": "src.models.document_profile",
-        "peekOfCode": "class DocumentProfile:\n    page_count: int = 0\n    digital_page_count: int = 0\n    scanned_page_count: int = 0\n    mixed_page_count: int = 0\n    dominant_page_type: PageType = PageType.UNKNOWN\n    recommended_mode: ConversionMode = ConversionMode.HYBRID\n    contains_tables: bool = False\n    contains_charts: bool = False\n    contains_forms: bool = False",
+        "peekOfCode": "class DocumentProfile:\n    \"\"\"\n    Stores document-level analysis results.\n    This profile summarizes all page profiles but does not\n    force every page to use the same conversion mode.\n    \"\"\"\n    page_count: int = 0\n    # ---------------------------------------------------------\n    # Page-content categories\n    # ---------------------------------------------------------",
         "detail": "src.models.document_profile",
         "documentation": {}
     },
@@ -2465,7 +2530,7 @@
         "kind": 6,
         "importPath": "src.models.page_profile",
         "description": "src.models.page_profile",
-        "peekOfCode": "class PageType(str, Enum):\n    SIMPLE_TEXT = \"simple_text\"\n    MULTI_COLUMN = \"multi_column\"\n    DESIGNED_COVER = \"designed_cover\"\n    TABLE_DOMINANT = \"table_dominant\"\n    CHART_DOMINANT = \"chart_dominant\"\n    FORM = \"form\"\n    IMAGE_DOMINANT = \"image_dominant\"\n    SCANNED = \"scanned\"\n    MAGAZINE = \"magazine\"",
+        "peekOfCode": "class PageType(str, Enum):\n    \"\"\"\n    High-level structural classification of one PDF page.\n    These values describe the page itself, not the complete\n    document. A single PDF may contain multiple page types.\n    \"\"\"\n    SIMPLE_TEXT = \"simple_text\"\n    MULTI_COLUMN = \"multi_column\"\n    DESIGNED_COVER = \"designed_cover\"\n    TABLE_DOMINANT = \"table_dominant\"",
         "detail": "src.models.page_profile",
         "documentation": {}
     },
@@ -2474,7 +2539,7 @@
         "kind": 6,
         "importPath": "src.models.page_profile",
         "description": "src.models.page_profile",
-        "peekOfCode": "class ConversionMode(str, Enum):\n    EDITABLE = \"editable\"\n    FIXED = \"fixed\"\n    HYBRID = \"hybrid\"\n    OCR = \"ocr\"\n    IMAGE_FALLBACK = \"image_fallback\"\n@dataclass(slots=True)\nclass PageProfile:\n    page_number: int\n    page_type: PageType = PageType.UNKNOWN",
+        "peekOfCode": "class ConversionMode(str, Enum):\n    \"\"\"\n    Recommended conversion strategy for one page.\n    \"\"\"\n    EDITABLE = \"editable\"\n    FIXED = \"fixed\"\n    HYBRID = \"hybrid\"\n    OCR = \"ocr\"\n    IMAGE_FALLBACK = \"image_fallback\"\n@dataclass(slots=True)",
         "detail": "src.models.page_profile",
         "documentation": {}
     },
@@ -2483,7 +2548,7 @@
         "kind": 6,
         "importPath": "src.models.page_profile",
         "description": "src.models.page_profile",
-        "peekOfCode": "class PageProfile:\n    page_number: int\n    page_type: PageType = PageType.UNKNOWN\n    recommended_mode: ConversionMode = ConversionMode.HYBRID\n    page_width: float = 0.0\n    page_height: float = 0.0\n    rotation: int = 0\n    text_coverage: float = 0.0\n    image_coverage: float = 0.0\n    vector_coverage: float = 0.0",
+        "peekOfCode": "class PageProfile:\n    \"\"\"\n    Stores analysis results for one PDF page.\n    The PageProfile does not perform analysis itself. The\n    PageProfileAnalyzer introduced in Step 62.5G.2 will fill\n    these fields.\n    \"\"\"\n    page_number: int\n    page_type: PageType = (\n        PageType.UNKNOWN",
         "detail": "src.models.page_profile",
         "documentation": {}
     },
@@ -2632,6 +2697,24 @@
         "documentation": {}
     },
     {
+        "label": "PageProfileModelTests",
+        "kind": 6,
+        "importPath": "tests.test_profile_models",
+        "description": "tests.test_profile_models",
+        "peekOfCode": "class PageProfileModelTests(\n    unittest.TestCase\n):\n    def test_page_creates_profile_automatically(\n        self,\n    ) -> None:\n        page = Page(\n            number=3,\n            bbox=Rectangle(\n                left=0.0,",
+        "detail": "tests.test_profile_models",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentProfileModelTests",
+        "kind": 6,
+        "importPath": "tests.test_profile_models",
+        "description": "tests.test_profile_models",
+        "peekOfCode": "class DocumentProfileModelTests(\n    unittest.TestCase\n):\n    def test_document_creates_profile(\n        self,\n    ) -> None:\n        document = Document(\n            metadata=PDFMetadata()\n        )\n        self.assertEqual(",
+        "detail": "tests.test_profile_models",
+        "documentation": {}
+    },
+    {
         "label": "block",
         "kind": 2,
         "importPath": "tests.test_reading_order",
@@ -2672,7 +2755,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"",
         "detail": "main",
         "documentation": {}
     },
@@ -2681,7 +2764,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"\n)",
         "detail": "main",
         "documentation": {}
     },
@@ -2690,7 +2773,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"\n    )\n    print(\n        \" Renderable vectors:\",\n        sum(",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"\n)\nprint(\n    \"Document profile:\",\n    document.profile\n)",
         "detail": "main",
         "documentation": {}
     },
