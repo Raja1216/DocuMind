@@ -85,6 +85,143 @@ analyzer.analyze(
     document
 )
 
+print(
+    "\nPage profile analysis"
+)
+
+for page in document.pages:
+    profile = page.profile
+
+    print(
+        f"\nPage {page.number}"
+    )
+
+    print(
+        " Type:",
+        profile.page_type.value,
+    )
+
+    print(
+        " Recommended mode:",
+        profile.recommended_mode.value,
+    )
+
+    print(
+        " Size:",
+        (
+            round(
+                profile.page_width,
+                2,
+            ),
+            round(
+                profile.page_height,
+                2,
+            ),
+        ),
+    )
+
+    print(
+        " Rotation:",
+        profile.rotation,
+    )
+
+    print(
+        " Text coverage:",
+        round(
+            profile.text_coverage,
+            4,
+        ),
+    )
+
+    print(
+        " Image coverage:",
+        round(
+            profile.image_coverage,
+            4,
+        ),
+    )
+
+    print(
+        " Vector coverage:",
+        round(
+            profile.vector_coverage,
+            4,
+        ),
+    )
+
+    print(
+        " Table coverage:",
+        round(
+            profile.table_coverage,
+            4,
+        ),
+    )
+
+    print(
+        " Chart coverage:",
+        round(
+            profile.chart_coverage,
+            4,
+        ),
+    )
+
+    print(
+        " Columns:",
+        profile.column_count,
+    )
+
+    print(
+        " Tables:",
+        profile.table_count,
+    )
+
+    print(
+        " Charts:",
+        profile.chart_count,
+    )
+
+    print(
+        " OCR required:",
+        profile.requires_ocr,
+    )
+
+    print(
+        " Confidence:",
+        {
+            "editable": round(
+                profile.editable_confidence,
+                3,
+            ),
+
+            "fixed": round(
+                profile.fixed_confidence,
+                3,
+            ),
+
+            "hybrid": round(
+                profile.hybrid_confidence,
+                3,
+            ),
+
+            "ocr": round(
+                profile.ocr_confidence,
+                3,
+            ),
+        },
+    )
+
+    for reason in profile.reasons:
+        print(
+            "  Reason:",
+            reason,
+        )
+
+    for warning in profile.warnings:
+        print(
+            "  Warning:",
+            warning,
+        )
+
 for page in document.pages:
 
     print(

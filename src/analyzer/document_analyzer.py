@@ -6,21 +6,42 @@ from src.analyzer.alignment_analyzer import AlignmentAnalyzer
 from src.analyzer.paragraph_region_analyzer import (
     ParagraphRegionAnalyzer,
 )
+from src.analyzer.page_profile_analyzer import (
+    PageProfileAnalyzer,
+)
 
 
 class DocumentAnalyzer:
 
     @staticmethod
-    def analyze(document):
+    def analyze(
+        document,
+    ) -> None:
+        DocumentStatisticsAnalyzer.analyze(
+            document
+        )
 
-        DocumentStatisticsAnalyzer.analyze(document)
-
-        HeadingDetector.detect(document)
+        HeadingDetector.detect(
+            document
+        )
 
         for page in document.pages:
             for block in page.blocks:
-                ParagraphAnalyzer.analyze(block)
+                ParagraphAnalyzer.analyze(
+                    block
+                )
+
             ParagraphRegionAnalyzer.analyze_page(
                 page
-            )    
-        ParagraphStyleAnalyzer.analyze(document)        
+            )
+
+        ParagraphStyleAnalyzer.analyze(
+            document
+        )
+
+        # Page profiling must run after paragraph regions,
+        # tables, vectors and charts have been classified.
+        for page in document.pages:
+            PageProfileAnalyzer.analyze_page(
+                page
+            )        
