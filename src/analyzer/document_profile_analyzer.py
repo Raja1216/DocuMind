@@ -84,7 +84,7 @@ class DocumentProfileAnalyzer:
 
         cls._calculate_type_and_mode_counts(
             profile=profile,
-            page_profiles=page_profiles,
+            pages=document.pages,
         )
 
         profile.dominant_page_type = (
@@ -340,28 +340,61 @@ class DocumentProfileAnalyzer:
     @staticmethod
     def _calculate_type_and_mode_counts(
         profile: DocumentProfile,
-        page_profiles: list[PageProfile],
+        pages,
     ) -> None:
         """
-        Store serializable page-type and mode counts.
+        Store page-type and resolved conversion-mode counts.
+    
+        The final ConversionPolicy mode is preferred. The
+        PageProfile recommendation is used as a fallback.
         """
-
+    
+        analyzed_pages = [
+            page
+            for page in pages
+            if getattr(
+                page,
+                "profile",
+                None,
+            ) is not None
+        ]
+    
         page_type_counter = Counter(
-            page_profile.page_type.value
-            for page_profile in page_profiles
+            page.profile.page_type.value
+            for page in analyzed_pages
         )
-
-        mode_counter = Counter(
-            page_profile.recommended_mode.value
-            for page_profile in page_profiles
-        )
-
+    
+        mode_counter = Counter()
+    
+        for page in analyzed_pages:
+            conversion_policy = getattr(
+                page,
+                "conversion_policy",
+                None,
+            )
+    
+            if conversion_policy is not None:
+                mode_value = (
+                    conversion_policy.mode.value
+                )
+            else:
+                mode_value = (
+                    page
+                    .profile
+                    .recommended_mode
+                    .value
+                )
+    
+            mode_counter[
+                mode_value
+            ] += 1
+    
         profile.page_type_counts = dict(
             sorted(
                 page_type_counter.items()
             )
         )
-
+    
         profile.mode_counts = dict(
             sorted(
                 mode_counter.items()

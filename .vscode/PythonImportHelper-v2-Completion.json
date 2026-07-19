@@ -448,107 +448,27 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -592,7 +512,23 @@
         "documentation": {}
     },
     {
-        "label": "field",
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -696,6 +632,110 @@
         "documentation": {}
     },
     {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -749,6 +789,14 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
         "documentation": {}
     },
     {
@@ -993,6 +1041,302 @@
         "documentation": {}
     },
     {
+        "label": "ConversionPolicy",
+        "importPath": "src.models.conversion_policy",
+        "description": "src.models.conversion_policy",
+        "isExtraImport": true,
+        "detail": "src.models.conversion_policy",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionPolicy",
+        "importPath": "src.models.conversion_policy",
+        "description": "src.models.conversion_policy",
+        "isExtraImport": true,
+        "detail": "src.models.conversion_policy",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "RectangleUnion",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
+        "label": "Bounds",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
+        "label": "RectangleUnion",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
+        "label": "RectangleUnion",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
         "label": "DocumentStatisticsAnalyzer",
         "importPath": "src.analyzer.document_statistics_analyzer",
         "description": "src.analyzer.document_statistics_analyzer",
@@ -1070,6 +1414,22 @@
         "description": "src.analyzer.document_profile_analyzer",
         "isExtraImport": true,
         "detail": "src.analyzer.document_profile_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionPolicyResolver",
+        "importPath": "src.analyzer.conversion_policy_resolver",
+        "description": "src.analyzer.conversion_policy_resolver",
+        "isExtraImport": true,
+        "detail": "src.analyzer.conversion_policy_resolver",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionPolicyResolver",
+        "importPath": "src.analyzer.conversion_policy_resolver",
+        "description": "src.analyzer.conversion_policy_resolver",
+        "isExtraImport": true,
+        "detail": "src.analyzer.conversion_policy_resolver",
         "documentation": {}
     },
     {
@@ -1193,126 +1553,6 @@
         "documentation": {}
     },
     {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageProfile",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageProfile",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageProfile",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
         "label": "Line",
         "importPath": "src.models.line",
         "description": "src.models.line",
@@ -1430,94 +1670,6 @@
         "description": "typing",
         "isExtraImport": true,
         "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Page",
-        "importPath": "src.models.page",
-        "description": "src.models.page",
-        "isExtraImport": true,
-        "detail": "src.models.page",
-        "documentation": {}
-    },
-    {
-        "label": "Bounds",
-        "importPath": "src.utils.rectangle_union",
-        "description": "src.utils.rectangle_union",
-        "isExtraImport": true,
-        "detail": "src.utils.rectangle_union",
-        "documentation": {}
-    },
-    {
-        "label": "RectangleUnion",
-        "importPath": "src.utils.rectangle_union",
-        "description": "src.utils.rectangle_union",
-        "isExtraImport": true,
-        "detail": "src.utils.rectangle_union",
-        "documentation": {}
-    },
-    {
-        "label": "RectangleUnion",
-        "importPath": "src.utils.rectangle_union",
-        "description": "src.utils.rectangle_union",
-        "isExtraImport": true,
-        "detail": "src.utils.rectangle_union",
         "documentation": {}
     },
     {
@@ -2457,6 +2609,15 @@
         "documentation": {}
     },
     {
+        "label": "ConversionPolicyResolver",
+        "kind": 6,
+        "importPath": "src.analyzer.conversion_policy_resolver",
+        "description": "src.analyzer.conversion_policy_resolver",
+        "peekOfCode": "class ConversionPolicyResolver:\n    \"\"\"\n    Converts a PageProfile into an actionable page-level\n    conversion policy.\n    This resolver must not contain:\n        filename-specific rules\n        page-number-specific rules\n        sample-PDF-specific rules\n    \"\"\"\n    MINIMUM_EDITABLE_CONFIDENCE = 0.55",
+        "detail": "src.analyzer.conversion_policy_resolver",
+        "documentation": {}
+    },
+    {
         "label": "DocumentAnalyzer",
         "kind": 6,
         "importPath": "src.analyzer.document_analyzer",
@@ -2817,6 +2978,15 @@
         "documentation": {}
     },
     {
+        "label": "ConversionPolicy",
+        "kind": 6,
+        "importPath": "src.models.conversion_policy",
+        "description": "src.models.conversion_policy",
+        "peekOfCode": "class ConversionPolicy:\n    \"\"\"\n    Describes how one PDF page should eventually be exported\n    to DOCX.\n    This model stores decisions only. It does not perform any\n    DOCX rendering.\n    \"\"\"\n    page_number: int\n    mode: ConversionMode = (\n        ConversionMode.HYBRID",
+        "detail": "src.models.conversion_policy",
+        "documentation": {}
+    },
+    {
         "label": "Document",
         "kind": 6,
         "importPath": "src.models.document",
@@ -3066,6 +3236,24 @@
         "description": "tests.debug_layout",
         "peekOfCode": "document = DocumentMapper.map(pdf)\nfor page in document.pages:\n    print(f\"\\n===== PAGE {page.number} =====\")\n    blocks = page.blocks\n    for i in range(len(blocks) - 1):\n        current = blocks[i]\n        nxt = blocks[i + 1]\n        gap = LayoutAnalyzer.vertical_gap(\n            current,\n            nxt,",
         "detail": "tests.debug_layout",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionPolicyResolverTests",
+        "kind": 6,
+        "importPath": "tests.test_conversion_policy_resolver",
+        "description": "tests.test_conversion_policy_resolver",
+        "peekOfCode": "class ConversionPolicyResolverTests(\n    unittest.TestCase\n):\n    def test_simple_text_policy(\n        self,\n    ) -> None:\n        page = make_page(\n            page_type=PageType.SIMPLE_TEXT,\n            recommended_mode=(\n                ConversionMode.EDITABLE",
+        "detail": "tests.test_conversion_policy_resolver",
+        "documentation": {}
+    },
+    {
+        "label": "make_page",
+        "kind": 2,
+        "importPath": "tests.test_conversion_policy_resolver",
+        "description": "tests.test_conversion_policy_resolver",
+        "peekOfCode": "def make_page(\n    page_type: PageType,\n    recommended_mode: ConversionMode,\n    has_text: bool = True,\n    requires_ocr: bool = False,\n) -> Page:\n    page = Page(\n        number=1,\n        bbox=Rectangle(\n            left=0.0,",
+        "detail": "tests.test_conversion_policy_resolver",
         "documentation": {}
     },
     {

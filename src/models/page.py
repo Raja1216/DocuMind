@@ -17,6 +17,9 @@ from src.models.paragraph_region import (
 from src.models.page_profile import (
     PageProfile,
 )
+from src.models.conversion_policy import (
+    ConversionPolicy,
+)
 
 
 @dataclass(slots=True)
@@ -52,6 +55,10 @@ class Page:
     )
     profile: PageProfile = field(
         init=False
+    )
+    conversion_policy: ConversionPolicy | None = field(
+        default=None,
+        init=False,
     )
     def __post_init__(self) -> None:
         """

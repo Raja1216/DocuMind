@@ -12,6 +12,9 @@ from src.analyzer.page_profile_analyzer import (
 from src.analyzer.document_profile_analyzer import (
     DocumentProfileAnalyzer,
 )
+from src.analyzer.conversion_policy_resolver import (
+    ConversionPolicyResolver,
+)
 
 
 class DocumentAnalyzer:
@@ -48,6 +51,14 @@ class DocumentAnalyzer:
             PageProfileAnalyzer.analyze_page(
                 page
             )
+        
+            # Conversion policy depends on the completed page profile.
+            ConversionPolicyResolver.resolve(
+                page
+            )
+        
+        # Build the document profile after every page has both a
+        # PageProfile and a ConversionPolicy.
         DocumentProfileAnalyzer.analyze(
             document
-        )            
+        )           
