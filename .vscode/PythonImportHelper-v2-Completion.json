@@ -432,107 +432,19 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -576,7 +488,7 @@
         "documentation": {}
     },
     {
-        "label": "field",
+        "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -592,23 +504,7 @@
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -625,22 +521,6 @@
     },
     {
         "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -733,6 +613,150 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
         "documentation": {}
     },
     {
@@ -797,6 +821,22 @@
         "description": "src.adapters.pymupdf.raw_span",
         "isExtraImport": true,
         "detail": "src.adapters.pymupdf.raw_span",
+        "documentation": {}
+    },
+    {
+        "label": "Document",
+        "importPath": "src.models.document",
+        "description": "src.models.document",
+        "isExtraImport": true,
+        "detail": "src.models.document",
+        "documentation": {}
+    },
+    {
+        "label": "Document",
+        "importPath": "src.models.document",
+        "description": "src.models.document",
+        "isExtraImport": true,
+        "detail": "src.models.document",
         "documentation": {}
     },
     {
@@ -1017,11 +1057,19 @@
         "documentation": {}
     },
     {
-        "label": "Counter",
-        "importPath": "collections",
-        "description": "collections",
+        "label": "DocumentProfileAnalyzer",
+        "importPath": "src.analyzer.document_profile_analyzer",
+        "description": "src.analyzer.document_profile_analyzer",
         "isExtraImport": true,
-        "detail": "collections",
+        "detail": "src.analyzer.document_profile_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentProfileAnalyzer",
+        "importPath": "src.analyzer.document_profile_analyzer",
+        "description": "src.analyzer.document_profile_analyzer",
+        "isExtraImport": true,
+        "detail": "src.analyzer.document_profile_analyzer",
         "documentation": {}
     },
     {
@@ -1049,75 +1097,27 @@
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "collections",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "collections",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "fmean",
+        "importPath": "statistics",
+        "description": "statistics",
         "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "statistics",
         "documentation": {}
     },
     {
@@ -1174,6 +1174,214 @@
         "description": "statistics",
         "isExtraImport": true,
         "detail": "statistics",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentProfile",
+        "importPath": "src.models.document_profile",
+        "description": "src.models.document_profile",
+        "isExtraImport": true,
+        "detail": "src.models.document_profile",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentProfile",
+        "importPath": "src.models.document_profile",
+        "description": "src.models.document_profile",
+        "isExtraImport": true,
+        "detail": "src.models.document_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageProfile",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "ConversionMode",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "PageType",
+        "importPath": "src.models.page_profile",
+        "description": "src.models.page_profile",
+        "isExtraImport": true,
+        "detail": "src.models.page_profile",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
         "documentation": {}
     },
     {
@@ -1281,83 +1489,11 @@
         "documentation": {}
     },
     {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
         "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageProfile",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageProfile",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "ConversionMode",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
-        "documentation": {}
-    },
-    {
-        "label": "PageType",
-        "importPath": "src.models.page_profile",
-        "description": "src.models.page_profile",
-        "isExtraImport": true,
-        "detail": "src.models.page_profile",
+        "detail": "src.models.page",
         "documentation": {}
     },
     {
@@ -1898,6 +2034,14 @@
         "documentation": {}
     },
     {
+        "label": "PDFMetadata",
+        "importPath": "src.models.metadata",
+        "description": "src.models.metadata",
+        "isExtraImport": true,
+        "detail": "src.models.metadata",
+        "documentation": {}
+    },
+    {
         "label": "Image",
         "importPath": "src.models.image",
         "description": "src.models.image",
@@ -2155,14 +2299,6 @@
         "documentation": {}
     },
     {
-        "label": "DocumentProfile",
-        "importPath": "src.models.document_profile",
-        "description": "src.models.document_profile",
-        "isExtraImport": true,
-        "detail": "src.models.document_profile",
-        "documentation": {}
-    },
-    {
         "label": "ParagraphStyle",
         "importPath": "src.models.paragraph_style",
         "description": "src.models.paragraph_style",
@@ -2327,6 +2463,15 @@
         "description": "src.analyzer.document_analyzer",
         "peekOfCode": "class DocumentAnalyzer:\n    @staticmethod\n    def analyze(\n        document,\n    ) -> None:\n        DocumentStatisticsAnalyzer.analyze(\n            document\n        )\n        HeadingDetector.detect(\n            document",
         "detail": "src.analyzer.document_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentProfileAnalyzer",
+        "kind": 6,
+        "importPath": "src.analyzer.document_profile_analyzer",
+        "description": "src.analyzer.document_profile_analyzer",
+        "peekOfCode": "class DocumentProfileAnalyzer:\n    \"\"\"\n    Summarizes page-level profiles into one document-level\n    profile.\n    The document profile does not force every page to use the\n    same conversion strategy. Each page keeps its own\n    recommended mode.\n    \"\"\"\n    PAGE_SIZE_ABSOLUTE_TOLERANCE = 1.0\n    PAGE_SIZE_RELATIVE_TOLERANCE = 0.002",
+        "detail": "src.analyzer.document_profile_analyzer",
         "documentation": {}
     },
     {
@@ -2924,6 +3069,24 @@
         "documentation": {}
     },
     {
+        "label": "DocumentProfileAnalyzerTests",
+        "kind": 6,
+        "importPath": "tests.test_document_profile_analyzer",
+        "description": "tests.test_document_profile_analyzer",
+        "peekOfCode": "class DocumentProfileAnalyzerTests(\n    unittest.TestCase\n):\n    def test_all_simple_text_pages(\n        self,\n    ) -> None:\n        document = Document(\n            metadata=PDFMetadata()\n        )\n        document.pages.extend([",
+        "detail": "tests.test_document_profile_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "make_page",
+        "kind": 2,
+        "importPath": "tests.test_document_profile_analyzer",
+        "description": "tests.test_document_profile_analyzer",
+        "peekOfCode": "def make_page(\n    number: int,\n    width: float = 612.0,\n    height: float = 792.0,\n    page_type: PageType = PageType.SIMPLE_TEXT,\n    mode: ConversionMode = ConversionMode.EDITABLE,\n    has_text: bool = True,\n    requires_ocr: bool = False,\n) -> Page:\n    \"\"\"",
+        "detail": "tests.test_document_profile_analyzer",
+        "documentation": {}
+    },
+    {
         "label": "PageProfileAnalyzerTests",
         "kind": 6,
         "importPath": "tests.test_page_profile_analyzer",
@@ -3027,7 +3190,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"",
+        "peekOfCode": "reader = PDFReader()\npdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(",
         "detail": "main",
         "documentation": {}
     },
@@ -3036,7 +3199,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"\n)",
+        "peekOfCode": "pdf = reader.open(\n    \"samples/pdf/spdf1.pdf\"\n    # \"samples/BirlaPDF/Class-4-Print31 1.pdf\"\n)\ndocument = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"",
         "detail": "main",
         "documentation": {}
     },
@@ -3045,7 +3208,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nprint(\n    \"\\nInitial profile models\"\n)\nprint(\n    \"Document profile:\",\n    document.profile\n)",
+        "peekOfCode": "document = DocumentMapper.map(\n    pdf\n)\nfor page in document.pages:\n    print(\n        f\"\\nPage {page.number}\"\n    )\n    print(\n        \" Renderable vectors:\",\n        sum(",
         "detail": "main",
         "documentation": {}
     },
@@ -3055,6 +3218,15 @@
         "importPath": "main",
         "description": "main",
         "peekOfCode": "analyzer = DocumentAnalyzer()\nanalyzer.analyze(\n    document\n)\nprint(\n    \"\\nPage profile analysis\"\n)\nfor page in document.pages:\n    profile = page.profile\n    print(",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "document_profile",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "document_profile = document.profile\nprint(\n    \"\\nDocument profile analysis\"\n)\nprint(\n    \" Page count:\",\n    document_profile.page_count,\n)\nprint(\n    \" Dominant page type:\",",
         "detail": "main",
         "documentation": {}
     }

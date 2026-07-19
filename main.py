@@ -22,27 +22,6 @@ document = DocumentMapper.map(
     pdf
 )
 
-print(
-    "\nInitial profile models"
-)
-
-print(
-    "Document profile:",
-    document.profile
-)
-
-for page in document.pages:
-    print(
-        (
-            f"Page {page.number}: "
-            f"{page.profile.page_width:.2f} × "
-            f"{page.profile.page_height:.2f}, "
-            f"rotation={page.profile.rotation}, "
-            f"type={page.profile.page_type.value}, "
-            f"mode={page.profile.recommended_mode.value}"
-        )
-    )
-
 for page in document.pages:
 
     print(
@@ -280,6 +259,126 @@ for page in document.pages:
             "   Text:",
             preview,
         )
+        
+document_profile = document.profile
+
+print(
+    "\nDocument profile analysis"
+)
+
+print(
+    " Page count:",
+    document_profile.page_count,
+)
+
+print(
+    " Dominant page type:",
+    document_profile.dominant_page_type.value,
+)
+
+print(
+    " Recommended mode:",
+    document_profile.recommended_mode.value,
+)
+
+print(
+    " Digital pages:",
+    document_profile.digital_page_count,
+)
+
+print(
+    " Scanned pages:",
+    document_profile.scanned_page_count,
+)
+
+print(
+    " Mixed pages:",
+    document_profile.mixed_page_count,
+)
+
+print(
+    " Page type counts:",
+    document_profile.page_type_counts,
+)
+
+print(
+    " Mode counts:",
+    document_profile.mode_counts,
+)
+
+print(
+    " Contains tables:",
+    document_profile.contains_tables,
+)
+
+print(
+    " Contains charts:",
+    document_profile.contains_charts,
+)
+
+print(
+    " Contains forms:",
+    document_profile.contains_forms,
+)
+
+print(
+    " Contains scanned pages:",
+    document_profile.contains_scanned_pages,
+)
+
+print(
+    " Multiple page sizes:",
+    document_profile.contains_multiple_page_sizes,
+)
+
+print(
+    " Multiple orientations:",
+    document_profile.contains_multiple_orientations,
+)
+
+print(
+    " Requires OCR:",
+    document_profile.requires_ocr,
+)
+
+print(
+    " Requires hybrid conversion:",
+    document_profile.requires_hybrid_conversion,
+)
+
+print(
+    " Confidence:",
+    {
+        "editable": round(
+            document_profile.editable_confidence,
+            3,
+        ),
+        "fixed": round(
+            document_profile.fixed_confidence,
+            3,
+        ),
+        "hybrid": round(
+            document_profile.hybrid_confidence,
+            3,
+        ),
+        "ocr": round(
+            document_profile.ocr_confidence,
+            3,
+        ),
+    },
+)
+
+for reason in document_profile.reasons:
+    print(
+        "  Reason:",
+        reason,
+    )
+
+for warning in document_profile.warnings:
+    print(
+        "  Warning:",
+        warning,
+    )        
 FixedLayoutDocxExporter.export(
     document=document,
     output_path="output/output.docx",

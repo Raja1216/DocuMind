@@ -9,6 +9,9 @@ from src.analyzer.paragraph_region_analyzer import (
 from src.analyzer.page_profile_analyzer import (
     PageProfileAnalyzer,
 )
+from src.analyzer.document_profile_analyzer import (
+    DocumentProfileAnalyzer,
+)
 
 
 class DocumentAnalyzer:
@@ -44,4 +47,7 @@ class DocumentAnalyzer:
         for page in document.pages:
             PageProfileAnalyzer.analyze_page(
                 page
-            )        
+            )
+        DocumentProfileAnalyzer.analyze(
+            document
+        )            
