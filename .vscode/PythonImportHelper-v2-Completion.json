@@ -496,51 +496,19 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -584,46 +552,6 @@
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -641,30 +569,6 @@
     },
     {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -784,6 +688,126 @@
         "documentation": {}
     },
     {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -845,6 +869,22 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
         "documentation": {}
     },
     {
@@ -949,6 +989,22 @@
         "description": "src.adapters.pymupdf.raw_span",
         "isExtraImport": true,
         "detail": "src.adapters.pymupdf.raw_span",
+        "documentation": {}
+    },
+    {
+        "label": "Document",
+        "importPath": "src.models.document",
+        "description": "src.models.document",
+        "isExtraImport": true,
+        "detail": "src.models.document",
+        "documentation": {}
+    },
+    {
+        "label": "Document",
+        "importPath": "src.models.document",
+        "description": "src.models.document",
+        "isExtraImport": true,
+        "detail": "src.models.document",
         "documentation": {}
     },
     {
@@ -1134,6 +1190,22 @@
         "description": "src.models.conversion_policy",
         "isExtraImport": true,
         "detail": "src.models.conversion_policy",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
         "documentation": {}
     },
     {
@@ -1417,6 +1489,22 @@
         "documentation": {}
     },
     {
+        "label": "Bounds",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
+        "label": "RectangleUnion",
+        "importPath": "src.utils.rectangle_union",
+        "description": "src.utils.rectangle_union",
+        "isExtraImport": true,
+        "detail": "src.utils.rectangle_union",
+        "documentation": {}
+    },
+    {
         "label": "RectangleUnion",
         "importPath": "src.utils.rectangle_union",
         "description": "src.utils.rectangle_union",
@@ -1489,6 +1577,14 @@
         "documentation": {}
     },
     {
+        "label": "PageProfileAnalyzer",
+        "importPath": "src.analyzer.page_profile_analyzer",
+        "description": "src.analyzer.page_profile_analyzer",
+        "isExtraImport": true,
+        "detail": "src.analyzer.page_profile_analyzer",
+        "documentation": {}
+    },
+    {
         "label": "DocumentProfileAnalyzer",
         "importPath": "src.analyzer.document_profile_analyzer",
         "description": "src.analyzer.document_profile_analyzer",
@@ -1518,6 +1614,22 @@
         "description": "src.analyzer.conversion_policy_resolver",
         "isExtraImport": true,
         "detail": "src.analyzer.conversion_policy_resolver",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionAnalyzer",
+        "importPath": "src.analyzer.layout_region_analyzer",
+        "description": "src.analyzer.layout_region_analyzer",
+        "isExtraImport": true,
+        "detail": "src.analyzer.layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionAnalyzer",
+        "importPath": "src.analyzer.layout_region_analyzer",
+        "description": "src.analyzer.layout_region_analyzer",
+        "isExtraImport": true,
+        "detail": "src.analyzer.layout_region_analyzer",
         "documentation": {}
     },
     {
@@ -1530,6 +1642,14 @@
     },
     {
         "label": "Counter",
+        "importPath": "collections",
+        "description": "collections",
+        "isExtraImport": true,
+        "detail": "collections",
+        "documentation": {}
+    },
+    {
+        "label": "defaultdict",
         "importPath": "collections",
         "description": "collections",
         "isExtraImport": true,
@@ -1625,11 +1745,11 @@
         "documentation": {}
     },
     {
-        "label": "DocumentProfile",
-        "importPath": "src.models.document_profile",
-        "description": "src.models.document_profile",
+        "label": "median",
+        "importPath": "statistics",
+        "description": "statistics",
         "isExtraImport": true,
-        "detail": "src.models.document_profile",
+        "detail": "statistics",
         "documentation": {}
     },
     {
@@ -1641,75 +1761,61 @@
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "DocumentProfile",
+        "importPath": "src.models.document_profile",
+        "description": "src.models.document_profile",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "src.models.document_profile",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "unicodedata",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "importPath": "unicodedata",
+        "description": "unicodedata",
+        "detail": "unicodedata",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "math",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "ceil",
+        "importPath": "math",
+        "description": "math",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "math",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "isfinite",
+        "importPath": "math",
+        "description": "math",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "math",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
         "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "typing",
         "documentation": {}
     },
     {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
+        "label": "Iterable",
+        "importPath": "typing",
+        "description": "typing",
         "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
-        "documentation": {}
-    },
-    {
-        "label": "Line",
-        "importPath": "src.models.line",
-        "description": "src.models.line",
-        "isExtraImport": true,
-        "detail": "src.models.line",
+        "detail": "typing",
         "documentation": {}
     },
     {
@@ -1758,6 +1864,166 @@
         "description": "typing",
         "isExtraImport": true,
         "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnRegion",
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "isExtraImport": true,
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnRegion",
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "isExtraImport": true,
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnRegion",
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "isExtraImport": true,
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
+        "documentation": {}
+    },
+    {
+        "label": "Line",
+        "importPath": "src.models.line",
+        "description": "src.models.line",
+        "isExtraImport": true,
+        "detail": "src.models.line",
         "documentation": {}
     },
     {
@@ -2153,23 +2419,6 @@
         "documentation": {}
     },
     {
-        "label": "math",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "math",
-        "description": "math",
-        "detail": "math",
-        "documentation": {}
-    },
-    {
-        "label": "isfinite",
-        "importPath": "math",
-        "description": "math",
-        "isExtraImport": true,
-        "detail": "math",
-        "documentation": {}
-    },
-    {
         "label": "Paragraph",
         "importPath": "docx.text.paragraph",
         "description": "docx.text.paragraph",
@@ -2247,6 +2496,14 @@
         "description": "src.mapper.page_mapper",
         "isExtraImport": true,
         "detail": "src.mapper.page_mapper",
+        "documentation": {}
+    },
+    {
+        "label": "PDFMetadata",
+        "importPath": "src.models.metadata",
+        "description": "src.models.metadata",
+        "isExtraImport": true,
+        "detail": "src.models.metadata",
         "documentation": {}
     },
     {
@@ -2547,46 +2804,6 @@
         "documentation": {}
     },
     {
-        "label": "ColumnRegion",
-        "importPath": "src.models.column_region",
-        "description": "src.models.column_region",
-        "isExtraImport": true,
-        "detail": "src.models.column_region",
-        "documentation": {}
-    },
-    {
-        "label": "ColumnRegion",
-        "importPath": "src.models.column_region",
-        "description": "src.models.column_region",
-        "isExtraImport": true,
-        "detail": "src.models.column_region",
-        "documentation": {}
-    },
-    {
-        "label": "LayoutRegion",
-        "importPath": "src.models.layout_region",
-        "description": "src.models.layout_region",
-        "isExtraImport": true,
-        "detail": "src.models.layout_region",
-        "documentation": {}
-    },
-    {
-        "label": "LayoutRegion",
-        "importPath": "src.models.layout_region",
-        "description": "src.models.layout_region",
-        "isExtraImport": true,
-        "detail": "src.models.layout_region",
-        "documentation": {}
-    },
-    {
-        "label": "LayoutRegionType",
-        "importPath": "src.models.layout_region",
-        "description": "src.models.layout_region",
-        "isExtraImport": true,
-        "detail": "src.models.layout_region",
-        "documentation": {}
-    },
-    {
         "label": "ParagraphStyle",
         "importPath": "src.models.paragraph_style",
         "description": "src.models.paragraph_style",
@@ -2666,6 +2883,14 @@
         "importPath": "unittest",
         "description": "unittest",
         "detail": "unittest",
+        "documentation": {}
+    },
+    {
+        "label": "SimpleNamespace",
+        "importPath": "types",
+        "description": "types",
+        "isExtraImport": true,
+        "detail": "types",
         "documentation": {}
     },
     {
@@ -2796,6 +3021,33 @@
         "description": "src.analyzer.layout_analyzer",
         "peekOfCode": "class LayoutAnalyzer:\n    \"\"\"\n    Analyze the spatial relationship between text blocks.\n    \"\"\"\n    @staticmethod\n    def vertical_gap(\n        current: TextBlock,\n        next_block: TextBlock,\n    ) -> float:\n        \"\"\"",
         "detail": "src.analyzer.layout_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "_ParagraphItem",
+        "kind": 6,
+        "importPath": "src.analyzer.layout_region_analyzer",
+        "description": "src.analyzer.layout_region_analyzer",
+        "peekOfCode": "class _ParagraphItem:\n    \"\"\"\n    Normalized paragraph geometry used internally by the\n    layout analyzer.\n    \"\"\"\n    number: int\n    paragraph: Any\n    bbox: Bounds\n    text: str\n    @property",
+        "detail": "src.analyzer.layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "_BandCandidate",
+        "kind": 6,
+        "importPath": "src.analyzer.layout_region_analyzer",
+        "description": "src.analyzer.layout_region_analyzer",
+        "peekOfCode": "class _BandCandidate:\n    \"\"\"\n    Possible repeated header or footer paragraph.\n    \"\"\"\n    page_number: int\n    paragraph_number: int\n    band: str\n    signature: str\n    horizontal_bucket: int\n    relative_center_y: float",
+        "detail": "src.analyzer.layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionAnalyzer",
+        "kind": 6,
+        "importPath": "src.analyzer.layout_region_analyzer",
+        "description": "src.analyzer.layout_region_analyzer",
+        "peekOfCode": "class LayoutRegionAnalyzer:\n    \"\"\"\n    Detects page-level layout containers.\n    Current responsibilities:\n        repeated headers;\n        repeated footers;\n        sequential page-number footers;\n        page-body region;\n        strong paragraph columns.\n    This analyzer does not determine final reading order or",
+        "detail": "src.analyzer.layout_region_analyzer",
         "documentation": {}
     },
     {
@@ -3435,6 +3687,42 @@
         "description": "tests.test_document_profile_analyzer",
         "peekOfCode": "def make_page(\n    number: int,\n    width: float = 612.0,\n    height: float = 792.0,\n    page_type: PageType = PageType.SIMPLE_TEXT,\n    mode: ConversionMode = ConversionMode.EDITABLE,\n    has_text: bool = True,\n    requires_ocr: bool = False,\n) -> Page:\n    \"\"\"",
         "detail": "tests.test_document_profile_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionAnalyzerTests",
+        "kind": 6,
+        "importPath": "tests.test_layout_region_analyzer",
+        "description": "tests.test_layout_region_analyzer",
+        "peekOfCode": "class LayoutRegionAnalyzerTests(\n    unittest.TestCase\n):\n    def test_repeated_header_and_page_number_footer(\n        self,\n    ) -> None:\n        document = make_document()\n        for page_number in range(\n            1,\n            4,",
+        "detail": "tests.test_layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "make_document",
+        "kind": 2,
+        "importPath": "tests.test_layout_region_analyzer",
+        "description": "tests.test_layout_region_analyzer",
+        "peekOfCode": "def make_document() -> Document:\n    return Document(\n        metadata=PDFMetadata()\n    )\ndef make_page(\n    number: int,\n    width: float = 612.0,\n    height: float = 792.0,\n) -> Page:\n    return Page(",
+        "detail": "tests.test_layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "make_page",
+        "kind": 2,
+        "importPath": "tests.test_layout_region_analyzer",
+        "description": "tests.test_layout_region_analyzer",
+        "peekOfCode": "def make_page(\n    number: int,\n    width: float = 612.0,\n    height: float = 792.0,\n) -> Page:\n    return Page(\n        number=number,\n        bbox=Rectangle(\n            left=0.0,\n            top=0.0,",
+        "detail": "tests.test_layout_region_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "add_paragraph",
+        "kind": 2,
+        "importPath": "tests.test_layout_region_analyzer",
+        "description": "tests.test_layout_region_analyzer",
+        "peekOfCode": "def add_paragraph(\n    page: Page,\n    number: int,\n    text: str,\n    left: float,\n    top: float,\n    right: float,\n    bottom: float,\n    font_size: float = 12.0,\n) -> None:",
+        "detail": "tests.test_layout_region_analyzer",
         "documentation": {}
     },
     {

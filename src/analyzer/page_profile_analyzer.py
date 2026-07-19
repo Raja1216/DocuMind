@@ -13,6 +13,9 @@ from src.utils.rectangle_union import (
     Bounds,
     RectangleUnion,
 )
+from src.models.layout_region import (
+    LayoutRegionType,
+)
 
 
 class PageProfileAnalyzer:
@@ -139,6 +142,24 @@ class PageProfileAnalyzer:
         )
 
         page.profile = profile
+        layout_region_types = {
+            region.region_type
+            for region in getattr(
+                page,
+                "layout_regions",
+                [],
+            )
+        }
+
+        profile.has_header = (
+            LayoutRegionType.HEADER
+            in layout_region_types
+        )
+
+        profile.has_footer = (
+            LayoutRegionType.FOOTER
+            in layout_region_types
+        )
 
         text_rectangles = (
             cls._collect_text_rectangles(
@@ -315,12 +336,32 @@ class PageProfileAnalyzer:
             >= cls.OCR_MINIMUM_IMAGE_COVERAGE
         )
 
-        profile.column_count = (
-            cls._estimate_column_count(
-                page=page,
-                page_bounds=page_bounds,
+        detected_column_regions = list(
+            getattr(
+                page,
+                "column_regions",
+                [],
             )
+            or []
         )
+
+        if detected_column_regions:
+            profile.column_count = max(
+                len(
+                    detected_column_regions
+                ),
+                1,
+            )
+
+        else:
+            # Fallback remains available when the dedicated layout
+            # analyzer has not run.
+            profile.column_count = (
+                cls._estimate_column_count(
+                    page=page,
+                    page_bounds=page_bounds,
+                )
+            )
 
         (
             maximum_font_size,
@@ -1077,12 +1118,13 @@ class PageProfileAnalyzer:
                 )
             )
 
-            profile.add_warning(
-                (
-                    "Column count is provisional until "
-                    "the dedicated column engine runs."
+            if profile.column_count >= 2:
+                profile.add_reason(
+                    (
+                        "The dedicated layout analyzer detected "
+                        f"{profile.column_count} content columns."
+                    )
                 )
-            )
 
         if profile.requires_ocr:
             profile.add_reason(
@@ -1123,6 +1165,22 @@ class PageProfileAnalyzer:
                     f"median={median_font_size:.2f}."
                 )
             )
+            
+        if profile.has_header:
+            profile.add_reason(
+                (
+                    "A repeated header region was "
+                    "detected across document pages."
+                )
+            )
+
+        if profile.has_footer:
+            profile.add_reason(
+                (
+                    "A repeated footer region was "
+                    "detected across document pages."
+                )
+            )   
 
     @classmethod
     def _estimate_column_count(

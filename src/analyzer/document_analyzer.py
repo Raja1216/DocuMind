@@ -15,6 +15,9 @@ from src.analyzer.document_profile_analyzer import (
 from src.analyzer.conversion_policy_resolver import (
     ConversionPolicyResolver,
 )
+from src.analyzer.layout_region_analyzer import (
+    LayoutRegionAnalyzer,
+)
 
 
 class DocumentAnalyzer:
@@ -42,6 +45,10 @@ class DocumentAnalyzer:
             )
 
         ParagraphStyleAnalyzer.analyze(
+            document
+        )
+        
+        LayoutRegionAnalyzer.analyze(
             document
         )
 

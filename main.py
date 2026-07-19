@@ -81,77 +81,77 @@ for page in document.pages:
     )
 
     policy = page.conversion_policy
-    
+
     if policy is None:
         print(
             " Conversion policy: unavailable"
         )
-    
+
     else:
         print(
             " Conversion policy"
         )
-    
+
         print(
             "  Mode:",
             policy.mode.value,
         )
-    
+
         print(
             "  Text paragraphs:",
             policy.export_text_as_paragraphs,
         )
-    
+
         print(
             "  Word lists:",
             policy.export_lists_as_word_lists,
         )
-    
+
         print(
             "  Word tables:",
             policy.export_tables_as_word_tables,
         )
-    
+
         print(
             "  Form controls:",
             policy.export_forms_as_controls,
         )
-    
+
         print(
             "  Images:",
             policy.export_images_as_images,
         )
-    
+
         print(
             "  Vector images:",
             policy.export_vectors_as_images,
         )
-    
+
         print(
             "  Chart images:",
             policy.export_charts_as_images,
         )
-    
+
         print(
             "  Run OCR:",
             policy.run_ocr,
         )
-    
+
         print(
             "  Include OCR text:",
             policy.include_ocr_text,
         )
-    
+
         print(
             "  Full-page image:",
             policy.use_full_page_image,
         )
-    
+
         print(
             "  Region fallback:",
             policy.allow_region_image_fallback,
         )
-    
+
         print(
             "  Confidence:",
             round(
@@ -159,12 +159,12 @@ for page in document.pages:
                 3,
             ),
         )
-    
+
         print(
             "  Reason:",
             policy.reason,
         )
-    
+
         for warning in policy.warnings:
             print(
                 "   Warning:",
@@ -177,6 +177,53 @@ for page in document.pages:
     print(
         f"\nPage {page.number}"
     )
+    
+    print(
+        " Layout regions:",
+        len(
+            page.layout_regions
+        ),
+    )
+    
+    for region in page.layout_regions:
+        print(
+            (
+                f"  Region {region.region_id}: "
+                f"{region.region_type.value}, "
+                f"bbox=("
+                f"{region.left:.2f}, "
+                f"{region.top:.2f}, "
+                f"{region.right:.2f}, "
+                f"{region.bottom:.2f}), "
+                f"paragraphs="
+                f"{region.paragraph_region_numbers}, "
+                f"confidence="
+                f"{region.confidence:.3f}"
+            )
+        )
+    
+    print(
+        " Column regions:",
+        len(
+            page.column_regions
+        ),
+    )
+    
+    for column in page.column_regions:
+        print(
+            (
+                f"  Column {column.column_index + 1}: "
+                f"bbox=("
+                f"{column.left:.2f}, "
+                f"{column.top:.2f}, "
+                f"{column.right:.2f}, "
+                f"{column.bottom:.2f}), "
+                f"paragraphs="
+                f"{column.paragraph_region_numbers}, "
+                f"confidence="
+                f"{column.confidence:.3f}"
+            )
+        )
 
     print(
         " Type:",
