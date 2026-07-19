@@ -14,6 +14,7 @@ from src.models.vector_graphic_region import (
 from src.models.paragraph_region import (
     ParagraphRegion,
 )
+from src.models.page_profile import PageProfile
 
 
 @dataclass(slots=True)
@@ -47,3 +48,4 @@ class Page:
     paragraph_regions: list[ParagraphRegion] = field(
         default_factory=list
     )
+    profile: PageProfile | None = None
