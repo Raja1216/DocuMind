@@ -20,6 +20,13 @@ from src.models.page_profile import (
 from src.models.conversion_policy import (
     ConversionPolicy,
 )
+from src.models.column_region import (
+    ColumnRegion,
+)
+
+from src.models.layout_region import (
+    LayoutRegion,
+)
 
 
 @dataclass(slots=True)
@@ -51,6 +58,17 @@ class Page:
         default_factory=list
     )
     paragraph_regions: list[ParagraphRegion] = field(
+        default_factory=list
+    )
+    layout_regions: list[
+        LayoutRegion
+    ] = field(
+        default_factory=list
+    )
+    
+    column_regions: list[
+        ColumnRegion
+    ] = field(
         default_factory=list
     )
     profile: PageProfile = field(

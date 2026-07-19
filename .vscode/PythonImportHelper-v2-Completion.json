@@ -472,59 +472,27 @@
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
         "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
+        "detail": "__future__",
         "documentation": {}
     },
     {
@@ -560,30 +528,6 @@
         "documentation": {}
     },
     {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -601,14 +545,6 @@
     },
     {
         "label": "dataclass",
-        "importPath": "dataclasses",
-        "description": "dataclasses",
-        "isExtraImport": true,
-        "detail": "dataclasses",
-        "documentation": {}
-    },
-    {
-        "label": "field",
         "importPath": "dataclasses",
         "description": "dataclasses",
         "isExtraImport": true,
@@ -728,6 +664,126 @@
         "documentation": {}
     },
     {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "field",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "dataclass",
+        "importPath": "dataclasses",
+        "description": "dataclasses",
+        "isExtraImport": true,
+        "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
         "label": "dataclass",
         "importPath": "dataclasses",
         "description": "dataclasses",
@@ -789,6 +845,30 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
+        "documentation": {}
+    },
+    {
+        "label": "Rectangle",
+        "importPath": "src.models.geometry.rectangle",
+        "description": "src.models.geometry.rectangle",
+        "isExtraImport": true,
+        "detail": "src.models.geometry.rectangle",
         "documentation": {}
     },
     {
@@ -1054,6 +1134,14 @@
         "description": "src.models.conversion_policy",
         "isExtraImport": true,
         "detail": "src.models.conversion_policy",
+        "documentation": {}
+    },
+    {
+        "label": "Page",
+        "importPath": "src.models.page",
+        "description": "src.models.page",
+        "isExtraImport": true,
+        "detail": "src.models.page",
         "documentation": {}
     },
     {
@@ -2387,6 +2475,14 @@
         "documentation": {}
     },
     {
+        "label": "Enum",
+        "importPath": "enum",
+        "description": "enum",
+        "isExtraImport": true,
+        "detail": "enum",
+        "documentation": {}
+    },
+    {
         "label": "BaseElement",
         "importPath": "src.models.base_element",
         "description": "src.models.base_element",
@@ -2448,6 +2544,46 @@
         "description": "src.models.document_statistics",
         "isExtraImport": true,
         "detail": "src.models.document_statistics",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnRegion",
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "isExtraImport": true,
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
+        "label": "ColumnRegion",
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "isExtraImport": true,
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "isExtraImport": true,
+        "detail": "src.models.layout_region",
         "documentation": {}
     },
     {
@@ -2978,6 +3114,15 @@
         "documentation": {}
     },
     {
+        "label": "ColumnRegion",
+        "kind": 6,
+        "importPath": "src.models.column_region",
+        "description": "src.models.column_region",
+        "peekOfCode": "class ColumnRegion:\n    \"\"\"\n    Represents one detected content column.\n    A column is measured relative to its containing layout\n    region, not necessarily relative to the complete page.\n    \"\"\"\n    column_id: int\n    page_number: int\n    # Zero-based horizontal position:\n    #",
+        "detail": "src.models.column_region",
+        "documentation": {}
+    },
+    {
         "label": "ConversionPolicy",
         "kind": 6,
         "importPath": "src.models.conversion_policy",
@@ -3020,6 +3165,24 @@
         "description": "src.models.image",
         "peekOfCode": "class Image(BaseElement):\n    \"\"\"\n    Represents one raster image displayed on a PDF page.\n    \"\"\"\n    block_number: int\n    image_bytes: bytes\n    extension: str\n    pixel_width: int\n    pixel_height: int\n    x_resolution: int",
         "detail": "src.models.image",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionType",
+        "kind": 6,
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "peekOfCode": "class LayoutRegionType(str, Enum):\n    \"\"\"\n    Semantic type of one page-layout container.\n    A LayoutRegion represents a containing area rather than\n    an individual paragraph or text span.\n    \"\"\"\n    PAGE_BODY = \"page_body\"\n    HEADER = \"header\"\n    FOOTER = \"footer\"\n    COLUMN = \"column\"",
+        "detail": "src.models.layout_region",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegion",
+        "kind": 6,
+        "importPath": "src.models.layout_region",
+        "description": "src.models.layout_region",
+        "peekOfCode": "class LayoutRegion:\n    \"\"\"\n    Represents one semantic container on a PDF page.\n    Examples:\n        page body\n        header\n        footer\n        column\n        sidebar\n        table area",
+        "detail": "src.models.layout_region",
         "documentation": {}
     },
     {
@@ -3272,6 +3435,15 @@
         "description": "tests.test_document_profile_analyzer",
         "peekOfCode": "def make_page(\n    number: int,\n    width: float = 612.0,\n    height: float = 792.0,\n    page_type: PageType = PageType.SIMPLE_TEXT,\n    mode: ConversionMode = ConversionMode.EDITABLE,\n    has_text: bool = True,\n    requires_ocr: bool = False,\n) -> Page:\n    \"\"\"",
         "detail": "tests.test_document_profile_analyzer",
+        "documentation": {}
+    },
+    {
+        "label": "LayoutRegionModelTests",
+        "kind": 6,
+        "importPath": "tests.test_layout_region_models",
+        "description": "tests.test_layout_region_models",
+        "peekOfCode": "class LayoutRegionModelTests(\n    unittest.TestCase\n):\n    def test_layout_region_geometry(\n        self,\n    ) -> None:\n        region = LayoutRegion(\n            region_id=1,\n            page_number=2,\n            region_type=(",
+        "detail": "tests.test_layout_region_models",
         "documentation": {}
     },
     {
