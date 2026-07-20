@@ -5,6 +5,10 @@ from dataclasses import dataclass, field
 from src.models.base_element import BaseElement
 from src.models.line import Line
 from src.models.paragraph_style import ParagraphStyle
+from src.models.paragraph_alignment import (
+    AlignmentReferenceType,
+    ParagraphAlignment,
+)
 
 
 @dataclass(slots=True)
@@ -48,6 +52,18 @@ class ParagraphRegion(BaseElement):
     column_id: int | None = None
     
     reading_order: int | None = None
+    
+    detected_alignment: ParagraphAlignment = (
+        ParagraphAlignment.UNKNOWN
+    )
+    
+    alignment_confidence: float = 0.0
+    
+    alignment_reference_type: AlignmentReferenceType = (
+        AlignmentReferenceType.UNKNOWN
+    )
+    
+    alignment_reference_id: int | None = None
 
     @property
     def width(self) -> float:

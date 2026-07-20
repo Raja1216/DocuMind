@@ -31,6 +31,9 @@ from src.models.reading_order import (
     ReadingDirection,
     ReadingOrderEntry,
 )
+from src.models.paragraph_alignment import (
+    ParagraphAlignmentResult,
+)
 
 
 @dataclass(slots=True)
@@ -80,7 +83,11 @@ class Page:
     ] = field(
         default_factory=list
     )
-    
+    paragraph_alignment_results: list[
+        ParagraphAlignmentResult
+    ] = field(
+        default_factory=list
+    )
     reading_direction: ReadingDirection = (
         ReadingDirection.LEFT_TO_RIGHT
     )
