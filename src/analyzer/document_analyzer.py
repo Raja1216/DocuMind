@@ -18,7 +18,9 @@ from src.analyzer.conversion_policy_resolver import (
 from src.analyzer.layout_region_analyzer import (
     LayoutRegionAnalyzer,
 )
-
+from src.analyzer.reading_order_analyzer import (
+    ReadingOrderAnalyzer,
+)
 
 class DocumentAnalyzer:
 
@@ -49,6 +51,10 @@ class DocumentAnalyzer:
         )
         
         LayoutRegionAnalyzer.analyze(
+            document
+        )
+        
+        ReadingOrderAnalyzer.analyze(
             document
         )
 

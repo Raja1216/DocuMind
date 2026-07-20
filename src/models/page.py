@@ -27,6 +27,10 @@ from src.models.column_region import (
 from src.models.layout_region import (
     LayoutRegion,
 )
+from src.models.reading_order import (
+    ReadingDirection,
+    ReadingOrderEntry,
+)
 
 
 @dataclass(slots=True)
@@ -70,6 +74,15 @@ class Page:
         ColumnRegion
     ] = field(
         default_factory=list
+    )
+    reading_order_entries: list[
+        ReadingOrderEntry
+    ] = field(
+        default_factory=list
+    )
+    
+    reading_direction: ReadingDirection = (
+        ReadingDirection.LEFT_TO_RIGHT
     )
     profile: PageProfile = field(
         init=False

@@ -42,6 +42,12 @@ class ParagraphRegion(BaseElement):
     content_left: float | None = None
     list_marker_left: float | None = None
     list_marker_right: float | None = None
+    
+    layout_region_id: int | None = None
+
+    column_id: int | None = None
+    
+    reading_order: int | None = None
 
     @property
     def width(self) -> float:
