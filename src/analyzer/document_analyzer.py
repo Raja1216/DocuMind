@@ -21,6 +21,12 @@ from src.analyzer.layout_region_analyzer import (
 from src.analyzer.reading_order_analyzer import (
     ReadingOrderAnalyzer,
 )
+from src.analyzer.paragraph_alignment_analyzer import (
+    ParagraphAlignmentAnalyzer,
+)
+from src.analyzer.alignment_validation_analyzer import (
+    AlignmentValidationAnalyzer,
+)
 
 class DocumentAnalyzer:
 
@@ -55,6 +61,14 @@ class DocumentAnalyzer:
         )
         
         ReadingOrderAnalyzer.analyze(
+            document
+        )
+        
+        ParagraphAlignmentAnalyzer.analyze(
+            document
+        )
+
+        AlignmentValidationAnalyzer.analyze(
             document
         )
 

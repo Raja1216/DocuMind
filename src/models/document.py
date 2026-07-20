@@ -6,6 +6,9 @@ from src.models.document_statistics import DocumentStatistics
 from src.models.document_profile import (
     DocumentProfile,
 )
+from src.models.alignment_validation import (
+    AlignmentValidationReport,
+)
 
 
 @dataclass(slots=True)
@@ -22,4 +25,9 @@ class Document:
     )
     profile: DocumentProfile = field(
         default_factory=DocumentProfile
+    )
+    alignment_validation_report: (
+        AlignmentValidationReport
+    ) = field(
+        default_factory=AlignmentValidationReport
     )
