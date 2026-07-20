@@ -1,0 +1,126 @@
+{
+  "page_count": 4,
+  "paragraph_count": 61,
+  "result_count": 61,
+  "alignment_counts": {
+    "center": 1,
+    "justify": 2,
+    "left": 57,
+    "right": 1
+  },
+  "reference_counts": {
+    "footer": 8,
+    "page_body": 53
+  },
+  "average_confidence": 0.7865649161348504,
+  "minimum_confidence": 0.6772283375925148,
+  "low_confidence_count": 0,
+  "unknown_count": 0,
+  "warning_count": 1,
+  "error_count": 0,
+  "passed": true,
+  "page_summaries": [
+    {
+      "page_number": 1,
+      "paragraph_count": 8,
+      "result_count": 8,
+      "alignment_counts": {
+        "center": 1,
+        "justify": 2,
+        "left": 5
+      },
+      "reference_counts": {
+        "footer": 2,
+        "page_body": 6
+      },
+      "average_confidence": 0.809664089852285,
+      "minimum_confidence": 0.6772283375925148,
+      "low_confidence_count": 0,
+      "unknown_count": 0,
+      "warning_count": 0,
+      "error_count": 0,
+      "passed": true
+    },
+    {
+      "page_number": 2,
+      "paragraph_count": 30,
+      "result_count": 30,
+      "alignment_counts": {
+        "left": 29,
+        "right": 1
+      },
+      "reference_counts": {
+        "footer": 2,
+        "page_body": 28
+      },
+      "average_confidence": 0.7891378531407388,
+      "minimum_confidence": 0.7,
+      "low_confidence_count": 0,
+      "unknown_count": 0,
+      "warning_count": 0,
+      "error_count": 0,
+      "passed": true
+    },
+    {
+      "page_number": 3,
+      "paragraph_count": 14,
+      "result_count": 14,
+      "alignment_counts": {
+        "left": 14
+      },
+      "reference_counts": {
+        "footer": 2,
+        "page_body": 12
+      },
+      "average_confidence": 0.7810727195062477,
+      "minimum_confidence": 0.7,
+      "low_confidence_count": 0,
+      "unknown_count": 0,
+      "warning_count": 0,
+      "error_count": 0,
+      "passed": true
+    },
+    {
+      "page_number": 4,
+      "paragraph_count": 9,
+      "result_count": 9,
+      "alignment_counts": {
+        "left": 9
+      },
+      "reference_counts": {
+        "footer": 2,
+        "page_body": 7
+      },
+      "average_confidence": 0.7659992775664402,
+      "minimum_confidence": 0.7,
+      "low_confidence_count": 0,
+      "unknown_count": 0,
+      "warning_count": 1,
+      "error_count": 0,
+      "passed": true
+    }
+  ],
+  "issues": [
+    {
+      "page_number": 4,
+      "code": "left_geometry_conflict",
+      "severity": "warning",
+      "message": "Left alignment appears to be right-anchored geometrically.",
+      "paragraph_region_number": 7,
+      "metrics": {
+        "alignment": "left",
+        "confidence": 0.7059264557714338,
+        "reference_type": "page_body",
+        "reference_id": 2,
+        "left_gap": 24.118500823974607,
+        "right_gap": 6.1200000000000045,
+        "center_offset": 8.999250411987305,
+        "width_ratio": 0.9357386346005719,
+        "line_count": 1,
+        "last_line_width_ratio": 0.9357386346005719,
+        "last_line_relative_width": 1.0,
+        "has_hanging_indent": false
+      }
+    }
+  ]
+}

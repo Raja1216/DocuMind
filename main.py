@@ -9,12 +9,19 @@ from src.parser.pdf_reader import PDFReader
 from src.exporter.docx_exporter import (
     DocxExporter,
 )
+from src.exporter.editable_layout_resolver import (
+    EditableLayoutResolver,
+)
+
+from src.utils.alignment_validation_report_writer import (
+    AlignmentValidationReportWriter,
+)
 
 
 reader = PDFReader()
 
 pdf = reader.open(
-    "samples/pdf/spdf1.pdf"
+    "samples/pdf/spdf3.pdf"
     # "samples/BirlaPDF/Class-4-Print31 1.pdf"
 )
 
@@ -62,6 +69,88 @@ analyzer = DocumentAnalyzer()
 
 analyzer.analyze(
     document
+)
+
+alignment_report_path = (
+    AlignmentValidationReportWriter
+    .write(
+        report=(
+            document
+            .alignment_validation_report
+        ),
+
+        output_path=(
+            "output/"
+            "alignment_validation_report.json"
+        ),
+    )
+)
+
+alignment_report = (
+    document
+    .alignment_validation_report
+)
+
+print(
+    "\nAlignment validation"
+)
+
+print(
+    " Passed:",
+    alignment_report.passed,
+)
+
+print(
+    " Paragraphs:",
+    alignment_report.paragraph_count,
+)
+
+print(
+    " Results:",
+    alignment_report.result_count,
+)
+
+print(
+    " Alignment counts:",
+    alignment_report.alignment_counts,
+)
+
+print(
+    " Reference counts:",
+    alignment_report.reference_counts,
+)
+
+print(
+    " Average confidence:",
+    round(
+        alignment_report.average_confidence,
+        3,
+    ),
+)
+
+print(
+    " Unknown:",
+    alignment_report.unknown_count,
+)
+
+print(
+    " Low confidence:",
+    alignment_report.low_confidence_count,
+)
+
+print(
+    " Warnings:",
+    alignment_report.warning_count,
+)
+
+print(
+    " Errors:",
+    alignment_report.error_count,
+)
+
+print(
+    " Report:",
+    alignment_report_path,
 )
 
 print(
@@ -528,7 +617,78 @@ for warning in document_profile.warnings:
     print(
         "  Warning:",
         warning,
-    )        
+    )
+    
+print(
+    "\nEditable DOCX layout plan"
+)
+
+for page in document.pages:
+    paragraph_plans = (
+        EditableLayoutResolver
+        .build_page_plan(
+            page=page,
+
+            validation_report=(
+                document
+                .alignment_validation_report
+            ),
+        )
+    )
+
+    print(
+        f"\nPage {page.number}"
+    )
+
+    for paragraph_plan in paragraph_plans:
+        text = str(
+            getattr(
+                paragraph_plan.paragraph,
+                "text",
+                "",
+            )
+        ).replace(
+            "\n",
+            " ",
+        )
+
+        if len(text) > 70:
+            text = (
+                text[:67]
+                + "..."
+            )
+
+        if (
+            paragraph_plan.word_alignment
+            is None
+        ):
+            word_alignment = "default"
+
+        else:
+            word_alignment = str(
+                paragraph_plan
+                .word_alignment
+            )
+
+        print(
+            (
+                f" Order "
+                f"{paragraph_plan.reading_order}: "
+                f"paragraph="
+                f"{paragraph_plan.paragraph_region_number}, "
+                f"role="
+                f"{paragraph_plan.role.value}, "
+                f"detected="
+                f"{paragraph_plan.detected_alignment.value}, "
+                f"confidence="
+                f"{paragraph_plan.alignment_confidence:.3f}, "
+                f"word_alignment="
+                f"{word_alignment}, "
+                f"apply="
+                f"{paragraph_plan.apply_alignment}, "
+                f"text={text}"
+            )
+        )            
 FixedLayoutDocxExporter.export(
     document=document,
     output_path="output/output.docx",

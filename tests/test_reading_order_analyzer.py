@@ -297,8 +297,8 @@ class ReadingOrderAnalyzerTests(
             ],
             [
                 ReadingOrderRole.HEADER,
-                ReadingOrderRole.COLUMN,
-                ReadingOrderRole.COLUMN,
+                ReadingOrderRole.BODY,
+                ReadingOrderRole.BODY,
                 ReadingOrderRole.FOOTER,
             ],
         )

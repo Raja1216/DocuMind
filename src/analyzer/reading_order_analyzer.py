@@ -400,7 +400,7 @@ class ReadingOrderAnalyzer:
             page.column_regions
         )
 
-        if not columns:
+        if len(columns) <= 1:
             return [
                 _ResolvedNode(
                     node=node,

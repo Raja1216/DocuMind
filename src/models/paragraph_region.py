@@ -9,7 +9,10 @@ from src.models.paragraph_alignment import (
     AlignmentReferenceType,
     ParagraphAlignment,
 )
-
+from src.models.list_item import (
+    ListMarkerKind,
+    ListMarkerSource,
+)
 
 @dataclass(slots=True)
 class ParagraphRegion(BaseElement):
@@ -40,6 +43,19 @@ class ParagraphRegion(BaseElement):
     list_type: str | None = None
     list_marker: str | None = None
     list_level: int = 0
+
+    list_marker_kind: ListMarkerKind = (
+        ListMarkerKind.UNKNOWN
+    )
+    
+    list_marker_source: ListMarkerSource = (
+        ListMarkerSource.UNKNOWN
+    )
+    
+    list_confidence: float = 0.0
+    
+    list_sequence_id: int | None = None
+    list_item_index: int | None = None
 
     # Left position where the actual list-item content starts,
     # excluding a number such as "1.".

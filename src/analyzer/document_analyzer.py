@@ -27,6 +27,12 @@ from src.analyzer.paragraph_alignment_analyzer import (
 from src.analyzer.alignment_validation_analyzer import (
     AlignmentValidationAnalyzer,
 )
+from src.analyzer.list_item_analyzer import (
+    ListItemAnalyzer,
+)
+from src.analyzer.list_sequence_analyzer import (
+    ListSequenceAnalyzer,
+)
 
 class DocumentAnalyzer:
 
@@ -61,6 +67,14 @@ class DocumentAnalyzer:
         )
         
         ReadingOrderAnalyzer.analyze(
+            document
+        )
+        
+        ListItemAnalyzer.analyze(
+            document
+        )
+        
+        ListSequenceAnalyzer.analyze(
             document
         )
         

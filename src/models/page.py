@@ -34,7 +34,12 @@ from src.models.reading_order import (
 from src.models.paragraph_alignment import (
     ParagraphAlignmentResult,
 )
-
+from src.models.list_item import (
+    ListItemResult,
+)
+from src.models.list_sequence import (
+    ListSequence,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -65,6 +70,16 @@ class Page:
         default_factory=list
     )
     paragraph_regions: list[ParagraphRegion] = field(
+        default_factory=list
+    )
+    list_item_results: list[
+        ListItemResult
+    ] = field(
+        default_factory=list
+    )
+    list_sequences: list[
+        ListSequence
+    ] = field(
         default_factory=list
     )
     layout_regions: list[

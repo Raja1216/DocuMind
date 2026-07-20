@@ -531,8 +531,22 @@ class AlignmentValidationAnalyzer:
             )
 
         elif role == ReadingOrderRole.COLUMN:
+            is_true_multi_column_page = (
+                len(
+                    getattr(
+                        page,
+                        "column_regions",
+                        [],
+                    )
+                    or []
+                )
+                >= 2
+            )
+        
             expected_reference = (
                 AlignmentReferenceType.COLUMN
+                if is_true_multi_column_page
+                else AlignmentReferenceType.PAGE_BODY
             )
 
         elif (

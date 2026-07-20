@@ -7,11 +7,6 @@ from docx.shared import Pt
 
 from src.exporter.builders.run_builder import RunBuilder
 from src.models.enums.block_type import BlockType
-from docx.enum.text import (
-    WD_ALIGN_PARAGRAPH,
-    WD_BREAK,
-    WD_LINE_SPACING,
-)
 
 from docx.oxml.ns import qn
 from src.exporter.font_name_resolver import (
@@ -36,7 +31,37 @@ from docx.enum.text import (
     WD_LINE_SPACING,
     WD_TAB_ALIGNMENT,
 )
+from docx.text.paragraph import (
+    Paragraph,
+)
 
+from src.exporter.editable_layout_resolver import (
+    EditableLayoutResolver,
+    EditableParagraphPlan,
+)
+
+from src.models.page_profile import (
+    PageType,
+)
+from src.models.layout_region import (
+    LayoutRegionType,
+)
+
+from src.models.paragraph_alignment import (
+    ParagraphAlignment,
+)
+
+from src.exporter.header_footer_resolver import (
+    HeaderFooterResolver,
+    PageNumberFieldPlan,
+)
+
+from src.models.reading_order import (
+    ReadingOrderRole,
+)
+from src.models.list_item import (
+    ListMarkerSource,
+)
 
 class DocxExporter:
     """
@@ -89,36 +114,556 @@ class DocxExporter:
     CAPTION_SPACING_BEFORE = 12.0
 
     @staticmethod
-    def export(document, output_path: str) -> None:
+    def export(
+        document,
+        output_path: str,
+    ) -> None:
         word_document = WordDocument()
-        numbering_manager = WordNumberingManager(
-            word_document
-        )
-        
-        for page_index, page in enumerate(document.pages):
 
-            section = DocxExporter._prepare_page_section(
-                word_document=word_document,
-                page_index=page_index,
+        numbering_manager = (
+            WordNumberingManager(
+                word_document
             )
+        )
+
+        pages = list(
+            document.pages
+        )
+
+        if not pages:
+            word_document.save(
+                output_path
+            )
+            return
+
+        page_groups = (
+            DocxExporter
+            ._group_pages_by_section_template(
+                pages
+            )
+        )
+
+        for group_index, page_group in enumerate(
+            page_groups
+        ):
+            if group_index == 0:
+                section = (
+                    word_document.sections[0]
+                )
+
+            else:
+                section = (
+                    word_document.add_section(
+                        WD_SECTION.NEW_PAGE
+                    )
+                )
 
             DocxExporter._configure_page_geometry(
                 section=section,
-                page=page,
+                page=page_group[0],
             )
 
-            DocxExporter._configure_page_margins(
+            DocxExporter._configure_page_group_margins(
                 section=section,
-                page=page,
+                pages=page_group,
+            )
+            
+            DocxExporter._render_section_header_footer(
+                section=section,
+                page=page_group[0],
+                validation_report=getattr(
+                    document,
+                    "alignment_validation_report",
+                    None,
+                ),
             )
 
-            DocxExporter._render_page(
-                word_document=word_document,
+            for page in page_group:
+                DocxExporter._render_page(
+                    word_document=word_document,
+                    page=page,
+                    numbering_manager=(
+                        numbering_manager
+                    ),
+                    validation_report=getattr(
+                        document,
+                        "alignment_validation_report",
+                        None,
+                    ),
+                )
+
+        word_document.save(
+            output_path
+        )
+
+    @staticmethod
+    def _render_section_header_footer(
+        section,
+        page,
+        validation_report=None,
+    ) -> None:
+        """
+        Export detected PDF header/footer paragraphs into real
+        Word section headers and footers.
+        """
+
+        header_footer_plan = (
+            HeaderFooterResolver.build(
                 page=page,
-                numbering_manager=numbering_manager,
+                validation_report=(
+                    validation_report
+                ),
+            )
+        )
+
+        section.header.is_linked_to_previous = (
+            False
+        )
+
+        section.footer.is_linked_to_previous = (
+            False
+        )
+
+        DocxExporter._render_story_plans(
+            story=section.header,
+            paragraph_plans=(
+                header_footer_plan.header_plans
+            ),
+            page_number_fields=(
+                header_footer_plan
+                .page_number_fields
+            ),
+        )
+
+        DocxExporter._render_story_plans(
+            story=section.footer,
+            paragraph_plans=(
+                header_footer_plan.footer_plans
+            ),
+            page_number_fields=(
+                header_footer_plan
+                .page_number_fields
+            ),
+        )
+
+
+    @staticmethod
+    def _render_story_plans(
+        story,
+        paragraph_plans,
+        page_number_fields,
+    ) -> None:
+        """
+        Render paragraphs into a Word header or footer story.
+        """
+
+        first_paragraph = (
+            DocxExporter
+            ._reset_story_paragraphs(
+                story
+            )
+        )
+
+        if not paragraph_plans:
+            return
+
+        for index, paragraph_plan in enumerate(
+            paragraph_plans
+        ):
+            if index == 0:
+                word_paragraph = (
+                    first_paragraph
+                )
+
+            else:
+                word_paragraph = (
+                    story.add_paragraph()
+                )
+
+            field_plan = (
+                page_number_fields.get(
+                    paragraph_plan
+                    .paragraph_region_number
+                )
             )
 
-        word_document.save(output_path)
+            if field_plan is not None:
+                DocxExporter._render_page_field(
+                    word_paragraph=(
+                        word_paragraph
+                    ),
+                    field_plan=field_plan,
+                )
+
+            else:
+                DocxExporter._render_paragraph_runs(
+                    word_paragraph=(
+                        word_paragraph
+                    ),
+                    paragraph=(
+                        paragraph_plan.paragraph
+                    ),
+                    strip_textual_list_marker=False,
+                    preserve_line_breaks=False,
+                )
+
+            DocxExporter._normalize_alignment_indentation(
+                word_paragraph=(
+                    word_paragraph
+                ),
+                paragraph_plan=(
+                    paragraph_plan
+                ),
+            )
+
+            EditableLayoutResolver.apply_alignment(
+                word_paragraph=(
+                    word_paragraph
+                ),
+                plan=paragraph_plan,
+            )
+
+
+    @staticmethod
+    def _reset_story_paragraphs(
+        story,
+    ):
+        """
+        Keep one empty paragraph and remove stale paragraphs from
+        a Word header/footer story.
+        """
+
+        paragraphs = list(
+            story.paragraphs
+        )
+
+        if not paragraphs:
+            return story.add_paragraph()
+
+        first_paragraph = (
+            paragraphs[0]
+        )
+
+        first_paragraph.text = ""
+
+        for paragraph in paragraphs[1:]:
+            paragraph_element = (
+                paragraph._element
+            )
+
+            parent = (
+                paragraph_element
+                .getparent()
+            )
+
+            if parent is not None:
+                parent.remove(
+                    paragraph_element
+                )
+
+        return first_paragraph
+
+    @staticmethod
+    def _render_page_field(
+        word_paragraph,
+        field_plan: PageNumberFieldPlan,
+    ) -> None:
+        """
+        Render PAGE and optionally NUMPAGES Word fields.
+    
+        Examples:
+    
+            1
+            Page 1
+            Page 1 of 10
+            1 / 10
+        """
+    
+        if field_plan.prefix:
+            word_paragraph.add_run(
+                field_plan.prefix
+            )
+    
+        DocxExporter._append_word_field(
+            word_paragraph=word_paragraph,
+            instruction="PAGE",
+            placeholder="1",
+        )
+    
+        if field_plan.include_total_pages:
+            if field_plan.separator:
+                word_paragraph.add_run(
+                    field_plan.separator
+                )
+    
+            DocxExporter._append_word_field(
+                word_paragraph=word_paragraph,
+                instruction="NUMPAGES",
+                placeholder="1",
+            )
+    
+        if field_plan.suffix:
+            word_paragraph.add_run(
+                field_plan.suffix
+            )
+    
+    
+    @staticmethod
+    def _append_word_field(
+        word_paragraph,
+        instruction: str,
+        placeholder: str,
+    ) -> None:
+        """
+        Append a Word field such as PAGE or NUMPAGES.
+        """
+    
+        run = word_paragraph.add_run()
+    
+        begin = OxmlElement(
+            "w:fldChar"
+        )
+    
+        begin.set(
+            qn(
+                "w:fldCharType"
+            ),
+            "begin",
+        )
+    
+        instruction_text = OxmlElement(
+            "w:instrText"
+        )
+    
+        instruction_text.set(
+            qn(
+                "xml:space"
+            ),
+            "preserve",
+        )
+    
+        instruction_text.text = (
+            f" {instruction} "
+        )
+    
+        separate = OxmlElement(
+            "w:fldChar"
+        )
+    
+        separate.set(
+            qn(
+                "w:fldCharType"
+            ),
+            "separate",
+        )
+    
+        displayed_text = OxmlElement(
+            "w:t"
+        )
+    
+        displayed_text.text = (
+            placeholder
+        )
+    
+        end = OxmlElement(
+            "w:fldChar"
+        )
+    
+        end.set(
+            qn(
+                "w:fldCharType"
+            ),
+            "end",
+        )
+    
+        run._r.append(
+            begin
+        )
+    
+        run._r.append(
+            instruction_text
+        )
+    
+        run._r.append(
+            separate
+        )
+    
+        run._r.append(
+            displayed_text
+        )
+    
+        run._r.append(
+            end
+        )
+
+    @staticmethod
+    def _group_pages_by_section_template(
+        pages,
+    ) -> list[list]:
+        """
+        Group consecutive pages that can share one Word section.
+
+        Pages must have:
+
+            the same size;
+            the same rotation;
+            the same normalized header;
+            the same normalized footer.
+        """
+
+        groups: list[list] = []
+
+        previous_key = None
+
+        for page in pages:
+            geometry_key = (
+                round(
+                    float(
+                        page.bbox.width
+                    ),
+                    2,
+                ),
+                round(
+                    float(
+                        page.bbox.height
+                    ),
+                    2,
+                ),
+                int(
+                    getattr(
+                        page,
+                        "rotation",
+                        0,
+                    )
+                )
+                % 360,
+            )
+
+            section_key = (
+                geometry_key,
+                HeaderFooterResolver
+                .section_signature(
+                    page
+                ),
+            )
+
+            if (
+                previous_key is None
+                or section_key
+                != previous_key
+            ):
+                groups.append(
+                    [page]
+                )
+
+            else:
+                groups[-1].append(
+                    page
+                )
+
+            previous_key = section_key
+
+        return groups
+
+    @staticmethod
+    def _configure_page_group_margins(
+        section,
+        pages,
+    ) -> None:
+        """
+        Configure one editable section using all consecutive
+        pages that share the same geometry.
+
+        Page-body containers are preferred because they exclude
+        repeated headers and footers.
+        """
+
+        body_regions = [
+            region
+            for page in pages
+            for region in getattr(
+                page,
+                "layout_regions",
+                [],
+            )
+            if (
+                region.region_type
+                == LayoutRegionType.PAGE_BODY
+            )
+        ]
+
+        if body_regions:
+            left_edge = min(
+                region.left
+                for region in body_regions
+            )
+
+            top_edge = min(
+                region.top
+                for region in body_regions
+            )
+
+        else:
+            paragraph_regions = [
+                region
+                for page in pages
+                for region in getattr(
+                    page,
+                    "paragraph_regions",
+                    [],
+                )
+                if str(
+                    getattr(
+                        region,
+                        "text",
+                        "",
+                    )
+                ).strip()
+            ]
+
+            if not paragraph_regions:
+                DocxExporter._apply_default_margins(
+                    section
+                )
+                return
+
+            left_edge = min(
+                region.left
+                for region in paragraph_regions
+            )
+
+            top_edge = min(
+                region.top
+                for region in paragraph_regions
+            )
+
+        section.left_margin = Pt(
+            max(
+                left_edge,
+                DocxExporter.MINIMUM_MARGIN,
+            )
+        )
+
+        section.top_margin = Pt(
+            max(
+                top_edge,
+                DocxExporter.MINIMUM_MARGIN,
+            )
+        )
+
+        section.right_margin = Pt(
+            DocxExporter
+            .EDITABLE_RIGHT_MARGIN
+        )
+
+        section.bottom_margin = Pt(
+            DocxExporter
+            .EDITABLE_BOTTOM_MARGIN
+        )
+
+        section.header_distance = Pt(0)
+        section.footer_distance = Pt(0)
+        section.gutter = Pt(0)
 
     @staticmethod
     def _prepare_page_section(
@@ -157,6 +702,40 @@ class DocxExporter:
         section.page_height = Pt(
             page.bbox.height
         )
+
+    @staticmethod
+    def _normalize_alignment_indentation(
+        word_paragraph,
+        paragraph_plan,
+    ) -> None:
+        """
+        Remove PDF-position indentation when Word alignment itself
+        should control the horizontal placement.
+
+        Without this correction, a centered title can retain a
+        large PDF-derived left indent and appear shifted to the
+        right even though w:jc is set to center.
+        """
+
+        if not paragraph_plan.apply_alignment:
+            return
+
+        if (
+            paragraph_plan.detected_alignment
+            not in {
+                ParagraphAlignment.CENTER,
+                ParagraphAlignment.RIGHT,
+            }
+        ):
+            return
+
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+
+        paragraph_format.left_indent = Pt(0)
+        paragraph_format.right_indent = Pt(0)
+        paragraph_format.first_line_indent = Pt(0)
 
     @staticmethod
     def _configure_page_margins(
@@ -242,26 +821,58 @@ class DocxExporter:
         word_document,
         page,
         numbering_manager: WordNumberingManager,
+        validation_report=None,
     ) -> None:
         """
-        Render one PDF page using normal editable Word
-        paragraphs.
+        Render one PDF page using validated reading order and
+        container-aware paragraph alignment.
 
         No VML textbox or absolutely positioned text shape is
         created here.
         """
 
-        regions = sorted(
-            [
-                region
-                for region in page.paragraph_regions
-                if region.text.strip()
-            ],
-            key=lambda region: (
-                region.top,
-                region.left,
-            ),
-        )
+        # paragraph_plans = (
+        #     EditableLayoutResolver
+        #     .build_page_plan(
+        #         page=page,
+        #         validation_report=(
+        #             validation_report
+        #         ),
+        #     )
+        # )
+        
+        paragraph_plans = [
+            plan
+            for plan in (
+                EditableLayoutResolver
+                .build_page_plan(
+                    page=page,
+                    validation_report=(
+                        validation_report
+                    ),
+                )
+            )
+            if plan.role
+            not in {
+                ReadingOrderRole.HEADER,
+                ReadingOrderRole.FOOTER,
+            }
+        ]
+
+        if not paragraph_plans:
+            return
+
+        regions = [
+            paragraph_plan.paragraph
+            for paragraph_plan in paragraph_plans
+            if str(
+                getattr(
+                    paragraph_plan.paragraph,
+                    "text",
+                    "",
+                )
+            ).strip()
+        ]
 
         if not regions:
             return
@@ -275,18 +886,45 @@ class DocxExporter:
             region.right
             for region in regions
         )
-        
+
         active_list_type = None
         active_number_id = None
         previous_region = None
 
-        for region in regions:
+        is_designed_cover = (
+            getattr(
+                getattr(
+                    page,
+                    "profile",
+                    None,
+                ),
+                "page_type",
+                None,
+            )
+            == PageType.DESIGNED_COVER
+        )
+
+        for paragraph_plan in paragraph_plans:
+            region = (
+                paragraph_plan.paragraph
+            )
+
+            if not str(
+                getattr(
+                    region,
+                    "text",
+                    "",
+                )
+            ).strip():
+                continue
+
             word_paragraph = (
                 word_document.add_paragraph()
             )
 
             is_heading = (
-                DocxExporter._region_is_heading(
+                DocxExporter
+                ._region_is_heading(
                     page=page,
                     region=region,
                 )
@@ -314,7 +952,9 @@ class DocxExporter:
                 continues_list = (
                     DocxExporter
                     ._continues_previous_list(
-                        previous_region=previous_region,
+                        previous_region=(
+                            previous_region
+                        ),
                         current_region=region,
                     )
                 )
@@ -345,7 +985,9 @@ class DocxExporter:
                     active_number_id = (
                         numbering_manager
                         .create_list(
-                            list_type=region.list_type,
+                            list_type=(
+                                region.list_type
+                            ),
                             start_at=start_at,
                             marker_font_name=(
                                 marker_font_name
@@ -379,19 +1021,29 @@ class DocxExporter:
             DocxExporter._render_paragraph_runs(
                 word_paragraph=word_paragraph,
                 paragraph=region,
+
                 strip_textual_list_marker=(
-                    region.list_type == "number"
+                    region.list_marker_source
+                    == ListMarkerSource.TEXT
                 ),
 
-                # Preserve intentional cover-page breaks such as:
-                #
-                # Sample
-                # PDF
-                #
-                # Normal content pages should reflow.
+                # Preserve source line breaks only for headings
+                # on structurally detected designed-cover pages.
+                # Do not use page.number == 1.
                 preserve_line_breaks=(
-                    page.number == 1
+                    is_designed_cover
+                    and is_heading
                 ),
+            )
+
+            DocxExporter._normalize_alignment_indentation(
+                word_paragraph=word_paragraph,
+                paragraph_plan=paragraph_plan,
+            )
+
+            EditableLayoutResolver.apply_alignment(
+                word_paragraph=word_paragraph,
+                plan=paragraph_plan,
             )
 
             previous_region = region
@@ -747,11 +1399,24 @@ class DocxExporter:
                 )
 
             else:
+                is_designed_cover = (
+                    getattr(
+                        getattr(
+                            page,
+                            "profile",
+                            None,
+                        ),
+                        "page_type",
+                        None,
+                    )
+                    == PageType.DESIGNED_COVER
+                )
+
                 maximum_spacing = (
                     DocxExporter
                     .MAXIMUM_COVER_SPACING_BEFORE
 
-                    if page.number == 1
+                    if is_designed_cover
 
                     else DocxExporter
                     .MAXIMUM_BODY_SPACING_BEFORE
@@ -783,19 +1448,6 @@ class DocxExporter:
         )
 
         paragraph_format.line_spacing = 1.0
-
-        alignment = (
-            DocxExporter
-            ._resolve_region_alignment(
-                page=page,
-                region=region,
-            )
-        )
-
-        DocxExporter._apply_alignment(
-            word_paragraph=word_paragraph,
-            alignment=alignment,
-        )
 
         paragraph_format.keep_together = True
         paragraph_format.widow_control = False
@@ -936,88 +1588,6 @@ class DocxExporter:
             ),
             1.0,
         )
-
-    @staticmethod
-    def _resolve_region_alignment(
-        page,
-        region,
-    ) -> str:
-        """
-        Detect alignment using page geometry instead of trusting
-        only the source block classification.
-        """
-
-        if region.list_type in {
-            "bullet",
-            "number",
-        }:
-            return "left"
-
-        visible_regions = [
-            item
-            for item in page.paragraph_regions
-            if item.text.strip()
-        ]
-
-        if not visible_regions:
-            return "left"
-
-        frame_left = min(
-            item.left
-            for item in visible_regions
-        )
-
-        frame_right = max(
-            item.right
-            for item in visible_regions
-        )
-
-        frame_width = max(
-            frame_right - frame_left,
-            1.0,
-        )
-
-        region_center = (
-            region.left + region.right
-        ) / 2.0
-
-        frame_center = (
-            frame_left + frame_right
-        ) / 2.0
-
-        tolerance = max(
-            8.0,
-            frame_width * 0.03,
-        )
-
-        left_gap = (
-            region.left - frame_left
-        )
-
-        right_gap = (
-            frame_right - region.right
-        )
-
-        # A short region with balanced left/right gaps is centered.
-        if (
-            abs(
-                region_center - frame_center
-            )
-            <= tolerance
-            and region.width
-            < frame_width * 0.90
-        ):
-            return "center"
-
-        # Region touching the frame's right side while being well
-        # away from its left side is right-aligned.
-        if (
-            abs(right_gap) <= tolerance
-            and left_gap > tolerance * 2.0
-        ):
-            return "right"
-
-        return "left"
 
     @staticmethod
     def _region_is_heading(
@@ -1926,38 +2496,6 @@ class DocxExporter:
         font_properties.set(
             qn("w:cs"),
             word_font_name,
-        )
-
-
-    @staticmethod
-    def _apply_alignment(
-        word_paragraph,
-        alignment: str,
-    ) -> None:
-        """
-        Apply paragraph alignment.
-        """
-
-        if alignment == "center":
-            word_paragraph.alignment = (
-                WD_ALIGN_PARAGRAPH.CENTER
-            )
-            return
-
-        if alignment == "right":
-            word_paragraph.alignment = (
-                WD_ALIGN_PARAGRAPH.RIGHT
-            )
-            return
-
-        if alignment == "justify":
-            word_paragraph.alignment = (
-                WD_ALIGN_PARAGRAPH.JUSTIFY
-            )
-            return
-
-        word_paragraph.alignment = (
-            WD_ALIGN_PARAGRAPH.LEFT
         )
 
     @staticmethod
