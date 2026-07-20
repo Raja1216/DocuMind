@@ -62,6 +62,9 @@ from src.models.reading_order import (
 from src.models.list_item import (
     ListMarkerSource,
 )
+from src.exporter.editable_list_sequence_resolver import (
+    EditableListSequenceResolver,
+)
 
 class DocxExporter:
     """
@@ -126,6 +129,12 @@ class DocxExporter:
             )
         )
 
+        list_sequence_resolver = (
+            EditableListSequenceResolver(
+                numbering_manager
+            )
+        )
+
         pages = list(
             document.pages
         )
@@ -184,6 +193,9 @@ class DocxExporter:
                     page=page,
                     numbering_manager=(
                         numbering_manager
+                    ),
+                    list_sequence_resolver=(
+                        list_sequence_resolver
                     ),
                     validation_report=getattr(
                         document,
@@ -821,6 +833,9 @@ class DocxExporter:
         word_document,
         page,
         numbering_manager: WordNumberingManager,
+        list_sequence_resolver: (
+            EditableListSequenceResolver
+        ),
         validation_report=None,
     ) -> None:
         """
@@ -887,8 +902,8 @@ class DocxExporter:
             for region in regions
         )
 
-        active_list_type = None
-        active_number_id = None
+        legacy_active_list_type = None
+        legacy_active_number_id = None
         previous_region = None
 
         is_designed_cover = (
@@ -948,83 +963,147 @@ class DocxExporter:
                 }
             )
 
+            list_sequence_binding = None
+
             if is_list_item:
-                continues_list = (
+                (
+                    marker_font_name,
+                    marker_font_size,
+                ) = (
                     DocxExporter
-                    ._continues_previous_list(
-                        previous_region=(
-                            previous_region
+                    ._resolve_list_marker_style(
+                        region
+                    )
+                )
+
+                list_sequence_binding = (
+                    list_sequence_resolver
+                    .resolve(
+                        page=page,
+                        paragraph=region,
+                        marker_font_name=(
+                            marker_font_name
                         ),
-                        current_region=region,
+                        marker_font_size=(
+                            marker_font_size
+                        ),
                     )
                 )
 
-                if (
-                    not continues_list
-                    or active_list_type
-                    != region.list_type
-                    or active_number_id is None
-                ):
-                    start_at = (
+                if list_sequence_binding is not None:
+                    # One numId is reused for every item in the same
+                    # logical sequence.
+                    DocxExporter._apply_list_numbering(
+                        word_paragraph=word_paragraph,
+                        number_id=(
+                            list_sequence_binding
+                            .number_id
+                        ),
+                        level=(
+                            list_sequence_binding
+                            .level
+                        ),
+                    )
+
+                    # The multilevel numbering definition already contains
+                    # the correct indentation for every level. Remove the
+                    # direct PDF paragraph indentation so it does not
+                    # override w:lvl/w:pPr/w:ind.
+                    DocxExporter._clear_direct_list_indentation(
+                        word_paragraph
+                    )
+
+                    legacy_active_list_type = None
+                    legacy_active_number_id = None
+
+                else:
+                    # Backward-compatible fallback for list paragraphs
+                    # created before ListSequenceAnalyzer existed.
+                    continues_list = (
                         DocxExporter
-                        ._extract_list_start_number(
-                            region.list_marker
+                        ._continues_previous_list(
+                            previous_region=(
+                                previous_region
+                            ),
+                            current_region=region,
                         )
                     )
 
-                    (
-                        marker_font_name,
-                        marker_font_size,
-                    ) = (
-                        DocxExporter
-                        ._resolve_list_marker_style(
-                            region
+                    if (
+                        not continues_list
+                        or legacy_active_list_type
+                        != region.list_type
+                        or legacy_active_number_id is None
+                    ):
+                        start_at = (
+                            DocxExporter
+                            ._extract_list_start_number(
+                                region.list_marker
+                            )
                         )
-                    )
 
-                    active_number_id = (
-                        numbering_manager
-                        .create_list(
-                            list_type=(
-                                region.list_type
-                            ),
-                            start_at=start_at,
-                            marker_font_name=(
-                                marker_font_name
-                            ),
-                            marker_font_size=(
-                                marker_font_size
-                            ),
+                        legacy_active_number_id = (
+                            numbering_manager
+                            .create_list(
+                                list_type=(
+                                    region.list_type
+                                ),
+                                start_at=start_at,
+                                marker_font_name=(
+                                    marker_font_name
+                                ),
+                                marker_font_size=(
+                                    marker_font_size
+                                ),
+                            )
                         )
+
+                        legacy_active_list_type = (
+                            region.list_type
+                        )
+
+                    DocxExporter._apply_list_numbering(
+                        word_paragraph=word_paragraph,
+                        number_id=(
+                            legacy_active_number_id
+                        ),
+                        level=getattr(
+                            region,
+                            "list_level",
+                            0,
+                        ),
                     )
 
-                    active_list_type = (
-                        region.list_type
+                    DocxExporter._apply_list_indentation(
+                        word_paragraph=word_paragraph,
+                        region=region,
+                        content_left=content_left,
                     )
-
-                DocxExporter._apply_list_numbering(
-                    word_paragraph=word_paragraph,
-                    number_id=active_number_id,
-                    level=region.list_level,
-                )
-
-                DocxExporter._apply_list_indentation(
-                    word_paragraph=word_paragraph,
-                    region=region,
-                    content_left=content_left,
-                )
 
             else:
-                active_list_type = None
-                active_number_id = None
+                legacy_active_list_type = None
+                legacy_active_number_id = None
 
             DocxExporter._render_paragraph_runs(
                 word_paragraph=word_paragraph,
                 paragraph=region,
 
                 strip_textual_list_marker=(
-                    region.list_marker_source
-                    == ListMarkerSource.TEXT
+                    (
+                        list_sequence_binding
+                        .strip_textual_marker
+                    )
+                    if list_sequence_binding
+                    is not None
+                
+                    else (
+                        getattr(
+                            region,
+                            "list_marker_source",
+                            ListMarkerSource.UNKNOWN,
+                        )
+                        == ListMarkerSource.TEXT
+                    )
                 ),
 
                 # Preserve source line breaks only for headings
@@ -1333,6 +1412,27 @@ class DocxExporter:
             Pt(left_indent),
             WD_TAB_ALIGNMENT.LEFT,
         )
+
+    @staticmethod
+    def _clear_direct_list_indentation(
+        word_paragraph,
+    ) -> None:
+        """
+        Remove direct paragraph indentation for sequence-based
+        lists.
+
+        The Word numbering level definition supplies left and
+        hanging indentation. Keeping PDF-derived direct
+        indentation here can override the numbering definition and
+        produce doubled or incorrectly shifted indentation.
+        """
+
+        paragraph_format = (
+            word_paragraph.paragraph_format
+        )
+
+        paragraph_format.left_indent = None
+        paragraph_format.first_line_indent = None
 
     @staticmethod
     def _apply_region_layout(
