@@ -56,14 +56,15 @@ from src.exporter.header_footer_resolver import (
     PageNumberFieldPlan,
 )
 
-from src.models.reading_order import (
-    ReadingOrderRole,
-)
 from src.models.list_item import (
     ListMarkerSource,
 )
 from src.exporter.editable_list_sequence_resolver import (
     EditableListSequenceResolver,
+)
+from src.exporter.editable_page_render_resolver import (
+    EditablePageRenderResolver,
+    EditableRenderAction,
 )
 
 class DocxExporter:
@@ -829,6 +830,29 @@ class DocxExporter:
         section.bottom_margin = margin
 
     @staticmethod
+    def _build_editable_render_plan(
+        page,
+        validation_report=None,
+    ):
+        """
+        Convert the unified page render plan into editable DOCX
+        instructions.
+
+        The wrapper keeps DocxExporter independent from resolver
+        implementation details and makes integration easy to test.
+        """
+
+        return (
+            EditablePageRenderResolver
+            .build_page_plan(
+                page=page,
+                validation_report=(
+                    validation_report
+                ),
+            )
+        )
+
+    @staticmethod
     def _render_page(
         word_document,
         page,
@@ -839,71 +863,74 @@ class DocxExporter:
         validation_report=None,
     ) -> None:
         """
-        Render one PDF page using validated reading order and
-        container-aware paragraph alignment.
+        Render one PDF page using the unified page render plan.
 
-        No VML textbox or absolutely positioned text shape is
-        created here.
+        Only RENDER_PARAGRAPH instructions are handled in this
+        step. Tables, images, charts, vectors and fallback items
+        remain deferred for their dedicated exporters.
         """
 
-        # paragraph_plans = (
-        #     EditableLayoutResolver
-        #     .build_page_plan(
-        #         page=page,
-        #         validation_report=(
-        #             validation_report
-        #         ),
-        #     )
-        # )
-        
-        paragraph_plans = [
-            plan
-            for plan in (
-                EditableLayoutResolver
-                .build_page_plan(
-                    page=page,
-                    validation_report=(
-                        validation_report
-                    ),
-                )
+        editable_render_plan = (
+            DocxExporter
+            ._build_editable_render_plan(
+                page=page,
+                validation_report=(
+                    validation_report
+                ),
             )
-            if plan.role
-            not in {
-                ReadingOrderRole.HEADER,
-                ReadingOrderRole.FOOTER,
-            }
+        )
+
+        paragraph_instructions = [
+            instruction
+
+            for instruction
+            in editable_render_plan.instructions
+
+            if (
+                instruction.action
+                == EditableRenderAction
+                .RENDER_PARAGRAPH
+
+                and instruction.layout_item
+                is not None
+
+                and str(
+                    getattr(
+                        instruction.source,
+                        "text",
+                        "",
+                    )
+                ).strip()
+            )
         ]
 
-        if not paragraph_plans:
+        if not paragraph_instructions:
             return
 
         regions = [
-            paragraph_plan.paragraph
-            for paragraph_plan in paragraph_plans
-            if str(
-                getattr(
-                    paragraph_plan.paragraph,
-                    "text",
-                    "",
-                )
-            ).strip()
+            instruction.source
+
+            for instruction
+            in paragraph_instructions
         ]
 
-        if not regions:
-            return
-
         content_left = min(
-            region.left
+            float(
+                region.left
+            )
             for region in regions
         )
 
         content_right = max(
-            region.right
+            float(
+                region.right
+            )
             for region in regions
         )
 
         legacy_active_list_type = None
         legacy_active_number_id = None
+
         previous_region = None
 
         is_designed_cover = (
@@ -919,10 +946,29 @@ class DocxExporter:
             == PageType.DESIGNED_COVER
         )
 
-        for paragraph_plan in paragraph_plans:
-            region = (
-                paragraph_plan.paragraph
+        for instruction in (
+            editable_render_plan.instructions
+        ):
+            if (
+                instruction.action
+                != EditableRenderAction
+                .RENDER_PARAGRAPH
+            ):
+                # These instructions remain available for later
+                # table, image, chart, vector and fallback
+                # exporters.
+                continue
+
+            paragraph_plan = (
+                instruction.layout_item
             )
+
+            region = (
+                instruction.source
+            )
+
+            if paragraph_plan is None:
+                continue
 
             if not str(
                 getattr(
@@ -956,7 +1002,11 @@ class DocxExporter:
             )
 
             is_list_item = (
-                region.list_type
+                getattr(
+                    region,
+                    "list_type",
+                    None,
+                )
                 in {
                     "bullet",
                     "number",
@@ -991,8 +1041,6 @@ class DocxExporter:
                 )
 
                 if list_sequence_binding is not None:
-                    # One numId is reused for every item in the same
-                    # logical sequence.
                     DocxExporter._apply_list_numbering(
                         word_paragraph=word_paragraph,
                         number_id=(
@@ -1005,10 +1053,8 @@ class DocxExporter:
                         ),
                     )
 
-                    # The multilevel numbering definition already contains
-                    # the correct indentation for every level. Remove the
-                    # direct PDF paragraph indentation so it does not
-                    # override w:lvl/w:pPr/w:ind.
+                    # Numbering-level indentation is already
+                    # defined in numbering.xml.
                     DocxExporter._clear_direct_list_indentation(
                         word_paragraph
                     )
@@ -1017,8 +1063,7 @@ class DocxExporter:
                     legacy_active_number_id = None
 
                 else:
-                    # Backward-compatible fallback for list paragraphs
-                    # created before ListSequenceAnalyzer existed.
+                    # Backward-compatible list fallback.
                     continues_list = (
                         DocxExporter
                         ._continues_previous_list(
@@ -1031,14 +1076,21 @@ class DocxExporter:
 
                     if (
                         not continues_list
+
                         or legacy_active_list_type
                         != region.list_type
-                        or legacy_active_number_id is None
+
+                        or legacy_active_number_id
+                        is None
                     ):
                         start_at = (
                             DocxExporter
                             ._extract_list_start_number(
-                                region.list_marker
+                                getattr(
+                                    region,
+                                    "list_marker",
+                                    None,
+                                )
                             )
                         )
 
@@ -1095,7 +1147,7 @@ class DocxExporter:
                     )
                     if list_sequence_binding
                     is not None
-                
+
                     else (
                         getattr(
                             region,
@@ -1106,9 +1158,6 @@ class DocxExporter:
                     )
                 ),
 
-                # Preserve source line breaks only for headings
-                # on structurally detected designed-cover pages.
-                # Do not use page.number == 1.
                 preserve_line_breaks=(
                     is_designed_cover
                     and is_heading

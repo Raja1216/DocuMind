@@ -1,8 +1,18 @@
-from src.analyzer.document_statistics_analyzer import DocumentStatisticsAnalyzer
-from src.analyzer.heading_detector import HeadingDetector
-from src.analyzer.paragraph_analyzer import ParagraphAnalyzer
-from src.analyzer.paragraph_style_analyzer import ParagraphStyleAnalyzer
-from src.analyzer.alignment_analyzer import AlignmentAnalyzer
+from src.analyzer.document_statistics_analyzer import (
+    DocumentStatisticsAnalyzer,
+)
+from src.analyzer.heading_detector import (
+    HeadingDetector,
+)
+from src.analyzer.paragraph_analyzer import (
+    ParagraphAnalyzer,
+)
+from src.analyzer.paragraph_style_analyzer import (
+    ParagraphStyleAnalyzer,
+)
+from src.analyzer.alignment_analyzer import (
+    AlignmentAnalyzer,
+)
 from src.analyzer.paragraph_region_analyzer import (
     ParagraphRegionAnalyzer,
 )
@@ -33,6 +43,10 @@ from src.analyzer.list_item_analyzer import (
 from src.analyzer.list_sequence_analyzer import (
     ListSequenceAnalyzer,
 )
+from src.analyzer.page_render_plan_analyzer import (
+    PageRenderPlanAnalyzer,
+)
+
 
 class DocumentAnalyzer:
 
@@ -48,6 +62,10 @@ class DocumentAnalyzer:
             document
         )
 
+        # -----------------------------------------------------
+        # Block and paragraph-region analysis
+        # -----------------------------------------------------
+
         for page in document.pages:
             for block in page.blocks:
                 ParagraphAnalyzer.analyze(
@@ -58,26 +76,31 @@ class DocumentAnalyzer:
                 page
             )
 
+        # -----------------------------------------------------
+        # Document-level semantic analysis
+        # -----------------------------------------------------
+
         ParagraphStyleAnalyzer.analyze(
             document
         )
-        
+
         LayoutRegionAnalyzer.analyze(
             document
         )
-        
+
         ReadingOrderAnalyzer.analyze(
             document
         )
-        
+
         ListItemAnalyzer.analyze(
             document
         )
-        
+
+        # This already processes every page.
         ListSequenceAnalyzer.analyze(
             document
         )
-        
+
         ParagraphAlignmentAnalyzer.analyze(
             document
         )
@@ -86,20 +109,40 @@ class DocumentAnalyzer:
             document
         )
 
-        # Page profiling must run after paragraph regions,
-        # tables, vectors and charts have been classified.
+        # -----------------------------------------------------
+        # Page profile, conversion policy and render plan
+        # -----------------------------------------------------
+
         for page in document.pages:
+            # Page profiling must run after paragraphs, tables,
+            # images, vectors and charts have been classified.
             PageProfileAnalyzer.analyze_page(
                 page
             )
-        
-            # Conversion policy depends on the completed page profile.
+
+            # Conversion policy depends on the completed page
+            # profile.
             ConversionPolicyResolver.resolve(
                 page
             )
-        
-        # Build the document profile after every page has both a
-        # PageProfile and a ConversionPolicy.
+
+            # The unified render plan must run after:
+            #
+            # - paragraph-region analysis
+            # - layout and reading-order analysis
+            # - list-item and list-sequence analysis
+            # - table/image/chart/vector classification
+            # - page profiling
+            # - conversion policy resolution
+            #
+            # Running it here also allows PAGE_FALLBACK items
+            # to use the resolved conversion policy.
+            PageRenderPlanAnalyzer.analyze_page(
+                page
+            )
+
+        # Build the document profile after every page has a
+        # PageProfile and ConversionPolicy.
         DocumentProfileAnalyzer.analyze(
             document
-        )           
+        )

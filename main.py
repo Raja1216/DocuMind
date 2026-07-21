@@ -9,8 +9,8 @@ from src.parser.pdf_reader import PDFReader
 from src.exporter.docx_exporter import (
     DocxExporter,
 )
-from src.exporter.editable_layout_resolver import (
-    EditableLayoutResolver,
+from src.exporter.editable_page_render_resolver import (
+    EditablePageRenderResolver,
 )
 
 from src.utils.alignment_validation_report_writer import (
@@ -623,12 +623,15 @@ print(
     "\nEditable DOCX layout plan"
 )
 
+print(
+    "\nEditable DOCX render instructions"
+)
+
 for page in document.pages:
-    paragraph_plans = (
-        EditableLayoutResolver
+    editable_plan = (
+        EditablePageRenderResolver
         .build_page_plan(
             page=page,
-
             validation_report=(
                 document
                 .alignment_validation_report
@@ -637,56 +640,53 @@ for page in document.pages:
     )
 
     print(
-        f"\nPage {page.number}"
+        (
+            f"\nPage {page.number}: "
+            f"paragraphs="
+            f"{len(editable_plan.paragraph_instructions)}, "
+            f"deferred="
+            f"{len(editable_plan.deferred_instructions)}, "
+            f"ignored="
+            f"{len(editable_plan.ignored_instructions)}"
+        )
     )
 
-    for paragraph_plan in paragraph_plans:
-        text = str(
+    for instruction in (
+        editable_plan.instructions
+    ):
+        source_text = str(
             getattr(
-                paragraph_plan.paragraph,
+                instruction.source,
                 "text",
                 "",
             )
+            or ""
         ).replace(
             "\n",
             " ",
         )
 
-        if len(text) > 70:
-            text = (
-                text[:67]
+        if len(source_text) > 60:
+            source_text = (
+                source_text[:57]
                 + "..."
             )
 
-        if (
-            paragraph_plan.word_alignment
-            is None
-        ):
-            word_alignment = "default"
+        render_item_id = (
+            instruction.render_item.item_id
 
-        else:
-            word_alignment = str(
-                paragraph_plan
-                .word_alignment
-            )
+            if instruction.render_item
+            is not None
+
+            else "legacy"
+        )
 
         print(
             (
-                f" Order "
-                f"{paragraph_plan.reading_order}: "
-                f"paragraph="
-                f"{paragraph_plan.paragraph_region_number}, "
-                f"role="
-                f"{paragraph_plan.role.value}, "
-                f"detected="
-                f"{paragraph_plan.detected_alignment.value}, "
-                f"confidence="
-                f"{paragraph_plan.alignment_confidence:.3f}, "
-                f"word_alignment="
-                f"{word_alignment}, "
-                f"apply="
-                f"{paragraph_plan.apply_alignment}, "
-                f"text={text}"
+                f" {instruction.order:02d}. "
+                f"{instruction.action.value:<22} "
+                f"id={render_item_id:<22} "
+                f"text={source_text!r}"
             )
         )            
 FixedLayoutDocxExporter.export(
