@@ -46,6 +46,9 @@ from src.analyzer.list_sequence_analyzer import (
 from src.analyzer.page_render_plan_analyzer import (
     PageRenderPlanAnalyzer,
 )
+from src.analyzer.editable_table_normalizer import (
+    EditableTableNormalizer,
+)
 
 
 class DocumentAnalyzer:
@@ -106,6 +109,9 @@ class DocumentAnalyzer:
         )
 
         AlignmentValidationAnalyzer.analyze(
+            document
+        )
+        EditableTableNormalizer.normalize_document(
             document
         )
 

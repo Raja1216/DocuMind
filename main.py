@@ -71,6 +71,42 @@ analyzer.analyze(
     document
 )
 
+print(
+    "\nNormalized editable tables"
+)
+
+for page in document.pages:
+    print(
+        (
+            f"\nPage {page.number}: "
+            f"{len(page.editable_tables)} tables"
+        )
+    )
+
+    for table in page.editable_tables:
+        print(
+            (
+                f" {table.table_id}: "
+                f"grid={table.row_count}x"
+                f"{table.column_count}, "
+                f"cells={len(table.cells)}, "
+                f"rows={len(table.rows)}, "
+                f"columns={len(table.columns)}, "
+                f"confidence="
+                f"{table.confidence:.3f}, "
+                f"strategy="
+                f"{table.disposition.value}, "
+                f"valid="
+                f"{table.is_structurally_valid}"
+            )
+        )
+
+        for warning in table.warnings:
+            print(
+                "   Warning:",
+                warning,
+            )
+
 alignment_report_path = (
     AlignmentValidationReportWriter
     .write(

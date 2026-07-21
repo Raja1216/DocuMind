@@ -43,6 +43,9 @@ from src.models.list_sequence import (
 from src.models.page_render_plan import (
     PageRenderPlan,
 )
+from src.models.editable_table import (
+    EditableTable,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -64,6 +67,11 @@ class Page:
         default_factory=list
     )
     tables: list[Table] = field(
+        default_factory=list
+    )
+    editable_tables: list[
+        EditableTable
+    ] = field(
         default_factory=list
     )
     vector_graphics: list[VectorGraphic] = field(
