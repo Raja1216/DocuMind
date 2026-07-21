@@ -57,6 +57,8 @@ class ParagraphRegion(BaseElement):
     list_sequence_id: int | None = None
     list_item_index: int | None = None
 
+    is_list_marker_only: bool = False
+    list_content_region_number: int | None = None
     # Left position where the actual list-item content starts,
     # excluding a number such as "1.".
     content_left: float | None = None

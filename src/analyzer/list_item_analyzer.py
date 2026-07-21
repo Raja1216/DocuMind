@@ -97,6 +97,14 @@ class ListItemAnalyzer:
 
     ESTIMATED_CHARACTER_WIDTH_FACTOR = 0.48
     MINIMUM_MARKER_CONTENT_GAP = 4.0
+    
+    STANDALONE_MARKER_MAXIMUM_GAP = 72.0
+
+    STANDALONE_MARKER_MINIMUM_VERTICAL_OVERLAP = (
+        0.45
+    )
+
+    STANDALONE_MARKER_MAXIMUM_CENTER_OFFSET = 8.0
 
     @classmethod
     def analyze(
@@ -126,6 +134,13 @@ class ListItemAnalyzer:
                 page=page,
                 paragraph=paragraph,
             )
+
+        # Some PDFs extract the marker and text as separate
+        # ParagraphRegions even though they are visually on the same
+        # line. Transfer the marker metadata to the content paragraph.
+        cls._attach_standalone_markers(
+            page
+        )
 
         return page.list_item_results
 
@@ -355,6 +370,490 @@ class ListItemAnalyzer:
                     "preserved."
                 ),
             )
+
+    @classmethod
+    def _attach_standalone_markers(
+        cls,
+        page: Page,
+    ) -> None:
+        """
+        Attach marker-only ParagraphRegions to the following
+        same-line content ParagraphRegion.
+
+        Example PDF extraction:
+
+            Region 23: "•"
+            Region 24: "Invoices sorted by date"
+
+        becomes:
+
+            Region 23: marker-only, suppressed from editable output
+            Region 24: genuine bullet-list item
+        """
+
+        ordered_paragraphs = (
+            cls._ordered_paragraphs(
+                page
+            )
+        )
+
+        for index, marker_paragraph in enumerate(
+            ordered_paragraphs[:-1]
+        ):
+            if not cls._is_standalone_marker(
+                marker_paragraph
+            ):
+                continue
+
+            content_paragraph = (
+                ordered_paragraphs[
+                    index + 1
+                ]
+            )
+
+            if not cls._can_attach_standalone_marker(
+                marker_paragraph=(
+                    marker_paragraph
+                ),
+                content_paragraph=(
+                    content_paragraph
+                ),
+            ):
+                continue
+
+            marker = str(
+                marker_paragraph.list_marker
+                or ""
+            )
+
+            marker_kind = getattr(
+                marker_paragraph,
+                "list_marker_kind",
+                ListMarkerKind.UNKNOWN,
+            )
+
+            if not isinstance(
+                marker_kind,
+                ListMarkerKind,
+            ):
+                try:
+                    marker_kind = (
+                        ListMarkerKind(
+                            str(
+                                marker_kind
+                            )
+                        )
+                    )
+
+                except ValueError:
+                    marker_kind = (
+                        ListMarkerKind.UNKNOWN
+                    )
+
+            marker_source = getattr(
+                marker_paragraph,
+                "list_marker_source",
+                ListMarkerSource.UNKNOWN,
+            )
+
+            if not isinstance(
+                marker_source,
+                ListMarkerSource,
+            ):
+                try:
+                    marker_source = (
+                        ListMarkerSource(
+                            str(
+                                marker_source
+                            )
+                        )
+                    )
+
+                except ValueError:
+                    marker_source = (
+                        ListMarkerSource.UNKNOWN
+                    )
+
+            try:
+                confidence = float(
+                    marker_paragraph
+                    .list_confidence
+                )
+
+            except (
+                TypeError,
+                ValueError,
+            ):
+                confidence = 0.90
+
+            marker_match = _MarkerMatch(
+                marker=marker,
+
+                list_type=str(
+                    marker_paragraph.list_type
+                ),
+
+                marker_kind=marker_kind,
+
+                confidence=max(
+                    0.0,
+                    min(
+                        confidence,
+                        1.0,
+                    ),
+                ),
+            )
+
+            marker_left = getattr(
+                marker_paragraph,
+                "list_marker_left",
+                None,
+            )
+
+            if marker_left is None:
+                marker_left = float(
+                    marker_paragraph.left
+                )
+
+            marker_right = getattr(
+                marker_paragraph,
+                "list_marker_right",
+                None,
+            )
+
+            if marker_right is None:
+                marker_right = float(
+                    marker_paragraph.right
+                )
+
+            # Remove the result that currently belongs to the
+            # marker-only region.
+            page.list_item_results[:] = [
+                result
+
+                for result
+                in page.list_item_results
+
+                if (
+                    result.paragraph_region_number
+                    != marker_paragraph
+                    .region_number
+                )
+            ]
+
+            # The content paragraph becomes the actual Word list
+            # paragraph.
+            cls._assign_result(
+                page=page,
+
+                paragraph=content_paragraph,
+
+                marker_match=marker_match,
+
+                marker_source=marker_source,
+
+                marker_left=float(
+                    marker_left
+                ),
+
+                marker_right=float(
+                    marker_right
+                ),
+
+                content_left=float(
+                    content_paragraph.left
+                ),
+
+                reason=(
+                    "A detached same-line list marker was "
+                    "attached to the following content "
+                    "paragraph."
+                ),
+            )
+
+            # Do not export the marker as an empty Word paragraph.
+            cls._reset_paragraph(
+                marker_paragraph
+            )
+
+            marker_paragraph.is_list_marker_only = (
+                True
+            )
+
+            marker_paragraph.list_content_region_number = (
+                content_paragraph.region_number
+            )
+
+
+    @classmethod
+    def _ordered_paragraphs(
+        cls,
+        page: Page,
+    ) -> list[Any]:
+        """
+        Return paragraph regions using detected reading order.
+        """
+
+        reading_order_by_number = {
+            entry.paragraph_region_number: (
+                int(
+                    entry.order
+                )
+            )
+
+            for entry in getattr(
+                page,
+                "reading_order_entries",
+                [],
+            )
+            or []
+        }
+
+        return sorted(
+            [
+                paragraph
+
+                for paragraph
+                in page.paragraph_regions
+
+                if str(
+                    getattr(
+                        paragraph,
+                        "text",
+                        "",
+                    )
+                ).strip()
+            ],
+
+            key=lambda paragraph: (
+                reading_order_by_number.get(
+                    int(
+                        paragraph.region_number
+                    ),
+                    1_000_000,
+                ),
+                float(
+                    paragraph.top
+                ),
+                float(
+                    paragraph.left
+                ),
+            ),
+        )
+
+
+    @classmethod
+    def _is_standalone_marker(
+        cls,
+        paragraph: Any,
+    ) -> bool:
+        if (
+            getattr(
+                paragraph,
+                "list_type",
+                None,
+            )
+            not in {
+                "bullet",
+                "number",
+            }
+        ):
+            return False
+
+        marker = str(
+            getattr(
+                paragraph,
+                "list_marker",
+                "",
+            )
+            or ""
+        ).strip()
+
+        text = " ".join(
+            str(
+                getattr(
+                    paragraph,
+                    "text",
+                    "",
+                )
+            ).split()
+        )
+
+        return bool(
+            marker
+            and text == marker
+        )
+
+
+    @classmethod
+    def _can_attach_standalone_marker(
+        cls,
+        marker_paragraph: Any,
+        content_paragraph: Any,
+    ) -> bool:
+        """
+        Confirm that the next paragraph is visually the text
+        belonging to the standalone marker.
+        """
+
+        if getattr(
+            content_paragraph,
+            "is_list_marker_only",
+            False,
+        ):
+            return False
+
+        if getattr(
+            content_paragraph,
+            "list_type",
+            None,
+        ) in {
+            "bullet",
+            "number",
+        }:
+            return False
+
+        content_text = str(
+            getattr(
+                content_paragraph,
+                "text",
+                "",
+            )
+        ).strip()
+
+        if not content_text:
+            return False
+
+        # Do not join content across different known columns or
+        # layout regions.
+        for attribute_name in (
+            "column_id",
+            "layout_region_id",
+        ):
+            marker_value = getattr(
+                marker_paragraph,
+                attribute_name,
+                None,
+            )
+
+            content_value = getattr(
+                content_paragraph,
+                attribute_name,
+                None,
+            )
+
+            if (
+                marker_value is not None
+                and content_value is not None
+                and marker_value != content_value
+            ):
+                return False
+
+        marker_left = float(
+            marker_paragraph.left
+        )
+
+        marker_right = float(
+            getattr(
+                marker_paragraph,
+                "list_marker_right",
+                None,
+            )
+            or marker_paragraph.right
+        )
+
+        content_left = float(
+            content_paragraph.left
+        )
+
+        if content_left <= marker_left:
+            return False
+
+        horizontal_gap = (
+            content_left
+            - marker_right
+        )
+
+        if (
+            horizontal_gap < -2.0
+            or horizontal_gap
+            > cls.STANDALONE_MARKER_MAXIMUM_GAP
+        ):
+            return False
+
+        marker_top = float(
+            marker_paragraph.top
+        )
+
+        marker_bottom = float(
+            marker_paragraph.bottom
+        )
+
+        content_top = float(
+            content_paragraph.top
+        )
+
+        content_bottom = float(
+            content_paragraph.bottom
+        )
+
+        marker_height = max(
+            marker_bottom - marker_top,
+            1.0,
+        )
+
+        content_height = max(
+            content_bottom - content_top,
+            1.0,
+        )
+
+        vertical_overlap = max(
+            min(
+                marker_bottom,
+                content_bottom,
+            )
+            - max(
+                marker_top,
+                content_top,
+            ),
+            0.0,
+        )
+
+        overlap_ratio = (
+            vertical_overlap
+            / min(
+                marker_height,
+                content_height,
+            )
+        )
+
+        marker_center = (
+            marker_top
+            + marker_bottom
+        ) / 2.0
+
+        content_center = (
+            content_top
+            + content_bottom
+        ) / 2.0
+
+        center_offset = abs(
+            marker_center
+            - content_center
+        )
+
+        if (
+            overlap_ratio
+            < cls
+            .STANDALONE_MARKER_MINIMUM_VERTICAL_OVERLAP
+
+            and center_offset
+            > cls
+            .STANDALONE_MARKER_MAXIMUM_CENTER_OFFSET
+        ):
+            return False
+
+        return True
 
     @classmethod
     def _assign_result(
@@ -806,3 +1305,6 @@ class ListItemAnalyzer:
         paragraph.content_left = None
         paragraph.list_marker_left = None
         paragraph.list_marker_right = None
+        
+        paragraph.is_list_marker_only = False
+        paragraph.list_content_region_number = None

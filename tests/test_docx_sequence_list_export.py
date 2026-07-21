@@ -27,7 +27,7 @@ from src.models.list_sequence import (
     ListSequenceItem,
 )
 from src.models.page import Page
-
+from types import SimpleNamespace
 
 def make_page_and_sequence():
     page = Page(
@@ -301,6 +301,52 @@ class DocxSequenceListExportTests(
             .first_line_indent
         )
 
+    def test_list_marker_style_uses_content_font(
+        self,
+    ) -> None:
+        region = SimpleNamespace(
+            list_marker="•",
+    
+            lines=[
+                SimpleNamespace(
+                    spans=[
+                        SimpleNamespace(
+                            text="• ",
+                            font="Symbol",
+                            font_size=11.0,
+                            left=50.0,
+                        ),
+    
+                        SimpleNamespace(
+                            text="List item text",
+                            font="Arial",
+                            font_size=11.0,
+                            left=70.0,
+                        ),
+                    ]
+                )
+            ],
+        )
+    
+        (
+            marker_font_name,
+            marker_font_size,
+        ) = (
+            DocxExporter
+            ._resolve_list_marker_style(
+                region
+            )
+        )
+    
+        self.assertEqual(
+            marker_font_name,
+            "Arial",
+        )
+    
+        self.assertEqual(
+            marker_font_size,
+            11.0,
+        )
 
 if __name__ == "__main__":
     unittest.main()

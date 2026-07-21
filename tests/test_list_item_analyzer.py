@@ -332,6 +332,137 @@ class ListItemAnalyzerTests(
             paragraph.list_type
         )
 
+    def test_standalone_bullet_attaches_to_same_line_content(
+        self,
+    ) -> None:
+        page = make_page()
+    
+        marker_paragraph = add_paragraph(
+            page=page,
+            number=1,
+            spans=[
+                make_span(
+                    "•",
+                    50.0,
+                    56.0,
+                ),
+            ],
+        )
+    
+        content_paragraph = add_paragraph(
+            page=page,
+            number=2,
+            spans=[
+                make_span(
+                    "Invoices sorted by date.",
+                    70.0,
+                    220.0,
+                ),
+            ],
+        )
+    
+        results = (
+            ListItemAnalyzer
+            .analyze_page(
+                page
+            )
+        )
+    
+        self.assertTrue(
+            marker_paragraph
+            .is_list_marker_only
+        )
+    
+        self.assertEqual(
+            marker_paragraph
+            .list_content_region_number,
+            2,
+        )
+    
+        self.assertIsNone(
+            marker_paragraph.list_type
+        )
+    
+        self.assertEqual(
+            content_paragraph.list_type,
+            "bullet",
+        )
+    
+        self.assertEqual(
+            content_paragraph.list_marker,
+            "•",
+        )
+    
+        self.assertEqual(
+            content_paragraph.content_left,
+            70.0,
+        )
+    
+        self.assertEqual(
+            len(results),
+            1,
+        )
+    
+        self.assertEqual(
+            results[0]
+            .paragraph_region_number,
+            2,
+        )
+    
+    
+    def test_standalone_bullet_does_not_attach_to_distant_line(
+        self,
+    ) -> None:
+        page = make_page()
+    
+        marker_paragraph = add_paragraph(
+            page=page,
+            number=1,
+            spans=[
+                make_span(
+                    "•",
+                    50.0,
+                    56.0,
+                ),
+            ],
+        )
+    
+        content_paragraph = add_paragraph(
+            page=page,
+            number=2,
+            spans=[
+                make_span(
+                    "Separate paragraph.",
+                    70.0,
+                    220.0,
+                ),
+            ],
+        )
+    
+        content_paragraph.top = 160.0
+        content_paragraph.bottom = 175.0
+    
+        for span in (
+            content_paragraph
+            .lines[0]
+            .spans
+        ):
+            span.top = 160.0
+            span.bottom = 175.0
+    
+        ListItemAnalyzer.analyze_page(
+            page
+        )
+    
+        self.assertFalse(
+            marker_paragraph
+            .is_list_marker_only
+        )
+    
+        self.assertIsNone(
+            content_paragraph.list_type
+        )
+
     def test_reanalysis_removes_stale_list_data(
         self,
     ) -> None:

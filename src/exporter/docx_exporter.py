@@ -1132,37 +1132,76 @@ class DocxExporter:
         region,
     ) -> tuple[str, float]:
         """
-        Use the first line's text style for the Word bullet or
-        number marker.
+        Use the list content style for the generated Word marker.
+    
+        PDF bullets are frequently extracted using the legacy
+        Symbol font, while the list text uses Arial or another
+        Unicode font. Word's generated Unicode bullet should use
+        the content font, not the PDF Symbol font.
         """
-
+    
+        marker = str(
+            getattr(
+                region,
+                "list_marker",
+                "",
+            )
+            or ""
+        ).strip()
+    
+        fallback_font_size = 11.0
+    
         for line in region.lines:
             visible_spans = sorted(
                 [
                     span
+    
                     for span in line.spans
-                    if span.text.strip()
+    
+                    if str(
+                        span.text
+                    ).strip()
                 ],
-                key=lambda span: span.left,
-            )
-
-            if not visible_spans:
-                continue
-
-            marker_span = visible_spans[0]
-
-            return (
-                FontNameResolver.resolve(
-                    marker_span.font
-                ),
-                DocxExporter._round_word_font_size(
-                    marker_span.font_size
+                key=lambda span: (
+                    span.left
                 ),
             )
-
+    
+            for span in visible_spans:
+                visible_text = str(
+                    span.text
+                ).strip()
+    
+                fallback_font_size = (
+                    DocxExporter
+                    ._round_word_font_size(
+                        span.font_size
+                    )
+                )
+    
+                # Skip a span containing only the original marker.
+                # The generated Word marker should inherit the
+                # content font.
+                if (
+                    marker
+                    and visible_text == marker
+                ):
+                    continue
+                
+                return (
+                    FontNameResolver.resolve(
+                        span.font
+                    ),
+    
+                    DocxExporter
+                    ._round_word_font_size(
+                        span.font_size
+                    ),
+                )
+    
         return (
             "Arial",
-            11.0,
+            fallback_font_size,
         )
 
 

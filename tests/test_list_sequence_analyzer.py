@@ -427,7 +427,59 @@ class ListSequenceAnalyzerTests(
         self.assertIsNone(
             paragraph.list_item_index
         )
-
+    def test_marker_only_region_does_not_split_sequence(
+        self,
+    ) -> None:
+        page = make_page()
+    
+        first = add_paragraph(
+            page,
+            1,
+            "First item",
+            100.0,
+            80.0,
+        )
+    
+        marker_only = add_paragraph(
+            page,
+            2,
+            "•",
+            125.0,
+            60.0,
+            list_type=None,
+            marker=None,
+            marker_kind=(
+                ListMarkerKind.UNKNOWN
+            ),
+        )
+    
+        marker_only.is_list_marker_only = (
+            True
+        )
+    
+        second = add_paragraph(
+            page,
+            3,
+            "Second item",
+            125.0,
+            80.0,
+        )
+    
+        ListSequenceAnalyzer.analyze_page(
+            page
+        )
+    
+        self.assertEqual(
+            len(
+                page.list_sequences
+            ),
+            1,
+        )
+    
+        self.assertEqual(
+            first.list_sequence_id,
+            second.list_sequence_id,
+        )
 
 if __name__ == "__main__":
     unittest.main()

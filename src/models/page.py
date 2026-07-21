@@ -40,6 +40,9 @@ from src.models.list_item import (
 from src.models.list_sequence import (
     ListSequence,
 )
+from src.models.page_render_plan import (
+    PageRenderPlan,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -82,6 +85,9 @@ class Page:
     ] = field(
         default_factory=list
     )
+    render_plan: PageRenderPlan = field(
+        init=False
+    )
     layout_regions: list[
         LayoutRegion
     ] = field(
@@ -121,7 +127,9 @@ class Page:
         Content metrics and classification are filled later by
         PageProfileAnalyzer.
         """
-    
+        self.render_plan = PageRenderPlan(
+            page_number=self.number
+        )
         self.profile = PageProfile(
             page_number=self.number,
     

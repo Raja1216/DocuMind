@@ -555,6 +555,54 @@ class WordNumberingManagerTests(
             ),
         )
 
+    def test_unicode_bullet_does_not_use_symbol_font(
+        self,
+    ) -> None:
+        word_document = WordDocument()
+    
+        manager = WordNumberingManager(
+            word_document
+        )
+    
+        number_id = manager.create_sequence(
+            sequence=make_bullet_sequence(),
+            marker_font_name="Symbol",
+            marker_font_size=11.0,
+        )
+    
+        abstract_number = (
+            self._resolve_abstract_number(
+                manager,
+                number_id,
+            )
+        )
+    
+        level = abstract_number.find(
+            qn("w:lvl")
+        )
+    
+        run_properties = level.find(
+            qn("w:rPr")
+        )
+    
+        fonts = run_properties.find(
+            qn("w:rFonts")
+        )
+    
+        self.assertEqual(
+            fonts.get(
+                qn("w:ascii")
+            ),
+            "Arial",
+        )
+    
+        self.assertEqual(
+            fonts.get(
+                qn("w:hAnsi")
+            ),
+            "Arial",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

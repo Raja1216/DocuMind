@@ -730,6 +730,13 @@ class ListSequenceAnalyzer:
         for index, paragraph in enumerate(
             page.paragraph_regions
         ):
+            if getattr(
+                paragraph,
+                "is_list_marker_only",
+                False,
+            ):
+                continue
+    
             text = str(
                 getattr(
                     paragraph,

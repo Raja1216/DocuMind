@@ -156,10 +156,35 @@ class ParagraphRegionAnalyzer:
     )
 
     TEXTUAL_LIST_PATTERN = re.compile(
-        r"^(?P<marker>"
-        r"(?:\d+|[A-Za-z]|[ivxlcdmIVXLCDM]+)"
-        r"[\.\)]"
-        r")(?:\s+|$)"
+        r"""
+        ^\s*
+        (?P<marker>
+            [•◦▪▫●○■□‣⁃⁌⁍➢➤➔✓✔]
+            |
+            \(
+                \s*
+                (?:
+                    \d+(?:\.\d+)*
+                    |
+                    [A-Za-z]
+                    |
+                    [ivxlcdmIVXLCDM]+
+                )
+                \s*
+            \)
+            |
+            (?:
+                \d+(?:\.\d+)*
+                |
+                [A-Za-z]
+                |
+                [ivxlcdmIVXLCDM]+
+            )
+            [\.\)]
+        )
+        (?P<separator>\s+|$)
+        """,
+        flags=re.VERBOSE,
     )
 
     TERMINAL_PARAGRAPH_CHARACTERS = (
@@ -813,6 +838,10 @@ class ParagraphRegionAnalyzer:
         """
         Determine whether the current visual line continues the
         previous logical paragraph.
+
+        List continuation alignment is measured against the content
+        start after the marker rather than against the marker's left
+        edge.
         """
 
         previous = group[-1]
@@ -826,14 +855,13 @@ class ParagraphRegionAnalyzer:
         ):
             return False
 
-        current_text = (
-            current.text.strip()
-        )
+        current_text = current.text.strip()
 
         if not current_text:
             return False
 
-        # A new textual marker always starts another list item.
+        # A textual marker starts a new list item and must never be
+        # absorbed into the preceding item.
         if (
             cls._extract_textual_marker(
                 current_text
@@ -848,23 +876,47 @@ class ParagraphRegionAnalyzer:
             )
         )
 
+        reference_font_size = max(
+            float(
+                previous.font_size
+            ),
+            float(
+                current.font_size
+            ),
+            1.0,
+        )
+
+        left_tolerance = max(
+            float(
+                cls.CONTINUATION_LEFT_TOLERANCE
+            ),
+            reference_font_size * 0.90,
+        )
+
         if (
             abs(
-                current.left
-                - expected_left
+                float(
+                    current.left
+                )
+                - float(
+                    expected_left
+                )
             )
-            > cls.CONTINUATION_LEFT_TOLERANCE
+            > left_tolerance
         ):
             return False
 
         # Use line-top advancement rather than bbox bottom/top gap.
         #
-        # PDF font bounding boxes often overlap vertically, which
-        # makes current.top - previous.bottom negative even when
-        # the lines are perfectly normal consecutive lines.
+        # PDF font bounding boxes can overlap vertically even when two
+        # lines are normal consecutive lines.
         line_advance = (
-            current.top
-            - previous.top
+            float(
+                current.top
+            )
+            - float(
+                previous.top
+            )
         )
 
         if (
@@ -872,12 +924,6 @@ class ParagraphRegionAnalyzer:
             < cls.MINIMUM_LINE_ADVANCE
         ):
             return False
-
-        reference_font_size = max(
-            previous.font_size,
-            current.font_size,
-            1.0,
-        )
 
         maximum_line_advance = (
             reference_font_size
@@ -895,24 +941,22 @@ class ParagraphRegionAnalyzer:
             & current.block_numbers
         )
 
-        # Consecutive lines from the same PyMuPDF text block are
-        # normally part of the same paragraph.
+        # Consecutive lines originating from one PyMuPDF block normally
+        # belong to the same logical paragraph.
         if same_source_block:
             return True
 
-        previous_text = (
-            previous.text.rstrip()
-        )
+        previous_text = previous.text.rstrip()
 
         if not previous_text:
             return False
 
-        # A trailing hyphen explicitly indicates continuation.
+        # Explicit word hyphenation indicates continuation.
         if previous_text.endswith("-"):
             return True
 
-        # Across different PDF blocks, sentence-ending punctuation
-        # usually means that the next line starts a new paragraph.
+        # Across independent PDF blocks, terminal punctuation normally
+        # indicates a genuine paragraph boundary.
         if previous_text.endswith(
             cls.TERMINAL_PARAGRAPH_CHARACTERS
         ):
@@ -925,32 +969,164 @@ class ParagraphRegionAnalyzer:
         cls,
         group: list[_LineRecord],
     ) -> float:
-        first = group[0]
+        """
+        Return the expected left edge of wrapped paragraph text.
+
+        For a list item, the expected edge is the text position
+        after the marker, not the marker's own left position.
+        """
+
+        if not group:
+            return 0.0
+
+        first_line = group[0]
 
         visible_spans = sorted(
-            first.visible_spans,
-            key=lambda span: span.left,
+            [
+                span
+                for span in first_line.visible_spans
+                if str(
+                    getattr(
+                        span,
+                        "text",
+                        "",
+                    )
+                ).strip()
+            ],
+            key=lambda span: float(
+                span.left
+            ),
         )
 
         if not visible_spans:
-            return first.left
+            return float(
+                first_line.left
+            )
 
-        first_text = (
-            visible_spans[0]
-            .text
-            .strip()
+        first_span = visible_spans[0]
+
+        raw_text = str(
+            getattr(
+                first_span,
+                "text",
+                "",
+            )
+            or ""
         )
 
-        if (
-            cls._extract_textual_marker(
-                first_text
-            )
-            is not None
-            and len(visible_spans) > 1
-        ):
-            return visible_spans[1].left
+        leading_whitespace_length = (
+            len(raw_text)
+            - len(raw_text.lstrip())
+        )
 
-        return first.left
+        visible_text = raw_text.lstrip()
+
+        marker_match = (
+            cls.TEXTUAL_LIST_PATTERN.match(
+                visible_text
+            )
+        )
+
+        if marker_match is None:
+            return float(
+                first_line.left
+            )
+
+        marker = marker_match.group(
+            "marker"
+        )
+
+        text_after_marker = visible_text[
+            marker_match.end():
+        ].strip()
+
+        # Marker and content are in separate spans:
+        #
+        # span 1 = "•"
+        # span 2 = "Identify the target..."
+        if (
+            not text_after_marker
+            and len(visible_spans) >= 2
+        ):
+            return float(
+                visible_spans[1].left
+            )
+
+        span_left = float(
+            first_span.left
+        )
+
+        span_right = float(
+            first_span.right
+        )
+
+        span_width = max(
+            span_right - span_left,
+            0.0,
+        )
+
+        visible_character_count = max(
+            len(
+                visible_text
+            ),
+            1,
+        )
+
+        average_character_width = (
+            span_width
+            / visible_character_count
+        )
+
+        if average_character_width <= 0.0:
+            average_character_width = max(
+                float(
+                    getattr(
+                        first_span,
+                        "font_size",
+                        10.0,
+                    )
+                )
+                * 0.48,
+                1.0,
+            )
+
+        # marker_match.end() includes marker punctuation and the
+        # following whitespace.
+        consumed_character_count = (
+            leading_whitespace_length
+            + marker_match.end()
+        )
+
+        estimated_content_left = (
+            span_left
+            + (
+                average_character_width
+                * consumed_character_count
+            )
+        )
+
+        minimum_marker_width = max(
+            float(
+                getattr(
+                    first_span,
+                    "font_size",
+                    10.0,
+                )
+            )
+            * 0.90,
+            8.0,
+        )
+
+        estimated_content_left = max(
+            estimated_content_left,
+            span_left + minimum_marker_width,
+        )
+
+        # Never return a coordinate beyond the first span.
+        return min(
+            estimated_content_left,
+            span_right,
+        )
 
     @classmethod
     def _build_region(

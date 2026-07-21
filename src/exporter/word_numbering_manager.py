@@ -66,7 +66,15 @@ class WordNumberingManager:
         "□",
         "‣",
     )
-
+    
+    LEGACY_SYMBOL_FONT_TOKENS = (
+        "symbol",
+        "wingdings",
+        "webdings",
+        "zapfdingbats",
+        "dingbats",
+    )
+    
     DEFAULT_LEFT_TWIPS = 720
     DEFAULT_HANGING_TWIPS = 360
 
@@ -134,7 +142,14 @@ class WordNumberingManager:
             raise ValueError(
                 f"Unsupported list type: {list_type}"
             )
-
+        marker_font_name = (
+            self._normalize_marker_font(
+                list_type=list_type,
+                marker_font_name=(
+                    marker_font_name
+                ),
+            )
+        )
         marker_half_points = (
             self._to_half_points(
                 marker_font_size
@@ -213,11 +228,11 @@ class WordNumberingManager:
     ) -> int:
         """
         Create one genuine multilevel Word numbering sequence.
-
+    
         Every logical ListSequence receives its own numId, while
         compatible sequences may reuse the same abstractNum.
         """
-
+    
         if sequence.list_type not in {
             "bullet",
             "number",
@@ -228,7 +243,20 @@ class WordNumberingManager:
                     f"{sequence.list_type}"
                 )
             )
-
+    
+        # This must be outside the error condition and before
+        # level definitions are created.
+        marker_font_name = (
+            self._normalize_marker_font(
+                list_type=(
+                    sequence.list_type
+                ),
+                marker_font_name=(
+                    marker_font_name
+                ),
+            )
+        )
+    
         level_definitions = (
             self._build_sequence_level_definitions(
                 sequence=sequence,
@@ -240,13 +268,13 @@ class WordNumberingManager:
                 ),
             )
         )
-
+    
         start_overrides = (
             self._build_start_overrides(
                 sequence
             )
         )
-
+    
         return self._create_numbering_instance(
             level_definitions=(
                 level_definitions
@@ -1154,6 +1182,42 @@ class WordNumberingManager:
             )
             + 1
         )
+
+    @classmethod
+    def _normalize_marker_font(
+        cls,
+        list_type: str,
+        marker_font_name: str,
+    ) -> str:
+        """
+        Prevent a Unicode bullet such as U+2022 from being rendered
+        using a legacy Symbol/Wingdings character map.
+        """
+
+        normalized_name = str(
+            marker_font_name
+            or "Arial"
+        ).strip()
+
+        if not normalized_name:
+            normalized_name = "Arial"
+
+        if list_type != "bullet":
+            return normalized_name
+
+        lower_name = (
+            normalized_name.casefold()
+        )
+
+        if any(
+            token in lower_name
+
+            for token
+            in cls.LEGACY_SYMBOL_FONT_TOKENS
+        ):
+            return "Arial"
+
+        return normalized_name
 
     # ---------------------------------------------------------
     # Unit helpers

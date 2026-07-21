@@ -515,6 +515,12 @@ class EditableLayoutResolver:
             )
             or []
         ):
+            if getattr(
+                paragraph,
+                "is_list_marker_only",
+                False,
+            ):
+                continue
             text = str(
                 getattr(
                     paragraph,
