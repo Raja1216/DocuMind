@@ -15,7 +15,9 @@ from src.models.list_item import (
     ListMarkerSource,
 )
 from src.models.page import Page
-
+from src.analyzer.list_sequence_analyzer import (
+    ListSequenceAnalyzer,
+)
 
 def make_page() -> Page:
     return Page(
@@ -461,6 +463,137 @@ class ListItemAnalyzerTests(
     
         self.assertIsNone(
             content_paragraph.list_type
+        )
+
+    def test_inline_marker_content_does_not_use_next_format_span(
+        self,
+    ) -> None:
+        page = make_page()
+
+        paragraph = add_paragraph(
+            page=page,
+            number=1,
+            spans=[
+                make_span(
+                    "1. Open the template design ",
+                    50.0,
+                    200.0,
+                ),
+                make_span(
+                    "ap_bookmark.IFD",
+                    200.0,
+                    290.0,
+                ),
+            ],
+        )
+
+        ListItemAnalyzer.analyze_page(
+            page
+        )
+
+        self.assertEqual(
+            paragraph.list_marker,
+            "1.",
+        )
+
+        self.assertIsNotNone(
+            paragraph.content_left
+        )
+
+        self.assertLess(
+            paragraph.content_left,
+            90.0,
+        )
+
+        self.assertGreater(
+            paragraph.content_left,
+            paragraph.list_marker_right,
+        )
+
+        self.assertNotAlmostEqual(
+            paragraph.content_left,
+            200.0,
+            places=2,
+        )
+
+    def test_formatting_spans_do_not_create_false_numbered_nesting(
+        self,
+    ) -> None:
+        page = make_page()
+    
+        first = add_paragraph(
+            page=page,
+            number=1,
+            spans=[
+                make_span(
+                    "1. Open the template design ",
+                    50.0,
+                    200.0,
+                ),
+                make_span(
+                    "ap_bookmark.IFD",
+                    200.0,
+                    290.0,
+                ),
+            ],
+        )
+    
+        second = add_paragraph(
+            page=page,
+            number=2,
+            spans=[
+                make_span(
+                    "2. Modify the ",
+                    50.0,
+                    122.0,
+                ),
+                make_span(
+                    "-z",
+                    122.0,
+                    134.0,
+                ),
+                make_span(
+                    " option in the command.",
+                    134.0,
+                    265.0,
+                ),
+            ],
+        )
+    
+        second.top = 125.0
+        second.bottom = 140.0
+    
+        for span in second.lines[0].spans:
+            span.top = 125.0
+            span.bottom = 140.0
+    
+        ListItemAnalyzer.analyze_page(
+            page
+        )
+    
+        ListSequenceAnalyzer.analyze_page(
+            page
+        )
+    
+        self.assertAlmostEqual(
+            first.content_left,
+            second.content_left,
+            delta=8.0,
+        )
+    
+        self.assertEqual(
+            first.list_sequence_id,
+            second.list_sequence_id,
+        )
+    
+        self.assertEqual(
+            first.list_level,
+            0,
+        )
+    
+        self.assertEqual(
+            second.list_level,
+            0,
         )
 
     def test_reanalysis_removes_stale_list_data(

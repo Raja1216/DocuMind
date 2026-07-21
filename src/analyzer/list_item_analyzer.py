@@ -1069,10 +1069,28 @@ class ListItemAnalyzer:
         float | None,
         float | None,
     ]:
+        """
+        Resolve marker and content geometry from the first visible
+        PDF line.
+    
+        A list marker can be extracted in either form:
+    
+            span 1 = "1."
+            span 2 = " Item text"
+    
+        or:
+    
+            span 1 = "1. Item text before "
+            span 2 = "bold text"
+    
+        In the second form, span 2 is only a formatting change. It
+        must not be treated as the beginning of the list content.
+        """
+    
         spans = cls._first_visible_spans(
             paragraph
         )
-
+    
         if not spans:
             return (
                 None,
@@ -1083,109 +1101,163 @@ class ListItemAnalyzer:
                     None,
                 ),
             )
-
+    
         marker_span = spans[0]
-
-        marker_left = float(
+    
+        span_left = float(
             marker_span.left
         )
-
+    
+        span_right = float(
+            marker_span.right
+        )
+    
         marker_text = str(
             marker_span.text
+            or ""
         )
-
+    
         marker_text_stripped = (
             marker_text.strip()
         )
-
+    
+        # Marker-only first span. The following visible span is the
+        # actual content span.
         if (
-            marker_text_stripped
-            == marker
+            marker_text_stripped == marker
             and len(spans) >= 2
         ):
             return (
-                marker_left,
-                float(
-                    marker_span.right
-                ),
+                span_left,
+                span_right,
                 float(
                     spans[1].left
                 ),
             )
-
-        if marker_text.lstrip().startswith(
+    
+        leading_whitespace_count = (
+            len(marker_text)
+            - len(marker_text.lstrip())
+        )
+    
+        text_without_leading_space = (
+            marker_text.lstrip()
+        )
+    
+        if text_without_leading_space.startswith(
             marker
         ):
             span_width = max(
-                float(
-                    marker_span.right
-                )
-                - float(
-                    marker_span.left
-                ),
+                span_right - span_left,
                 0.0,
             )
-
-            visible_character_count = max(
-                len(
-                    marker_text.strip()
-                ),
+    
+            character_count = max(
+                len(marker_text),
                 1,
             )
-
+    
             average_character_width = (
                 span_width
-                / visible_character_count
+                / character_count
             )
-
+    
             if average_character_width <= 0.0:
                 average_character_width = (
                     max(
                         float(
-                            marker_span.font_size
+                            getattr(
+                                marker_span,
+                                "font_size",
+                                10.0,
+                            )
                         ),
                         1.0,
                     )
                     * cls
                     .ESTIMATED_CHARACTER_WIDTH_FACTOR
                 )
-
-            estimated_marker_width = (
-                average_character_width
-                * len(marker)
+    
+            marker_start_character = (
+                leading_whitespace_count
             )
-
-            marker_right = (
-                marker_left
-                + estimated_marker_width
+    
+            marker_end_character = (
+                marker_start_character
+                + len(marker)
             )
-
-            content_left = (
-                float(
+    
+            content_start_character = (
+                marker_end_character
+            )
+    
+            # Include separator whitespace after the marker.
+            while (
+                content_start_character
+                < len(marker_text)
+                and marker_text[
+                    content_start_character
+                ].isspace()
+            ):
+                content_start_character += 1
+    
+            marker_left = (
+                span_left
+                + average_character_width
+                * marker_start_character
+            )
+    
+            marker_right = min(
+                span_left
+                + average_character_width
+                * marker_end_character,
+                span_right,
+            )
+    
+            # Content begins inside the same span. Later spans may
+            # merely represent bold, italic, font, or color changes.
+            if (
+                content_start_character
+                < len(marker_text)
+            ):
+                content_left = min(
+                    span_left
+                    + average_character_width
+                    * content_start_character,
+                    span_right,
+                )
+    
+            # The first span contains only marker/separator text.
+            elif len(spans) >= 2:
+                content_left = float(
                     spans[1].left
                 )
-                if len(spans) >= 2
-                else marker_right
-                + max(
-                    cls.MINIMUM_MARKER_CONTENT_GAP,
-                    float(
-                        marker_span.font_size
+    
+            else:
+                content_left = (
+                    marker_right
+                    + max(
+                        cls.MINIMUM_MARKER_CONTENT_GAP,
+                        float(
+                            getattr(
+                                marker_span,
+                                "font_size",
+                                10.0,
+                            )
+                        )
+                        * 0.30,
                     )
-                    * 0.30,
                 )
-            )
-
+    
             return (
                 marker_left,
                 marker_right,
                 content_left,
             )
-
+    
         return (
-            marker_left,
-            float(
-                marker_span.right
-            ),
+            span_left,
+            span_right,
             (
                 float(
                     spans[1].left
