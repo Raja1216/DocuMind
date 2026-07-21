@@ -386,8 +386,6 @@ class EditableTableCell:
         repr=False,
     )
 
-    is_synthetic: bool = False
-
     warnings: list[str] = field(
         default_factory=list
     )

@@ -49,6 +49,9 @@ from src.analyzer.page_render_plan_analyzer import (
 from src.analyzer.editable_table_normalizer import (
     EditableTableNormalizer,
 )
+from src.analyzer.editable_table_grid_reconstructor import (
+    EditableTableGridReconstructor,
+)
 
 
 class DocumentAnalyzer:
@@ -114,7 +117,9 @@ class DocumentAnalyzer:
         EditableTableNormalizer.normalize_document(
             document
         )
-
+        EditableTableGridReconstructor.reconstruct_document(
+            document
+        )
         # -----------------------------------------------------
         # Page profile, conversion policy and render plan
         # -----------------------------------------------------
