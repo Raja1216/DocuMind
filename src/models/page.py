@@ -46,6 +46,9 @@ from src.models.page_render_plan import (
 from src.models.editable_table import (
     EditableTable,
 )
+from src.models.editable_table_validation import (
+    EditableTableValidationReport,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -73,6 +76,13 @@ class Page:
         EditableTable
     ] = field(
         default_factory=list
+    )
+
+    editable_table_validation_reports: dict[
+        str,
+        EditableTableValidationReport
+    ] = field(
+        default_factory=dict
     )
     vector_graphics: list[VectorGraphic] = field(
         default_factory=list

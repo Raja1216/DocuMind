@@ -25,6 +25,10 @@ from src.models.editable_table import (
     EditableTableDisposition,
     EditableTableRow,
 )
+from src.models.editable_table_validation import (
+    EditableTableRenderDecision,
+    EditableTableValidationReport,
+)
 from src.models.geometry.rectangle import (
     Rectangle,
 )
@@ -161,6 +165,22 @@ def make_editable_table(
     return table
 
 
+def make_validation_report(
+    table: EditableTable,
+    *,
+    decision: EditableTableRenderDecision = (
+        EditableTableRenderDecision
+        .NATIVE_SAFE
+    ),
+) -> EditableTableValidationReport:
+    return EditableTableValidationReport(
+        table_id=table.table_id,
+        page_number=table.page_number,
+        decision=decision,
+        native_confidence=0.95,
+    )
+
+
 def make_table_render_item(
     source_table,
     *,
@@ -224,6 +244,13 @@ class EditableTableRenderIntegrationTests(
             editable_tables=[
                 editable_table
             ],
+            editable_table_validation_reports={
+                editable_table.table_id: (
+                    make_validation_report(
+                        editable_table
+                    )
+                )
+            },
         )
 
         with patch(
@@ -297,6 +324,17 @@ class EditableTableRenderIntegrationTests(
             editable_tables=[
                 editable_table
             ],
+            editable_table_validation_reports={
+                editable_table.table_id: (
+                    make_validation_report(
+                        editable_table,
+                        decision=(
+                            EditableTableRenderDecision
+                            .VISUAL_FALLBACK
+                        ),
+                    )
+                )
+            },
         )
 
         with patch(

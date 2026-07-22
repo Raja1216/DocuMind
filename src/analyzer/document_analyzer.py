@@ -61,6 +61,9 @@ from src.analyzer.editable_table_merge_detector import (
 from src.analyzer.editable_table_style_analyzer import (
     EditableTableStyleAnalyzer,
 )
+from src.analyzer.editable_table_validator import (
+    EditableTableValidator,
+)
 
 class DocumentAnalyzer:
 
@@ -138,6 +141,11 @@ class DocumentAnalyzer:
         EditableTableStyleAnalyzer.analyze_document(
             document
         )
+
+        EditableTableValidator.validate_document(
+            document
+        )
+
         # -----------------------------------------------------
         # Page profile, conversion policy and render plan
         # -----------------------------------------------------

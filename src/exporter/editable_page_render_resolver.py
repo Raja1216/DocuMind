@@ -14,6 +14,9 @@ from src.models.page_render_plan import (
     RenderItemRole,
     RenderPlacement,
 )
+from src.models.editable_table_validation import (
+    EditableTableRenderDecision,
+)
 
 
 class EditableRenderAction(
@@ -228,6 +231,15 @@ class EditablePageRenderResolver:
             or []
         )
 
+        table_validation_reports = dict(
+            getattr(
+                page,
+                "editable_table_validation_reports",
+                {},
+            )
+            or {}
+        )
+
         render_plan = getattr(
             page,
             "render_plan",
@@ -279,6 +291,9 @@ class EditablePageRenderResolver:
                     editable_tables=(
                         editable_tables
                     ),
+                    table_validation_reports=(
+                        table_validation_reports
+                    ),
                 )
             )
 
@@ -307,6 +322,7 @@ class EditablePageRenderResolver:
         layout_by_identity: dict[int, Any],
         layout_by_region_number: dict[int, Any],
         editable_tables: list[Any],
+        table_validation_reports: dict[str, Any],
     ) -> EditableRenderInstruction:
         source = render_item.source
 
@@ -341,6 +357,9 @@ class EditablePageRenderResolver:
             return cls._resolve_table_instruction(
                 render_item=render_item,
                 editable_tables=editable_tables,
+                table_validation_reports=(
+                    table_validation_reports
+                ),
             )
 
         action_map = {
@@ -384,6 +403,7 @@ class EditablePageRenderResolver:
         *,
         render_item: PageRenderItem,
         editable_tables: list[Any],
+        table_validation_reports: dict[str, Any],
     ) -> EditableRenderInstruction:
         source_table = render_item.source
 
@@ -450,6 +470,105 @@ class EditablePageRenderResolver:
                 ),
                 warnings=[
                     warning
+                ],
+            )
+
+        validation_report = (
+            table_validation_reports.get(
+                str(
+                    getattr(
+                        editable_table,
+                        "table_id",
+                        "",
+                    )
+                )
+            )
+        )
+
+        if validation_report is None:
+            warning = (
+                "No EditableTableValidationReport exists for "
+                f"{getattr(editable_table, 'table_id', render_item.item_id)}."
+            )
+
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_TABLE
+                ),
+                source=editable_table,
+                render_item=render_item,
+                reason=(
+                    "Native Word-table rendering requires a "
+                    "completed generalized validation report."
+                ),
+                warnings=[
+                    warning
+                ],
+            )
+
+        validation_decision = getattr(
+            validation_report,
+            "decision",
+            None,
+        )
+
+        if (
+            validation_decision
+            == EditableTableRenderDecision.SKIP
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=EditableRenderAction.IGNORE,
+                source=editable_table,
+                render_item=render_item,
+                reason=(
+                    "The table validator selected the skip "
+                    "decision."
+                ),
+            )
+
+        if validation_decision not in {
+            EditableTableRenderDecision
+            .NATIVE_SAFE,
+            EditableTableRenderDecision
+            .NATIVE_WITH_WARNINGS,
+        }:
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_TABLE
+                ),
+                source=editable_table,
+                render_item=render_item,
+                reason=(
+                    "The generalized table validator selected "
+                    "visual fallback."
+                ),
+                warnings=[
+                    issue.message
+                    for issue in getattr(
+                        validation_report,
+                        "issues",
+                        [],
+                    )
+                    if str(
+                        getattr(
+                            getattr(
+                                issue,
+                                "severity",
+                                None,
+                            ),
+                            "value",
+                            "",
+                        )
+                    )
+                    in {
+                        "warning",
+                        "error",
+                    }
                 ],
             )
 
