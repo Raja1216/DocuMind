@@ -680,6 +680,8 @@ for page in document.pages:
             f"\nPage {page.number}: "
             f"paragraphs="
             f"{len(editable_plan.paragraph_instructions)}, "
+            f"tables="
+            f"{len(editable_plan.table_instructions)}, "
             f"deferred="
             f"{len(editable_plan.deferred_instructions)}, "
             f"ignored="

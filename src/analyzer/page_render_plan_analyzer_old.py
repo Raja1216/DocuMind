@@ -739,36 +739,10 @@ class PageRenderPlanAnalyzer:
             ):
                 anchor = -1_000_000.0
 
-            if (
-                item.placement
-                == RenderPlacement.FLOW
-            ):
-                # Flow items must remain in source reading order.
-                # BODY_SPANNING is a geometric role, not a command
-                # to move every spanning item ahead of normal body
-                # content. Use role only as a tie-breaker.
-                primary_order = float(
-                    anchor
-                )
-                secondary_order = (
-                    role_rank
-                )
-
-            else:
-                # Header/footer and other non-flow stories still
-                # use their semantic role before their geometric
-                # anchor.
-                primary_order = (
-                    role_rank
-                )
-                secondary_order = float(
-                    anchor
-                )
-
             sort_key = (
                 placement_rank,
-                primary_order,
-                secondary_order,
+                role_rank,
+                float(anchor),
                 float(item.top),
                 float(item.left),
                 int(item.source_index),

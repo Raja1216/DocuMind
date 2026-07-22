@@ -364,6 +364,75 @@ class PageRenderPlanAnalyzerTests(
             ],
         )
 
+    def test_bottom_spanning_table_does_not_jump_ahead_of_body(
+        self,
+    ) -> None:
+        page = make_page()
+
+        add_paragraph(
+            page=page,
+            region_number=1,
+            top=100.0,
+            bottom=120.0,
+            text="Earlier body content",
+            order=1,
+        )
+
+        add_paragraph(
+            page=page,
+            region_number=2,
+            top=700.0,
+            bottom=720.0,
+            text="Later body content",
+            order=2,
+        )
+
+        page.tables.append(
+            make_source(
+                left=30.0,
+                top=520.0,
+                right=582.0,
+                bottom=640.0,
+                table_number=1,
+                confidence=0.95,
+            )
+        )
+
+        plan = (
+            PageRenderPlanAnalyzer
+            .analyze_page(
+                page
+            )
+        )
+
+        semantic_items = [
+            item
+            for item in plan.items
+            if (
+                item.placement
+                == RenderPlacement.FLOW
+                and item.disposition
+                != RenderDisposition.SKIP
+            )
+        ]
+
+        self.assertEqual(
+            [
+                item.kind
+                for item in semantic_items
+            ],
+            [
+                RenderItemKind.PARAGRAPH,
+                RenderItemKind.TABLE,
+                RenderItemKind.PARAGRAPH,
+            ],
+        )
+
+        self.assertEqual(
+            semantic_items[1].role,
+            RenderItemRole.BODY_SPANNING,
+        )
+
     def test_marker_only_paragraph_is_skipped(
         self,
     ) -> None:

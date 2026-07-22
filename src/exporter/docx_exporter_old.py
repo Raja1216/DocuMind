@@ -66,9 +66,6 @@ from src.exporter.editable_page_render_resolver import (
     EditablePageRenderResolver,
     EditableRenderAction,
 )
-from src.exporter.editable_word_table_renderer import (
-    EditableWordTableRenderer,
-)
 
 class DocxExporter:
     """
@@ -856,98 +853,6 @@ class DocxExporter:
         )
 
     @staticmethod
-    def _resolve_available_table_width(
-        word_document,
-    ) -> float:
-        """
-        Return the writable width of the active Word section in
-        points.
-
-        The native table renderer performs any final scaling needed
-        to fit this width.
-        """
-
-        sections = list(
-            getattr(
-                word_document,
-                "sections",
-                [],
-            )
-            or []
-        )
-
-        if not sections:
-            return (
-                EditableWordTableRenderer
-                .DEFAULT_AVAILABLE_WIDTH
-            )
-
-        section = sections[-1]
-
-        def resolve_points(
-            value,
-        ) -> float:
-            if value is None:
-                return 0.0
-
-            point_value = getattr(
-                value,
-                "pt",
-                None,
-            )
-
-            if point_value is not None:
-                return float(
-                    point_value
-                )
-
-            try:
-                return float(
-                    value
-                )
-            except (
-                TypeError,
-                ValueError,
-            ):
-                return 0.0
-
-        writable_width = (
-            resolve_points(
-                getattr(
-                    section,
-                    "page_width",
-                    None,
-                )
-            )
-            - resolve_points(
-                getattr(
-                    section,
-                    "left_margin",
-                    None,
-                )
-            )
-            - resolve_points(
-                getattr(
-                    section,
-                    "right_margin",
-                    None,
-                )
-            )
-        )
-
-        if writable_width <= 0.0:
-            return (
-                EditableWordTableRenderer
-                .DEFAULT_AVAILABLE_WIDTH
-            )
-
-        return max(
-            writable_width,
-            EditableWordTableRenderer
-            .MINIMUM_TABLE_WIDTH,
-        )
-
-    @staticmethod
     def _render_page(
         word_document,
         page,
@@ -960,8 +865,8 @@ class DocxExporter:
         """
         Render one PDF page using the unified page render plan.
 
-        RENDER_PARAGRAPH and RENDER_TABLE instructions are handled
-        in source order. Images, charts, vectors and fallback items
+        Only RENDER_PARAGRAPH instructions are handled in this
+        step. Tables, images, charts, vectors and fallback items
         remain deferred for their dedicated exporters.
         """
 
@@ -999,59 +904,29 @@ class DocxExporter:
             )
         ]
 
-        table_instructions = [
-            instruction
-
-            for instruction
-            in editable_render_plan.instructions
-
-            if (
-                instruction.action
-                == EditableRenderAction
-                .RENDER_TABLE
-            )
-        ]
-
-        if (
-            not paragraph_instructions
-            and not table_instructions
-        ):
+        if not paragraph_instructions:
             return
 
-        available_table_width = (
-            DocxExporter
-            ._resolve_available_table_width(
-                word_document
+        regions = [
+            instruction.source
+
+            for instruction
+            in paragraph_instructions
+        ]
+
+        content_left = min(
+            float(
+                region.left
             )
+            for region in regions
         )
 
-        if paragraph_instructions:
-            regions = [
-                instruction.source
-
-                for instruction
-                in paragraph_instructions
-            ]
-
-            content_left = min(
-                float(
-                    region.left
-                )
-                for region in regions
+        content_right = max(
+            float(
+                region.right
             )
-
-            content_right = max(
-                float(
-                    region.right
-                )
-                for region in regions
-            )
-
-        else:
-            content_left = 0.0
-            content_right = (
-                available_table_width
-            )
+            for region in regions
+        )
 
         legacy_active_list_type = None
         legacy_active_number_id = None
@@ -1076,33 +951,12 @@ class DocxExporter:
         ):
             if (
                 instruction.action
-                == EditableRenderAction
-                .RENDER_TABLE
-            ):
-                legacy_active_list_type = None
-                legacy_active_number_id = None
-
-                EditableWordTableRenderer.render(
-                    container=word_document,
-                    table=instruction.source,
-                    available_width=(
-                        available_table_width
-                    ),
-                )
-
-                previous_region = (
-                    instruction.render_item
-                )
-
-                continue
-
-            if (
-                instruction.action
                 != EditableRenderAction
                 .RENDER_PARAGRAPH
             ):
-                # Images, charts, vectors and fallback objects
-                # remain available for their later renderers.
+                # These instructions remain available for later
+                # table, image, chart, vector and fallback
+                # exporters.
                 continue
 
             paragraph_plan = (

@@ -27,8 +27,6 @@ class EditableRenderAction(
 
     RENDER_PARAGRAPH = "render_paragraph"
 
-    RENDER_TABLE = "render_table"
-
     DEFER_TABLE = "defer_table"
 
     DEFER_IMAGE = "defer_image"
@@ -74,15 +72,6 @@ class EditableRenderInstruction:
         return (
             self.action
             == EditableRenderAction.RENDER_PARAGRAPH
-        )
-
-    @property
-    def is_table(
-        self,
-    ) -> bool:
-        return (
-            self.action
-            == EditableRenderAction.RENDER_TABLE
         )
 
     @property
@@ -133,16 +122,6 @@ class EditablePageRenderPlan:
             instruction
             for instruction in self.instructions
             if instruction.is_paragraph
-        ]
-
-    @property
-    def table_instructions(
-        self,
-    ) -> list[EditableRenderInstruction]:
-        return [
-            instruction
-            for instruction in self.instructions
-            if instruction.is_table
         ]
 
     @property
@@ -219,15 +198,6 @@ class EditablePageRenderResolver:
             layout_items
         )
 
-        editable_tables = list(
-            getattr(
-                page,
-                "editable_tables",
-                [],
-            )
-            or []
-        )
-
         render_plan = getattr(
             page,
             "render_plan",
@@ -276,9 +246,6 @@ class EditablePageRenderResolver:
                     layout_by_region_number=(
                         layout_by_region_number
                     ),
-                    editable_tables=(
-                        editable_tables
-                    ),
                 )
             )
 
@@ -306,7 +273,6 @@ class EditablePageRenderResolver:
         render_item: PageRenderItem,
         layout_by_identity: dict[int, Any],
         layout_by_region_number: dict[int, Any],
-        editable_tables: list[Any],
     ) -> EditableRenderInstruction:
         source = render_item.source
 
@@ -337,13 +303,11 @@ class EditablePageRenderResolver:
                 ),
             )
 
-        if render_item.kind == RenderItemKind.TABLE:
-            return cls._resolve_table_instruction(
-                render_item=render_item,
-                editable_tables=editable_tables,
-            )
-
         action_map = {
+            RenderItemKind.TABLE: (
+                EditableRenderAction.DEFER_TABLE
+            ),
+
             RenderItemKind.IMAGE: (
                 EditableRenderAction.DEFER_IMAGE
             ),
@@ -377,239 +341,6 @@ class EditablePageRenderResolver:
                 "renderer is not connected yet."
             ),
         )
-
-    @classmethod
-    def _resolve_table_instruction(
-        cls,
-        *,
-        render_item: PageRenderItem,
-        editable_tables: list[Any],
-    ) -> EditableRenderInstruction:
-        source_table = render_item.source
-
-        if (
-            render_item.placement
-            != RenderPlacement.FLOW
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=source_table,
-                render_item=render_item,
-                reason=(
-                    "Non-flow table placement requires the "
-                    "later floating-object renderer."
-                ),
-            )
-
-        if (
-            render_item.disposition
-            != RenderDisposition.EDITABLE
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=source_table,
-                render_item=render_item,
-                reason=(
-                    "The unified render plan selected a visual "
-                    "table representation."
-                ),
-            )
-
-        editable_table = (
-            cls._match_editable_table(
-                render_item=render_item,
-                editable_tables=editable_tables,
-            )
-        )
-
-        if editable_table is None:
-            warning = (
-                "No normalized EditableTable model matches "
-                f"{render_item.item_id}."
-            )
-
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=source_table,
-                render_item=render_item,
-                reason=(
-                    "Native Word-table rendering cannot run "
-                    "without a normalized table model."
-                ),
-                warnings=[
-                    warning
-                ],
-            )
-
-        if not bool(
-            getattr(
-                editable_table,
-                "is_editable",
-                False,
-            )
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=editable_table,
-                render_item=render_item,
-                reason=(
-                    "The normalized table requested visual "
-                    "fallback instead of native Word output."
-                ),
-            )
-
-        if not bool(
-            getattr(
-                editable_table,
-                "is_structurally_valid",
-                False,
-            )
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=editable_table,
-                render_item=render_item,
-                reason=(
-                    "The normalized table grid is not "
-                    "structurally valid."
-                ),
-            )
-
-        row_count = int(
-            getattr(
-                editable_table,
-                "row_count",
-                0,
-            )
-        )
-
-        column_count = int(
-            getattr(
-                editable_table,
-                "column_count",
-                0,
-            )
-        )
-
-        if (
-            len(
-                getattr(
-                    editable_table,
-                    "rows",
-                    [],
-                )
-                or []
-            )
-            != row_count
-            or len(
-                getattr(
-                    editable_table,
-                    "columns",
-                    [],
-                )
-                or []
-            )
-            != column_count
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=editable_table,
-                render_item=render_item,
-                reason=(
-                    "The normalized table does not have complete "
-                    "row and column definitions."
-                ),
-            )
-
-        return EditableRenderInstruction(
-            order=render_item.order,
-            action=(
-                EditableRenderAction
-                .RENDER_TABLE
-            ),
-            source=editable_table,
-            render_item=render_item,
-            reason=(
-                "Render as a native editable Word table."
-            ),
-        )
-
-    @staticmethod
-    def _match_editable_table(
-        *,
-        render_item: PageRenderItem,
-        editable_tables: list[Any],
-    ) -> Any | None:
-        source_table = render_item.source
-
-        for editable_table in editable_tables:
-            if (
-                getattr(
-                    editable_table,
-                    "source_table",
-                    None,
-                )
-                is source_table
-            ):
-                return editable_table
-
-        source_index = int(
-            getattr(
-                render_item,
-                "source_index",
-                -1,
-            )
-        )
-
-        if (
-            0
-            <= source_index
-            < len(editable_tables)
-        ):
-            indexed_table = (
-                editable_tables[
-                    source_index
-                ]
-            )
-
-            indexed_source = getattr(
-                indexed_table,
-                "source_table",
-                None,
-            )
-
-            if (
-                indexed_source is None
-                or indexed_source
-                is source_table
-            ):
-                return indexed_table
-
-        return None
 
     @classmethod
     def _resolve_paragraph_instruction(
