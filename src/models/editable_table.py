@@ -7,6 +7,9 @@ from typing import Any
 from src.models.geometry.rectangle import (
     Rectangle,
 )
+from src.models.text_run import (
+    TextRun,
+)
 
 
 class EditableTableDisposition(
@@ -332,6 +335,78 @@ class EditableTableRow:
 
 
 @dataclass(slots=True)
+class EditableTableCellParagraph:
+    """
+    One logical editable paragraph inside a table cell.
+
+    Runs preserve font, size, color, bold and italic formatting
+    from the original PDF spans.
+    """
+
+    text: str = ""
+
+    runs: list[TextRun] = field(
+        default_factory=list
+    )
+
+    source_line_references: list[
+        tuple[int, int]
+    ] = field(
+        default_factory=list
+    )
+
+    paragraph_region_number: int | None = None
+
+    is_list_item: bool = False
+
+    list_marker: str | None = None
+
+    confidence: float = 0.0
+
+    def __post_init__(
+        self,
+    ) -> None:
+        self.text = str(
+            self.text
+            or ""
+        )
+
+        self.source_line_references = (
+            unique_line_references(
+                self.source_line_references
+            )
+        )
+
+        if (
+            self.paragraph_region_number
+            is not None
+        ):
+            try:
+                self.paragraph_region_number = int(
+                    self.paragraph_region_number
+                )
+
+            except (
+                TypeError,
+                ValueError,
+            ):
+                self.paragraph_region_number = None
+
+        normalized_marker = str(
+            self.list_marker
+            or ""
+        ).strip()
+
+        self.list_marker = (
+            normalized_marker
+            or None
+        )
+
+        self.confidence = clamp_confidence(
+            self.confidence
+        )
+
+@dataclass(slots=True)
 class EditableTableCell:
     """
     One anchor cell in the normalized editable table grid.
@@ -361,6 +436,12 @@ class EditableTableCell:
         repr=False,
     )
 
+    content_paragraphs: list[
+        EditableTableCellParagraph
+    ] = field(
+        default_factory=list
+    )
+
     borders: EditableTableCellBorders = field(
         default_factory=EditableTableCellBorders
     )
@@ -387,6 +468,13 @@ class EditableTableCell:
     )
 
     is_synthetic: bool = False
+
+    # True only when row_span or column_span was inferred by
+    # EditableTableMergeDetector rather than supplied directly by
+    # the extraction engine.
+    merge_inferred: bool = False
+
+    merge_confidence: float = 0.0
 
     warnings: list[str] = field(
         default_factory=list
@@ -433,6 +521,10 @@ class EditableTableCell:
             self.confidence
         )
 
+        self.merge_confidence = clamp_confidence(
+            self.merge_confidence
+        )
+
         self.paragraph_region_numbers = unique_integers(
             self.paragraph_region_numbers
         )
@@ -465,6 +557,15 @@ class EditableTableCell:
             0.0,
         )
 
+    @property
+    def is_merged(
+        self,
+    ) -> bool:
+        return (
+            self.row_span > 1
+            or self.column_span > 1
+        )
+    
     @property
     def covered_positions(
         self,
@@ -994,6 +1095,49 @@ def re_full_hex(
         for character in value
     )
 
+def unique_line_references(
+    values: list[
+        tuple[int, int]
+    ],
+) -> list[
+    tuple[int, int]
+]:
+    """
+    Normalize and deduplicate source line references.
+    """
+
+    result: list[
+        tuple[int, int]
+    ] = []
+
+    for value in values:
+        try:
+            block_number = int(
+                value[0]
+            )
+
+            line_index = int(
+                value[1]
+            )
+
+        except (
+            TypeError,
+            ValueError,
+            IndexError,
+        ):
+            continue
+
+        normalized = (
+            block_number,
+            line_index,
+        )
+
+        if normalized not in result:
+            result.append(
+                normalized
+            )
+
+    return result
 
 def unique_integers(
     values: list[int],

@@ -52,7 +52,15 @@ from src.analyzer.editable_table_normalizer import (
 from src.analyzer.editable_table_grid_reconstructor import (
     EditableTableGridReconstructor,
 )
-
+from src.analyzer.editable_table_content_assigner import (
+    EditableTableContentAssigner,
+)
+from src.analyzer.editable_table_merge_detector import (
+    EditableTableMergeDetector,
+)
+from src.analyzer.editable_table_style_analyzer import (
+    EditableTableStyleAnalyzer,
+)
 
 class DocumentAnalyzer:
 
@@ -118,6 +126,16 @@ class DocumentAnalyzer:
             document
         )
         EditableTableGridReconstructor.reconstruct_document(
+            document
+        )
+        EditableTableContentAssigner.assign_document(
+            document
+        )
+
+        EditableTableMergeDetector.detect_document(
+            document
+        )
+        EditableTableStyleAnalyzer.analyze_document(
             document
         )
         # -----------------------------------------------------
