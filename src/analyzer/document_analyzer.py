@@ -70,6 +70,9 @@ from src.analyzer.editable_image_normalizer import (
 from src.analyzer.editable_image_placement_planner import (
     EditableImagePlacementPlanner,
 )
+from src.analyzer.editable_image_payload_extractor import (
+    EditableImagePayloadExtractor,
+)
 
 class DocumentAnalyzer:
 
@@ -155,6 +158,9 @@ class DocumentAnalyzer:
             document
         )
         EditableImagePlacementPlanner.plan_document(
+            document
+        )
+        EditableImagePayloadExtractor.extract_document(
             document
         )
         # -----------------------------------------------------

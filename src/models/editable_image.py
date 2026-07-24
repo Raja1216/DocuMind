@@ -114,6 +114,24 @@ class EditableImageHorizontalAlignment(
 
     ABSOLUTE = "absolute"    
 
+class EditableImagePayloadStatus(
+    str,
+    Enum,
+):
+    """
+    Runtime state of normalized image payload extraction.
+    """
+
+    UNRESOLVED = "unresolved"
+
+    READY = "ready"
+
+    REGION_RENDERED = "region_rendered"
+
+    FAILED = "failed"
+
+    SKIPPED = "skipped"
+
 @dataclass(slots=True)
 class EditableImage:
     """
@@ -177,6 +195,20 @@ class EditableImage:
         default=None,
         repr=False,
     )
+
+    payload_status: EditableImagePayloadStatus = (
+        EditableImagePayloadStatus.UNRESOLVED
+    )
+
+    payload_mime_type: str | None = None
+
+    payload_checksum: str | None = None
+
+    payload_confidence: float = 0.0
+
+    payload_error: str | None = None
+
+    used_soft_mask: bool = False
 
     extension: str | None = None
 
@@ -274,25 +306,66 @@ class EditableImage:
             )
         )
         
+        self.payload_confidence = (
+            clamp_unit_value(
+                self.payload_confidence,
+                fallback=0.0,
+            )
+        )
+
+        normalized_mime_type = str(
+            self.payload_mime_type
+            or ""
+        ).strip().lower()
+
+        self.payload_mime_type = (
+            normalized_mime_type
+            or None
+        )
+
+        normalized_checksum = str(
+            self.payload_checksum
+            or ""
+        ).strip().lower()
+
+        self.payload_checksum = (
+            normalized_checksum
+            or None
+        )
+
+        normalized_error = str(
+            self.payload_error
+            or ""
+        ).strip()
+
+        self.payload_error = (
+            normalized_error
+            or None
+        )
+
+        self.used_soft_mask = bool(
+            self.used_soft_mask
+        )
+
         self.page_area_ratio = clamp_unit_value(
             self.page_area_ratio,
             fallback=0.0,
         )
-        
+
         self.text_overlap_ratio = (
             clamp_unit_value(
                 self.text_overlap_ratio,
                 fallback=0.0,
             )
         )
-        
+
         self.table_overlap_ratio = (
             clamp_unit_value(
                 self.table_overlap_ratio,
                 fallback=0.0,
             )
         )
-        
+
         try:
             normalized_repeat_count = int(
                 self.repeat_count
@@ -303,12 +376,12 @@ class EditableImage:
             OverflowError,
         ):
             normalized_repeat_count = 1
-        
+
         self.repeat_count = max(
             normalized_repeat_count,
             1,
         )
-        
+
         if (
             self.anchor_paragraph_region_number
             is not None
@@ -415,6 +488,23 @@ class EditableImage:
             self.extraction_mode
             != EditableImageExtractionMode
             .UNAVAILABLE
+        )
+
+    @property
+    def has_resolved_payload(
+        self,
+    ) -> bool:
+        return (
+            self.payload is not None
+            and len(
+                self.payload
+            ) > 0
+            and self.payload_status
+            in {
+                EditableImagePayloadStatus.READY,
+                EditableImagePayloadStatus
+                .REGION_RENDERED,
+            }
         )
 
     def add_reason(
