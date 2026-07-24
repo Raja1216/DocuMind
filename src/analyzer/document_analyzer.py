@@ -64,6 +64,9 @@ from src.analyzer.editable_table_style_analyzer import (
 from src.analyzer.editable_table_validator import (
     EditableTableValidator,
 )
+from src.analyzer.editable_image_normalizer import (
+    EditableImageNormalizer,
+)
 
 class DocumentAnalyzer:
 
@@ -143,6 +146,9 @@ class DocumentAnalyzer:
         )
 
         EditableTableValidator.validate_document(
+            document
+        )
+        EditableImageNormalizer.normalize_document(
             document
         )
 
