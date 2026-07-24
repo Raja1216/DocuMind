@@ -69,6 +69,9 @@ from src.exporter.editable_page_render_resolver import (
 from src.exporter.editable_word_table_renderer import (
     EditableWordTableRenderer,
 )
+from src.exporter.editable_table_export_coordinator import (
+    EditableTableExportCoordinator,
+)
 
 class DocxExporter:
     """
@@ -965,6 +968,10 @@ class DocxExporter:
         remain deferred for their dedicated exporters.
         """
 
+        # Re-exporting the same analyzed page replaces prior
+        # runtime results instead of retaining stale attempts.
+        page.editable_table_export_results = {}
+
         editable_render_plan = (
             DocxExporter
             ._build_editable_render_plan(
@@ -1074,19 +1081,51 @@ class DocxExporter:
         for instruction in (
             editable_render_plan.instructions
         ):
-            if (
-                instruction.action
-                == EditableRenderAction
-                .RENDER_TABLE
-            ):
+            if instruction.action in {
+                EditableRenderAction.RENDER_TABLE,
+                EditableRenderAction
+                .RENDER_TABLE_FALLBACK,
+            }:
                 legacy_active_list_type = None
                 legacy_active_number_id = None
 
-                EditableWordTableRenderer.render(
+                editable_table = (
+                    instruction.source
+                )
+
+                table_id = str(
+                    getattr(
+                        editable_table,
+                        "table_id",
+                        "",
+                    )
+                )
+
+                table_validation_report = (
+                    getattr(
+                        page,
+                        "editable_table_validation_reports",
+                        {},
+                    )
+                    .get(
+                        table_id
+                    )
+                )
+
+                EditableTableExportCoordinator.render(
                     container=word_document,
-                    table=instruction.source,
+                    page=page,
+                    table=editable_table,
                     available_width=(
                         available_table_width
+                    ),
+                    prefer_native=(
+                        instruction.action
+                        == EditableRenderAction
+                        .RENDER_TABLE
+                    ),
+                    validation_report=(
+                        table_validation_report
                     ),
                 )
 

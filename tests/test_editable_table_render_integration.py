@@ -291,7 +291,7 @@ class EditableTableRenderIntegrationTests(
             editable_table,
         )
 
-    def test_visual_fallback_table_remains_deferred(
+    def test_visual_fallback_table_becomes_fallback_instruction(
         self,
     ) -> None:
         source_table = (
@@ -356,12 +356,14 @@ class EditableTableRenderIntegrationTests(
         self.assertEqual(
             result.instructions[0].action,
             EditableRenderAction
-            .DEFER_TABLE,
+            .RENDER_TABLE_FALLBACK,
         )
 
         self.assertEqual(
-            result.table_instructions,
-            [],
+            len(
+                result.table_instructions
+            ),
+            1,
         )
 
     def test_table_only_page_is_rendered(

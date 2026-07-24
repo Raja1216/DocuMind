@@ -32,6 +32,10 @@ class EditableRenderAction(
 
     RENDER_TABLE = "render_table"
 
+    RENDER_TABLE_FALLBACK = (
+        "render_table_fallback"
+    )
+
     DEFER_TABLE = "defer_table"
 
     DEFER_IMAGE = "defer_image"
@@ -83,10 +87,11 @@ class EditableRenderInstruction:
     def is_table(
         self,
     ) -> bool:
-        return (
-            self.action
-            == EditableRenderAction.RENDER_TABLE
-        )
+        return self.action in {
+            EditableRenderAction.RENDER_TABLE,
+            EditableRenderAction
+            .RENDER_TABLE_FALLBACK,
+        }
 
     @property
     def is_deferred(
@@ -425,24 +430,6 @@ class EditablePageRenderResolver:
                 ),
             )
 
-        if (
-            render_item.disposition
-            != RenderDisposition.EDITABLE
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_TABLE
-                ),
-                source=source_table,
-                render_item=render_item,
-                reason=(
-                    "The unified render plan selected a visual "
-                    "table representation."
-                ),
-            )
-
         editable_table = (
             cls._match_editable_table(
                 render_item=render_item,
@@ -529,23 +516,22 @@ class EditablePageRenderResolver:
                 ),
             )
 
-        if validation_decision not in {
-            EditableTableRenderDecision
-            .NATIVE_SAFE,
-            EditableTableRenderDecision
-            .NATIVE_WITH_WARNINGS,
-        }:
+        if (
+            validation_decision
+            == EditableTableRenderDecision
+            .VISUAL_FALLBACK
+        ):
             return EditableRenderInstruction(
                 order=render_item.order,
                 action=(
                     EditableRenderAction
-                    .DEFER_TABLE
+                    .RENDER_TABLE_FALLBACK
                 ),
                 source=editable_table,
                 render_item=render_item,
                 reason=(
                     "The generalized table validator selected "
-                    "visual fallback."
+                    "source-region visual fallback."
                 ),
                 warnings=[
                     issue.message
@@ -572,6 +558,24 @@ class EditablePageRenderResolver:
                 ],
             )
 
+        if (
+            render_item.disposition
+            != RenderDisposition.EDITABLE
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .RENDER_TABLE_FALLBACK
+                ),
+                source=editable_table,
+                render_item=render_item,
+                reason=(
+                    "The unified render plan selected a visual "
+                    "table representation."
+                ),
+            )
+
         if not bool(
             getattr(
                 editable_table,
@@ -583,7 +587,7 @@ class EditablePageRenderResolver:
                 order=render_item.order,
                 action=(
                     EditableRenderAction
-                    .DEFER_TABLE
+                    .RENDER_TABLE_FALLBACK
                 ),
                 source=editable_table,
                 render_item=render_item,
@@ -604,7 +608,7 @@ class EditablePageRenderResolver:
                 order=render_item.order,
                 action=(
                     EditableRenderAction
-                    .DEFER_TABLE
+                    .RENDER_TABLE_FALLBACK
                 ),
                 source=editable_table,
                 render_item=render_item,
@@ -654,7 +658,7 @@ class EditablePageRenderResolver:
                 order=render_item.order,
                 action=(
                     EditableRenderAction
-                    .DEFER_TABLE
+                    .RENDER_TABLE_FALLBACK
                 ),
                 source=editable_table,
                 render_item=render_item,

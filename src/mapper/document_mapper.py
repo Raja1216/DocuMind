@@ -12,7 +12,8 @@ class DocumentMapper:
     def map(pdf_document) -> Document:
 
         document = Document(
-            metadata=PDFMetadata()
+            metadata=PDFMetadata(),
+            source_pdf_document=pdf_document,
         )
 
         extractor = TextBlockExtractor()

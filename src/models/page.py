@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import Any
 
 from src.models.geometry.rectangle import Rectangle
 from src.models.image import Image
@@ -49,6 +50,9 @@ from src.models.editable_table import (
 from src.models.editable_table_validation import (
     EditableTableValidationReport,
 )
+from src.models.editable_table_export import (
+    EditableTableExportResult,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -61,6 +65,14 @@ class Page:
     bbox: Rectangle
 
     rotation: int
+
+    # Runtime-only PyMuPDF page reference used for generalized
+    # region fallback rendering. The owning Document retains the
+    # source PDF document so this page does not become orphaned.
+    source_pdf_page: Any | None = field(
+        default=None,
+        repr=False,
+    )
 
     blocks: list[TextBlock] = field(
         default_factory=list
@@ -81,6 +93,13 @@ class Page:
     editable_table_validation_reports: dict[
         str,
         EditableTableValidationReport
+    ] = field(
+        default_factory=dict
+    )
+
+    editable_table_export_results: dict[
+        str,
+        EditableTableExportResult
     ] = field(
         default_factory=dict
     )

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Any
 
 from src.models.metadata import PDFMetadata
 from src.models.page import Page
@@ -18,6 +19,14 @@ class Document:
     """
 
     metadata: PDFMetadata
+
+    # Runtime-only reference that keeps the source PDF alive for
+    # region fallback rendering. It is not part of the semantic
+    # document model and is excluded from repr output.
+    source_pdf_document: Any | None = field(
+        default=None,
+        repr=False,
+    )
 
     pages: list[Page] = field(default_factory=list)
     statistics: DocumentStatistics = field(

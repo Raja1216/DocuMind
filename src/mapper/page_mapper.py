@@ -50,6 +50,8 @@ class PageMapper:
             ),
 
             rotation=pdf_page.rotation,
+
+            source_pdf_page=pdf_page,
         )
 
         for block_data in page_dict["blocks"]:
