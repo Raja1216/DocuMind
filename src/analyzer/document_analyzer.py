@@ -67,6 +67,9 @@ from src.analyzer.editable_table_validator import (
 from src.analyzer.editable_image_normalizer import (
     EditableImageNormalizer,
 )
+from src.analyzer.editable_image_placement_planner import (
+    EditableImagePlacementPlanner,
+)
 
 class DocumentAnalyzer:
 
@@ -151,7 +154,9 @@ class DocumentAnalyzer:
         EditableImageNormalizer.normalize_document(
             document
         )
-
+        EditableImagePlacementPlanner.plan_document(
+            document
+        )
         # -----------------------------------------------------
         # Page profile, conversion policy and render plan
         # -----------------------------------------------------

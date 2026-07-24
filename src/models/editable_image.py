@@ -84,6 +84,35 @@ class EditableImagePlacement(
 
     UNRESOLVED = "unresolved"
 
+class EditableImageAnchorPosition(
+    str,
+    Enum,
+):
+    """
+    Image position relative to its anchor paragraph.
+    """
+
+    BEFORE = "before"
+
+    AFTER = "after"
+
+    NONE = "none"
+    
+class EditableImageHorizontalAlignment(
+    str,
+    Enum,
+):
+    """
+    Approximate horizontal placement on the source page.
+    """
+
+    LEFT = "left"
+
+    CENTER = "center"
+
+    RIGHT = "right"
+
+    ABSOLUTE = "absolute"    
 
 @dataclass(slots=True)
 class EditableImage:
@@ -120,6 +149,29 @@ class EditableImage:
     role: EditableImageRole = (
         EditableImageRole.UNKNOWN
     )
+
+    anchor_paragraph_region_number: (
+        int | None
+    ) = None
+
+    anchor_position: (
+        EditableImageAnchorPosition
+    ) = EditableImageAnchorPosition.NONE
+
+    horizontal_alignment: (
+        EditableImageHorizontalAlignment
+    ) = EditableImageHorizontalAlignment.ABSOLUTE
+
+    placement_confidence: float = 0.0
+
+    page_area_ratio: float = 0.0
+
+    text_overlap_ratio: float = 0.0
+
+    table_overlap_ratio: float = 0.0
+
+    repeat_count: int = 1
+
 
     payload: bytes | None = field(
         default=None,
@@ -214,6 +266,68 @@ class EditableImage:
             self.confidence,
             fallback=0.0,
         )
+
+        self.placement_confidence = (
+            clamp_unit_value(
+                self.placement_confidence,
+                fallback=0.0,
+            )
+        )
+        
+        self.page_area_ratio = clamp_unit_value(
+            self.page_area_ratio,
+            fallback=0.0,
+        )
+        
+        self.text_overlap_ratio = (
+            clamp_unit_value(
+                self.text_overlap_ratio,
+                fallback=0.0,
+            )
+        )
+        
+        self.table_overlap_ratio = (
+            clamp_unit_value(
+                self.table_overlap_ratio,
+                fallback=0.0,
+            )
+        )
+        
+        try:
+            normalized_repeat_count = int(
+                self.repeat_count
+            )
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+        ):
+            normalized_repeat_count = 1
+        
+        self.repeat_count = max(
+            normalized_repeat_count,
+            1,
+        )
+        
+        if (
+            self.anchor_paragraph_region_number
+            is not None
+        ):
+            try:
+                self.anchor_paragraph_region_number = (
+                    int(
+                        self
+                        .anchor_paragraph_region_number
+                    )
+                )
+            except (
+                TypeError,
+                ValueError,
+                OverflowError,
+            ):
+                self.anchor_paragraph_region_number = (
+                    None
+                )
 
         self.has_alpha = bool(
             self.has_alpha
