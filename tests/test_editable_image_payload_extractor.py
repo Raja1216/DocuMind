@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import unittest
 
 from types import SimpleNamespace
@@ -18,15 +17,73 @@ from src.models.geometry.rectangle import (
     Rectangle,
 )
 
+def load_pymupdf():
+    """
+    Import the installed PyMuPDF package using either supported
+    module name.
+    """
 
-PNG_BYTES = base64.b64decode(
-    (
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAAB"
-        "CAQAAAC1HAwCAAAAC0lEQVR42mP8"
-        "/x8AAusB9Y9Z5ZkAAAAASUVORK5CYII="
+    try:
+        import pymupdf
+
+        return pymupdf
+
+    except ImportError:
+        import fitz as pymupdf
+
+        return pymupdf
+
+
+def create_test_png(
+    *,
+    grayscale: bool = False,
+    alpha: bool = False,
+) -> bytes:
+    """
+    Generate valid PNG bytes using the same PyMuPDF installation
+    used by the production image extractor.
+    """
+
+    pymupdf = load_pymupdf()
+
+    colorspace = (
+        pymupdf.csGRAY
+        if grayscale
+        else pymupdf.csRGB
     )
-)
 
+    pixmap = pymupdf.Pixmap(
+        colorspace,
+        pymupdf.IRect(
+            0,
+            0,
+            2,
+            2,
+        ),
+        alpha,
+    )
+
+    pixmap.clear_with(
+        255
+    )
+
+    payload = pixmap.tobytes(
+        "png"
+    )
+
+    if not payload:
+        raise RuntimeError(
+            "Unable to create test PNG payload."
+        )
+
+    return payload
+
+
+PNG_BYTES = create_test_png()
+
+MASK_PNG_BYTES = create_test_png(
+    grayscale=True,
+)
 
 class FakeDocument:
     def __init__(
@@ -234,7 +291,7 @@ class EditableImagePayloadExtractorTests(
                     "smask": 21,
                 },
                 21: {
-                    "image": PNG_BYTES,
+                    "image": MASK_PNG_BYTES,
                     "ext": "png",
                     "smask": 0,
                 },

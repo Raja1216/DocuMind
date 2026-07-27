@@ -516,7 +516,9 @@ class EditableImagePayloadExtractor:
             mask_pixmap = pymupdf.Pixmap(
                 mask_payload
             )
-
+            
+            # The mask must use the same pixel dimensions as the
+            # source image.
             if (
                 mask_pixmap.width
                 != base_pixmap.width
@@ -528,7 +530,16 @@ class EditableImagePayloadExtractor:
                     base_pixmap.width,
                     base_pixmap.height,
                 )
-
+            
+            # A soft-mask pixmap must not itself contain another
+            # alpha channel.
+            if mask_pixmap.alpha:
+                mask_pixmap = pymupdf.Pixmap(
+                    mask_pixmap,
+                    0,
+                )
+            
+            # Pixmap(source, mask) requires a grayscale mask.
             if (
                 mask_pixmap.colorspace
                 is not None
@@ -543,18 +554,20 @@ class EditableImagePayloadExtractor:
                     pymupdf.csGRAY,
                     mask_pixmap,
                 )
-
+            
+            # The source image must not already contain an alpha
+            # channel before the mask is applied.
             if base_pixmap.alpha:
                 base_pixmap = pymupdf.Pixmap(
                     base_pixmap,
                     0,
                 )
-
+            
             base_pixmap = pymupdf.Pixmap(
                 base_pixmap,
                 mask_pixmap,
             )
-
+            
             used_soft_mask = True
 
         return cls._pixmap_to_payload_result(
