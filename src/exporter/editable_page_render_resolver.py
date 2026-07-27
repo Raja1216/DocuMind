@@ -18,6 +18,13 @@ from src.models.editable_table_validation import (
     EditableTableRenderDecision,
 )
 
+from src.models.editable_image import (
+    EditableImage,
+    EditableImageDisposition,
+    EditableImagePayloadStatus,
+    EditableImagePlacement,
+)
+
 
 class EditableRenderAction(
     str,
@@ -34,6 +41,10 @@ class EditableRenderAction(
 
     RENDER_TABLE_FALLBACK = (
         "render_table_fallback"
+    )
+    
+    RENDER_INLINE_IMAGE = (
+        "render_inline_image"
     )
 
     DEFER_TABLE = "defer_table"
@@ -94,6 +105,16 @@ class EditableRenderInstruction:
         }
 
     @property
+    def is_inline_image(
+        self,
+    ) -> bool:
+        return (
+            self.action
+            == EditableRenderAction
+            .RENDER_INLINE_IMAGE
+        )
+
+    @property
     def is_deferred(
         self,
     ) -> bool:
@@ -151,6 +172,18 @@ class EditablePageRenderPlan:
             instruction
             for instruction in self.instructions
             if instruction.is_table
+        ]
+
+    @property
+    def inline_image_instructions(
+        self,
+    ) -> list[
+        EditableRenderInstruction
+    ]:
+        return [
+            instruction
+            for instruction in self.instructions
+            if instruction.is_inline_image
         ]
 
     @property
@@ -235,6 +268,15 @@ class EditablePageRenderResolver:
             )
             or []
         )
+        
+        editable_images = list(
+            getattr(
+                page,
+                "editable_images",
+                [],
+            )
+            or []
+        )
 
         table_validation_reports = dict(
             getattr(
@@ -296,6 +338,9 @@ class EditablePageRenderResolver:
                     editable_tables=(
                         editable_tables
                     ),
+                    editable_images=(
+                        editable_images
+                    ),
                     table_validation_reports=(
                         table_validation_reports
                     ),
@@ -327,6 +372,9 @@ class EditablePageRenderResolver:
         layout_by_identity: dict[int, Any],
         layout_by_region_number: dict[int, Any],
         editable_tables: list[Any],
+        editable_images: list[
+            EditableImage
+        ],
         table_validation_reports: dict[str, Any],
     ) -> EditableRenderInstruction:
         source = render_item.source
@@ -366,12 +414,13 @@ class EditablePageRenderResolver:
                     table_validation_reports
                 ),
             )
-
+        if render_item.kind == RenderItemKind.IMAGE:
+            return cls._resolve_image_instruction(
+                render_item=render_item,
+                editable_images=editable_images,
+            )
+    
         action_map = {
-            RenderItemKind.IMAGE: (
-                EditableRenderAction.DEFER_IMAGE
-            ),
-
             RenderItemKind.CHART: (
                 EditableRenderAction.DEFER_CHART
             ),
@@ -399,6 +448,196 @@ class EditablePageRenderResolver:
             reason=(
                 "The corresponding editable or visual "
                 "renderer is not connected yet."
+            ),
+        )
+
+    @classmethod
+    def _resolve_image_instruction(
+        cls,
+        *,
+        render_item: PageRenderItem,
+        editable_images: list[
+            EditableImage
+        ],
+    ) -> EditableRenderInstruction:
+        """
+        Resolve one unified image item into either a native inline
+        image instruction or a deferred instruction.
+
+        Floating, overlay, background and rotated images remain
+        deferred for later dedicated Word renderers.
+        """
+
+        source_image = render_item.source
+
+        editable_image = (
+            cls._find_editable_image(
+                render_item=render_item,
+                editable_images=editable_images,
+            )
+        )
+
+        if editable_image is None:
+            warning = (
+                "No unique normalized EditableImage model "
+                f"matches {render_item.item_id}."
+            )
+
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=source_image,
+                render_item=render_item,
+                reason=(
+                    "Native image rendering requires a unique "
+                    "normalized image-placement model."
+                ),
+                warnings=[
+                    warning
+                ],
+            )
+
+        if (
+            editable_image.disposition
+            == EditableImageDisposition.SKIP
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=EditableRenderAction.IGNORE,
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "The normalized image disposition is SKIP."
+                ),
+            )
+
+        if (
+            render_item.placement
+            != RenderPlacement.FLOW
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "Non-flow image placement requires the "
+                    "later floating, background or overlay "
+                    "image renderer."
+                ),
+            )
+
+        if (
+            editable_image.placement
+            != EditableImagePlacement.INLINE
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "The generalized placement planner did "
+                    "not classify this image as INLINE."
+                ),
+            )
+
+        if not editable_image.has_resolved_payload:
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "The inline image has no successfully "
+                    "resolved payload."
+                ),
+            )
+
+        if (
+            editable_image.payload_status
+            not in {
+                EditableImagePayloadStatus.READY,
+                EditableImagePayloadStatus
+                .REGION_RENDERED,
+            }
+        ):
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "The inline image payload status is not "
+                    "supported by the native renderer."
+                ),
+            )
+
+        try:
+            normalized_rotation = (
+                float(
+                    editable_image.rotation
+                )
+                % 360.0
+            )
+
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+        ):
+            normalized_rotation = 0.0
+
+        rotation_distance = min(
+            abs(
+                normalized_rotation
+            ),
+            abs(
+                360.0
+                - normalized_rotation
+            ),
+        )
+
+        if rotation_distance > 0.01:
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .DEFER_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "Rotated images require the later "
+                    "floating-image renderer."
+                ),
+            )
+
+        return EditableRenderInstruction(
+            order=render_item.order,
+            action=(
+                EditableRenderAction
+                .RENDER_INLINE_IMAGE
+            ),
+            source=editable_image,
+            render_item=render_item,
+            reason=(
+                "Render as a native inline Word image."
             ),
         )
 
@@ -733,6 +972,160 @@ class EditablePageRenderResolver:
                 return indexed_table
 
         return None
+
+    @classmethod
+    def _find_editable_image(
+        cls,
+        *,
+        render_item,
+        editable_images: list[
+            EditableImage
+        ],
+    ) -> EditableImage | None:
+        """
+        Resolve one render-plan image item to one normalized
+        image placement.
+
+        Object identity is preferred because repeated xrefs may
+        represent distinct placements.
+        """
+
+        source_image = getattr(
+            render_item,
+            "source",
+            None,
+        )
+
+        if source_image is None:
+            identity_matches = []
+        
+        else:
+            identity_matches = [
+                image
+                for image in editable_images
+                if image.source_image
+                is source_image
+            ]
+
+        if len(
+            identity_matches
+        ) == 1:
+            return identity_matches[0]
+
+        render_bbox = getattr(
+            render_item,
+            "bbox",
+            None,
+        )
+
+        if render_bbox is None:
+            return None
+
+        geometry_matches = [
+            image
+            for image in editable_images
+            if cls._image_geometry_matches(
+                image.bbox,
+                render_bbox,
+            )
+        ]
+
+        if len(
+            geometry_matches
+        ) == 1:
+            return geometry_matches[0]
+
+        source_xref = cls._positive_integer_or_none(
+            getattr(
+                source_image,
+                "xref",
+                None,
+            )
+        )
+
+        if source_xref is None:
+            return None
+
+        xref_geometry_matches = [
+            image
+            for image in geometry_matches
+            if image.xref
+            == source_xref
+        ]
+
+        if len(
+            xref_geometry_matches
+        ) == 1:
+            return xref_geometry_matches[0]
+
+        return None
+
+
+    @staticmethod
+    def _image_geometry_matches(
+        first_bbox,
+        second_bbox,
+        *,
+        tolerance: float = 1.5,
+    ) -> bool:
+        coordinate_names = (
+            "left",
+            "top",
+            "right",
+            "bottom",
+        )
+
+        try:
+            return all(
+                abs(
+                    float(
+                        getattr(
+                            first_bbox,
+                            coordinate_name,
+                        )
+                    )
+                    - float(
+                        getattr(
+                            second_bbox,
+                            coordinate_name,
+                        )
+                    )
+                )
+                <= tolerance
+                for coordinate_name
+                in coordinate_names
+            )
+
+        except (
+            AttributeError,
+            TypeError,
+            ValueError,
+            OverflowError,
+        ):
+            return False
+
+
+    @staticmethod
+    def _positive_integer_or_none(
+        value,
+    ) -> int | None:
+        try:
+            normalized = int(
+                value
+            )
+
+        except (
+            TypeError,
+            ValueError,
+            OverflowError,
+        ):
+            return None
+
+        return (
+            normalized
+            if normalized > 0
+            else None
+        )
 
     @classmethod
     def _resolve_paragraph_instruction(

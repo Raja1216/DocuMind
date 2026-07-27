@@ -72,6 +72,9 @@ from src.exporter.editable_word_table_renderer import (
 from src.exporter.editable_table_export_coordinator import (
     EditableTableExportCoordinator,
 )
+from src.exporter.editable_inline_image_renderer import (
+    EditableInlineImageRenderer,
+)
 
 class DocxExporter:
     """
@@ -951,6 +954,129 @@ class DocxExporter:
         )
 
     @staticmethod
+    def _resolve_available_image_size(
+        word_document,
+    ) -> tuple[
+        float,
+        float,
+    ]:
+        """
+        Return the writable width and height of the active Word
+        section in points.
+        """
+
+        sections = list(
+            getattr(
+                word_document,
+                "sections",
+                [],
+            )
+            or []
+        )
+
+        if not sections:
+            return (
+                468.0,
+                648.0,
+            )
+
+        section = sections[-1]
+
+        def resolve_points(
+            value,
+        ) -> float:
+            if value is None:
+                return 0.0
+
+            point_value = getattr(
+                value,
+                "pt",
+                None,
+            )
+
+            if point_value is not None:
+                return float(
+                    point_value
+                )
+
+            try:
+                return float(
+                    value
+                )
+
+            except (
+                TypeError,
+                ValueError,
+                OverflowError,
+            ):
+                return 0.0
+
+        writable_width = (
+            resolve_points(
+                getattr(
+                    section,
+                    "page_width",
+                    None,
+                )
+            )
+            - resolve_points(
+                getattr(
+                    section,
+                    "left_margin",
+                    None,
+                )
+            )
+            - resolve_points(
+                getattr(
+                    section,
+                    "right_margin",
+                    None,
+                )
+            )
+        )
+
+        writable_height = (
+            resolve_points(
+                getattr(
+                    section,
+                    "page_height",
+                    None,
+                )
+            )
+            - resolve_points(
+                getattr(
+                    section,
+                    "top_margin",
+                    None,
+                )
+            )
+            - resolve_points(
+                getattr(
+                    section,
+                    "bottom_margin",
+                    None,
+                )
+            )
+        )
+
+        if writable_width <= 0.0:
+            writable_width = 468.0
+
+        if writable_height <= 0.0:
+            writable_height = 648.0
+
+        return (
+            max(
+                writable_width,
+                1.0,
+            ),
+            max(
+                writable_height,
+                1.0,
+            ),
+        )
+
+    @staticmethod
     def _render_page(
         word_document,
         page,
@@ -1006,22 +1132,20 @@ class DocxExporter:
             )
         ]
 
-        table_instructions = [
-            instruction
+        table_instructions = (
+            editable_render_plan
+            .table_instructions
+        )
 
-            for instruction
-            in editable_render_plan.instructions
-
-            if (
-                instruction.action
-                == EditableRenderAction
-                .RENDER_TABLE
-            )
-        ]
+        inline_image_instructions = (
+            editable_render_plan
+            .inline_image_instructions
+        )
 
         if (
             not paragraph_instructions
             and not table_instructions
+            and not inline_image_instructions
         ):
             return
 
@@ -1032,6 +1156,16 @@ class DocxExporter:
             )
         )
 
+        (
+            available_image_width,
+            available_image_height,
+        ) = (
+            DocxExporter
+            ._resolve_available_image_size(
+                word_document
+            )
+        )
+        
         if paragraph_instructions:
             regions = [
                 instruction.source
@@ -1134,7 +1268,48 @@ class DocxExporter:
                 )
 
                 continue
-
+            if (
+                instruction.action
+                == EditableRenderAction
+                .RENDER_INLINE_IMAGE
+            ):
+                legacy_active_list_type = None
+                legacy_active_number_id = None
+            
+                editable_image = (
+                    instruction.source
+                )
+            
+                try:
+                    EditableInlineImageRenderer.render(
+                        container=word_document,
+                        image=editable_image,
+                        available_width=(
+                            available_image_width
+                        ),
+                        available_height=(
+                            available_image_height
+                        ),
+                    )
+            
+                except Exception as error:
+                    editable_image.add_warning(
+                        (
+                            "[inline-export] "
+                            "Native inline image rendering "
+                            f"failed: {error}"
+                        )
+                    )
+            
+                    # The standalone renderer removes its partially
+                    # inserted paragraph when rendering fails.
+                    continue
+                
+                previous_region = (
+                    instruction.render_item
+                )
+            
+                continue        
             if (
                 instruction.action
                 != EditableRenderAction
