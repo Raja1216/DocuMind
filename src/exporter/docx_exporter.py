@@ -75,6 +75,9 @@ from src.exporter.editable_table_export_coordinator import (
 from src.exporter.editable_inline_image_renderer import (
     EditableInlineImageRenderer,
 )
+from src.exporter.editable_floating_image_renderer import (
+    EditableFloatingImageRenderer,
+)
 
 class DocxExporter:
     """
@@ -1142,10 +1145,16 @@ class DocxExporter:
             .inline_image_instructions
         )
 
+        floating_image_instructions = (
+            editable_render_plan
+            .floating_image_instructions
+        )
+        
         if (
             not paragraph_instructions
             and not table_instructions
             and not inline_image_instructions
+            and not floating_image_instructions
         ):
             return
 
@@ -1303,13 +1312,52 @@ class DocxExporter:
             
                     # The standalone renderer removes its partially
                     # inserted paragraph when rendering fails.
-                    continue
+                    continue    
                 
                 previous_region = (
                     instruction.render_item
                 )
             
-                continue        
+                continue
+            
+            if (
+                instruction.action
+                == EditableRenderAction
+                .RENDER_FLOATING_IMAGE
+            ):
+                editable_image = (
+                    instruction.source
+                )
+            
+                try:
+                    EditableFloatingImageRenderer.render(
+                        container=word_document,
+                        image=editable_image,
+                        page_bbox=page.bbox,
+                    )
+            
+                except Exception as error:
+                    editable_image.add_warning(
+                        (
+                            "[floating-export] "
+                            "Native floating image rendering "
+                            f"failed: {error}"
+                        )
+                    )
+            
+                    # The standalone renderer removes its partially
+                    # inserted anchor paragraph when rendering fails.
+                    continue
+                
+                # Floating images do not participate in Word flow.
+                #
+                # Do not update previous_region because that would
+                # incorrectly change spacing for the next paragraph.
+                #
+                # Do not reset list state because a page-relative
+                # floating object should not interrupt a Word list.
+                continue
+        
             if (
                 instruction.action
                 != EditableRenderAction

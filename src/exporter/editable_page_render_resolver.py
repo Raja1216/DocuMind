@@ -46,6 +46,10 @@ class EditableRenderAction(
     RENDER_INLINE_IMAGE = (
         "render_inline_image"
     )
+    
+    RENDER_FLOATING_IMAGE = (
+        "render_floating_image"
+    )
 
     DEFER_TABLE = "defer_table"
 
@@ -114,6 +118,27 @@ class EditableRenderInstruction:
             .RENDER_INLINE_IMAGE
         )
 
+    @property
+    def is_floating_image(
+        self,
+    ) -> bool:
+        return (
+            self.action
+            == EditableRenderAction
+            .RENDER_FLOATING_IMAGE
+        )
+    
+    @property
+    def is_image(
+        self,
+    ) -> bool:
+        return self.action in {
+            EditableRenderAction
+            .RENDER_INLINE_IMAGE,
+            EditableRenderAction
+            .RENDER_FLOATING_IMAGE,
+        }
+    
     @property
     def is_deferred(
         self,
@@ -184,6 +209,30 @@ class EditablePageRenderPlan:
             instruction
             for instruction in self.instructions
             if instruction.is_inline_image
+        ]
+
+    @property
+    def floating_image_instructions(
+        self,
+    ) -> list[
+        EditableRenderInstruction
+    ]:
+        return [
+            instruction
+            for instruction in self.instructions
+            if instruction.is_floating_image
+        ]
+
+    @property
+    def image_instructions(
+        self,
+    ) -> list[
+        EditableRenderInstruction
+    ]:
+        return [
+            instruction
+            for instruction in self.instructions
+            if instruction.is_image
         ]
 
     @property
@@ -461,28 +510,30 @@ class EditablePageRenderResolver:
         ],
     ) -> EditableRenderInstruction:
         """
-        Resolve one unified image item into either a native inline
-        image instruction or a deferred instruction.
-
-        Floating, overlay, background and rotated images remain
-        deferred for later dedicated Word renderers.
+        Resolve one unified image item into inline, floating,
+        deferred or ignored output.
+    
+        The normalized EditableImage placement is the final image
+        placement authority. The PageRenderItem still controls
+        ordering and prevents background or overlay items from
+        being rendered as ordinary floating images.
         """
-
+    
         source_image = render_item.source
-
+    
         editable_image = (
             cls._find_editable_image(
                 render_item=render_item,
                 editable_images=editable_images,
             )
         )
-
+    
         if editable_image is None:
             warning = (
                 "No unique normalized EditableImage model "
                 f"matches {render_item.item_id}."
             )
-
+    
             return EditableRenderInstruction(
                 order=render_item.order,
                 action=(
@@ -492,65 +543,31 @@ class EditablePageRenderResolver:
                 source=source_image,
                 render_item=render_item,
                 reason=(
-                    "Native image rendering requires a unique "
+                    "Image rendering requires a unique "
                     "normalized image-placement model."
                 ),
                 warnings=[
                     warning
                 ],
             )
-
+    
         if (
             editable_image.disposition
             == EditableImageDisposition.SKIP
         ):
             return EditableRenderInstruction(
                 order=render_item.order,
-                action=EditableRenderAction.IGNORE,
-                source=editable_image,
-                render_item=render_item,
-                reason=(
-                    "The normalized image disposition is SKIP."
-                ),
-            )
-
-        if (
-            render_item.placement
-            != RenderPlacement.FLOW
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
                 action=(
-                    EditableRenderAction
-                    .DEFER_IMAGE
+                    EditableRenderAction.IGNORE
                 ),
                 source=editable_image,
                 render_item=render_item,
                 reason=(
-                    "Non-flow image placement requires the "
-                    "later floating, background or overlay "
-                    "image renderer."
+                    "The normalized image disposition "
+                    "is SKIP."
                 ),
             )
-
-        if (
-            editable_image.placement
-            != EditableImagePlacement.INLINE
-        ):
-            return EditableRenderInstruction(
-                order=render_item.order,
-                action=(
-                    EditableRenderAction
-                    .DEFER_IMAGE
-                ),
-                source=editable_image,
-                render_item=render_item,
-                reason=(
-                    "The generalized placement planner did "
-                    "not classify this image as INLINE."
-                ),
-            )
-
+    
         if not editable_image.has_resolved_payload:
             return EditableRenderInstruction(
                 order=render_item.order,
@@ -561,11 +578,11 @@ class EditablePageRenderResolver:
                 source=editable_image,
                 render_item=render_item,
                 reason=(
-                    "The inline image has no successfully "
+                    "The image has no successfully "
                     "resolved payload."
                 ),
             )
-
+    
         if (
             editable_image.payload_status
             not in {
@@ -583,11 +600,11 @@ class EditablePageRenderResolver:
                 source=editable_image,
                 render_item=render_item,
                 reason=(
-                    "The inline image payload status is not "
-                    "supported by the native renderer."
+                    "The image payload status is not "
+                    "supported by a native renderer."
                 ),
             )
-
+    
         try:
             normalized_rotation = (
                 float(
@@ -595,14 +612,14 @@ class EditablePageRenderResolver:
                 )
                 % 360.0
             )
-
+    
         except (
             TypeError,
             ValueError,
             OverflowError,
         ):
             normalized_rotation = 0.0
-
+    
         rotation_distance = min(
             abs(
                 normalized_rotation
@@ -612,7 +629,7 @@ class EditablePageRenderResolver:
                 - normalized_rotation
             ),
         )
-
+    
         if rotation_distance > 0.01:
             return EditableRenderInstruction(
                 order=render_item.order,
@@ -624,21 +641,128 @@ class EditablePageRenderResolver:
                 render_item=render_item,
                 reason=(
                     "Rotated images require the later "
-                    "floating-image renderer."
+                    "image-transform renderer."
                 ),
             )
-
+    
+        # -----------------------------------------------------
+        # Native inline image
+        # -----------------------------------------------------
+    
+        if (
+            editable_image.placement
+            == EditableImagePlacement.INLINE
+        ):
+            if (
+                render_item.placement
+                != RenderPlacement.FLOW
+            ):
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction
+                        .DEFER_IMAGE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "An inline image must participate "
+                        "in normal document flow."
+                    ),
+                )
+    
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .RENDER_INLINE_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "Render as a native inline Word image."
+                ),
+            )
+    
+        # -----------------------------------------------------
+        # Native floating image
+        # -----------------------------------------------------
+    
+        if (
+            editable_image.placement
+            == EditableImagePlacement.FLOATING
+        ):
+            if (
+                render_item.placement
+                in {
+                    RenderPlacement.BACKGROUND,
+                    RenderPlacement.OVERLAY,
+                }
+            ):
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction
+                        .DEFER_IMAGE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "Background and overlay render-plan "
+                        "items require dedicated image "
+                        "layer renderers."
+                    ),
+                )
+    
+            return EditableRenderInstruction(
+                order=render_item.order,
+                action=(
+                    EditableRenderAction
+                    .RENDER_FLOATING_IMAGE
+                ),
+                source=editable_image,
+                render_item=render_item,
+                reason=(
+                    "Render as a page-relative floating "
+                    "Word image."
+                ),
+            )
+    
+        # -----------------------------------------------------
+        # Deferred placement types
+        # -----------------------------------------------------
+    
+        if (
+            editable_image.placement
+            == EditableImagePlacement.BACKGROUND
+        ):
+            reason = (
+                "Background images require the later "
+                "page-background renderer."
+            )
+    
+        elif (
+            editable_image.placement
+            == EditableImagePlacement.OVERLAY
+        ):
+            reason = (
+                "Overlay images require the later "
+                "foreground-layer renderer."
+            )
+    
+        else:
+            reason = (
+                "The image placement remains unresolved."
+            )
+    
         return EditableRenderInstruction(
             order=render_item.order,
             action=(
-                EditableRenderAction
-                .RENDER_INLINE_IMAGE
+                EditableRenderAction.DEFER_IMAGE
             ),
             source=editable_image,
             render_item=render_item,
-            reason=(
-                "Render as a native inline Word image."
-            ),
+            reason=reason,
         )
 
     @classmethod

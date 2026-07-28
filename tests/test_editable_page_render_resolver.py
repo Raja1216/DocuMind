@@ -623,456 +623,736 @@ class EditablePageRenderResolverTests(
             result.warnings
         )
 
-def test_ready_inline_image_is_rendered(
-    self,
-) -> None:
-    page = make_page()
+    def test_ready_inline_image_is_rendered(
+        self,
+    ) -> None:
+        page = make_page()
 
-    source_image = SimpleNamespace(
-        xref=20
-    )
-
-    editable_image = make_editable_image(
-        order=1,
-        source_image=source_image,
-        xref=20,
-    )
-
-    page.editable_images = [
-        editable_image
-    ]
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
+        source_image = SimpleNamespace(
+            xref=20
         )
-    )
 
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+            xref=20,
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
             )
         )
 
-    self.assertEqual(
-        len(
-            result.inline_image_instructions
-        ),
-        1,
-    )
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction
-        .RENDER_INLINE_IMAGE,
-    )
-
-    self.assertIs(
-        result.instructions[0].source,
-        editable_image,
-    )
-
-
-def test_region_rendered_inline_image_is_rendered(
-    self,
-) -> None:
-    page = make_page()
-
-    source_image = SimpleNamespace()
-
-    editable_image = make_editable_image(
-        order=1,
-        source_image=source_image,
-        disposition=(
-            EditableImageDisposition
-            .REGION_FALLBACK
-        ),
-        payload_status=(
-            EditableImagePayloadStatus
-            .REGION_RENDERED
-        ),
-    )
-
-    page.editable_images = [
-        editable_image
-    ]
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
+        self.assertEqual(
+            len(
+                result.inline_image_instructions
+            ),
+            1,
         )
-    )
 
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction
+            .RENDER_INLINE_IMAGE,
+        )
+
+        self.assertIs(
+            result.instructions[0].source,
+            editable_image,
+        )
+
+
+    def test_region_rendered_inline_image_is_rendered(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+            disposition=(
+                EditableImageDisposition
+                .REGION_FALLBACK
+            ),
+            payload_status=(
+                EditableImagePayloadStatus
+                .REGION_RENDERED
+            ),
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
             )
         )
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction
-        .RENDER_INLINE_IMAGE,
-    )
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction
+            .RENDER_INLINE_IMAGE,
+        )
 
 
-def test_floating_image_remains_deferred(
-    self,
-) -> None:
-    page = make_page()
+    def test_floating_image_uses_floating_renderer(
+        self,
+    ) -> None:
+        page = make_page()
 
-    source_image = SimpleNamespace()
+        source_image = SimpleNamespace()
 
-    page.editable_images = [
-        make_editable_image(
+        page.editable_images = [
+            make_editable_image(
+                order=1,
+                source_image=source_image,
+                placement=(
+                    EditableImagePlacement.FLOATING
+                ),
+            )
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.FLOATING
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction
+            .RENDER_FLOATING_IMAGE,
+        )
+
+
+    def test_background_image_remains_deferred(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        page.editable_images = [
+            make_editable_image(
+                order=1,
+                source_image=source_image,
+                placement=(
+                    EditableImagePlacement
+                    .BACKGROUND
+                ),
+            )
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.BACKGROUND
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+
+
+    def test_overlay_image_remains_deferred(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        page.editable_images = [
+            make_editable_image(
+                order=1,
+                source_image=source_image,
+                placement=(
+                    EditableImagePlacement.OVERLAY
+                ),
+            )
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.OVERLAY
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+
+
+    def test_missing_image_payload_remains_deferred(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        page.editable_images = [
+            make_editable_image(
+                order=1,
+                source_image=source_image,
+                payload=None,
+                payload_status=(
+                    EditableImagePayloadStatus.FAILED
+                ),
+            )
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+
+
+    def test_skipped_image_is_ignored(
+        self,
+    ) -> None:
+        page = make_page()
+    
+        source_image = SimpleNamespace()
+    
+        page.editable_images = [
+            make_editable_image(
+                order=1,
+                source_image=source_image,
+                disposition=(
+                    EditableImageDisposition.SKIP
+                ),
+            )
+        ]
+    
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+            )
+        )
+    
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+    
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.IGNORE,
+        )
+
+
+    def test_repeated_xref_placements_match_independently(
+        self,
+    ) -> None:
+        page = make_page()
+
+        first_source = SimpleNamespace(
+            xref=50
+        )
+
+        second_source = SimpleNamespace(
+            xref=50
+        )
+
+        first_image = make_editable_image(
+            order=1,
+            source_image=first_source,
+            xref=50,
+        )
+
+        second_image = make_editable_image(
+            order=2,
+            source_image=second_source,
+            xref=50,
+        )
+
+        page.editable_images = [
+            first_image,
+            second_image,
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=first_source,
+            )
+        )
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=2,
+                item_id="image:2",
+                kind=RenderItemKind.IMAGE,
+                source=second_source,
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            len(
+                result.inline_image_instructions
+            ),
+            2,
+        )
+
+        self.assertIs(
+            result.instructions[0].source,
+            first_image,
+        )
+
+        self.assertIs(
+            result.instructions[1].source,
+            second_image,
+        )
+
+
+    def test_ready_floating_image_is_rendered(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace(
+            xref=30
+        )
+
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+            placement=(
+                EditableImagePlacement.FLOATING
+            ),
+            xref=30,
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.FLOATING
+                ),
+                disposition=(
+                    RenderDisposition.VISUAL
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction
+            .RENDER_FLOATING_IMAGE,
+        )
+
+        self.assertEqual(
+            len(
+                result.floating_image_instructions
+            ),
+            1,
+        )
+        
+    def test_flow_item_with_floating_image_uses_floating_renderer(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        editable_image = make_editable_image(
             order=1,
             source_image=source_image,
             placement=(
                 EditableImagePlacement.FLOATING
             ),
         )
-    ]
 
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
-            placement=(
-                RenderPlacement.FLOATING
-            ),
-        )
-    )
+        page.editable_images = [
+            editable_image
+        ]
 
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=RenderPlacement.FLOW,
             )
         )
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction.DEFER_IMAGE,
-    )
-
-
-def test_background_image_remains_deferred(
-    self,
-) -> None:
-    page = make_page()
-
-    source_image = SimpleNamespace()
-
-    page.editable_images = [
-        make_editable_image(
-            order=1,
-            source_image=source_image,
-            placement=(
-                EditableImagePlacement
-                .BACKGROUND
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
             ),
-        )
-    ]
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
-            placement=(
-                RenderPlacement.BACKGROUND
-            ),
-        )
-    )
-
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
             )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction
+            .RENDER_FLOATING_IMAGE,
         )
+        
+    def test_floating_image_without_payload_is_deferred(
+        self,
+    ) -> None:
+        page = make_page()
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction.DEFER_IMAGE,
-    )
+        source_image = SimpleNamespace()
 
-
-def test_overlay_image_remains_deferred(
-    self,
-) -> None:
-    page = make_page()
-
-    source_image = SimpleNamespace()
-
-    page.editable_images = [
-        make_editable_image(
+        editable_image = make_editable_image(
             order=1,
             source_image=source_image,
             placement=(
-                EditableImagePlacement.OVERLAY
+                EditableImagePlacement.FLOATING
             ),
-        )
-    ]
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
-            placement=(
-                RenderPlacement.OVERLAY
-            ),
-        )
-    )
-
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
-            )
-        )
-
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction.DEFER_IMAGE,
-    )
-
-
-def test_missing_image_payload_remains_deferred(
-    self,
-) -> None:
-    page = make_page()
-
-    source_image = SimpleNamespace()
-
-    page.editable_images = [
-        make_editable_image(
-            order=1,
-            source_image=source_image,
             payload=None,
             payload_status=(
                 EditableImagePayloadStatus.FAILED
             ),
         )
-    ]
 
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
-        )
-    )
+        page.editable_images = [
+            editable_image
+        ]
 
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.FLOATING
+                ),
             )
         )
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction.DEFER_IMAGE,
-    )
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
 
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+        
+    def test_rotated_floating_image_is_deferred(
+        self,
+    ) -> None:
+        page = make_page()
 
-def test_skipped_image_is_ignored(
-    self,
-) -> None:
-    page = make_page()
+        source_image = SimpleNamespace()
 
-    source_image = SimpleNamespace()
-
-    page.editable_images = [
-        make_editable_image(
+        editable_image = make_editable_image(
             order=1,
             source_image=source_image,
-            disposition=(
-                EditableImageDisposition.SKIP
+            placement=(
+                EditableImagePlacement.FLOATING
+            ),
+            rotation=90.0,
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.FLOATING
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+        
+    def test_background_render_item_is_not_rendered_as_floating(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+            placement=(
+                EditableImagePlacement.FLOATING
             ),
         )
-    ]
 
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=source_image,
-        )
-    )
+        page.editable_images = [
+            editable_image
+        ]
 
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.BACKGROUND
+                ),
             )
         )
 
-    self.assertEqual(
-        result.instructions[0].action,
-        EditableRenderAction.IGNORE,
-    )
-
-
-def test_repeated_xref_placements_match_independently(
-    self,
-) -> None:
-    page = make_page()
-
-    first_source = SimpleNamespace(
-        xref=50
-    )
-
-    second_source = SimpleNamespace(
-        xref=50
-    )
-
-    first_image = make_editable_image(
-        order=1,
-        source_image=first_source,
-        xref=50,
-    )
-
-    second_image = make_editable_image(
-        order=2,
-        source_image=second_source,
-        xref=50,
-    )
-
-    page.editable_images = [
-        first_image,
-        second_image,
-    ]
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=1,
-            item_id="image:1",
-            kind=RenderItemKind.IMAGE,
-            source=first_source,
-        )
-    )
-
-    page.render_plan.add_item(
-        make_render_item(
-            order=2,
-            item_id="image:2",
-            kind=RenderItemKind.IMAGE,
-            source=second_source,
-        )
-    )
-
-    with patch(
-        (
-            "src.exporter."
-            "editable_page_render_resolver."
-            "EditableLayoutResolver."
-            "build_page_plan"
-        ),
-        return_value=[],
-    ):
-        result = (
-            EditablePageRenderResolver
-            .build_page_plan(
-                page
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
             )
-        )
 
-    self.assertEqual(
-        len(
-            result.inline_image_instructions
-        ),
-        2,
-    )
-
-    self.assertIs(
-        result.instructions[0].source,
-        first_image,
-    )
-
-    self.assertIs(
-        result.instructions[1].source,
-        second_image,
-    )
-
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )            
+        
 if __name__ == "__main__":
     unittest.main()
