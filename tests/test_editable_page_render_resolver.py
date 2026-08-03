@@ -27,7 +27,10 @@ from src.models.page_render_plan import (
     RenderItemRole,
     RenderPlacement,
 )
-
+from src.models.editable_image_validation import (
+    EditableImageRenderDecision,
+    EditableImageValidationReport,
+)
 
 def make_paragraph(
     region_number: int,
@@ -107,6 +110,7 @@ def make_page():
         editable_images=[],
         editable_tables=[],
         editable_table_validation_reports={},
+        editable_image_validation_reports={},
     )
 
 def make_editable_image(
@@ -1353,6 +1357,129 @@ class EditablePageRenderResolverTests(
             result.instructions[0].action,
             EditableRenderAction.DEFER_IMAGE,
         )            
+    
+    def test_image_validator_can_defer_otherwise_safe_image(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+            placement=(
+                EditableImagePlacement.FLOATING
+            ),
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.editable_image_validation_reports = {
+            editable_image.image_id: (
+                EditableImageValidationReport(
+                    image_id=editable_image.image_id,
+                    page_number=1,
+                    decision=(
+                        EditableImageRenderDecision.DEFER
+                    ),
+                    native_confidence=0.20,
+                )
+            )
+        }
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+                placement=(
+                    RenderPlacement.FLOATING
+                ),
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.DEFER_IMAGE,
+        )
+
+    def test_image_validator_can_skip_image(
+        self,
+    ) -> None:
+        page = make_page()
+
+        source_image = SimpleNamespace()
+
+        editable_image = make_editable_image(
+            order=1,
+            source_image=source_image,
+        )
+
+        page.editable_images = [
+            editable_image
+        ]
+
+        page.editable_image_validation_reports = {
+            editable_image.image_id: (
+                EditableImageValidationReport(
+                    image_id=editable_image.image_id,
+                    page_number=1,
+                    decision=(
+                        EditableImageRenderDecision.SKIP
+                    ),
+                )
+            )
+        }
+
+        page.render_plan.add_item(
+            make_render_item(
+                order=1,
+                item_id="image:1",
+                kind=RenderItemKind.IMAGE,
+                source=source_image,
+            )
+        )
+
+        with patch(
+            (
+                "src.exporter."
+                "editable_page_render_resolver."
+                "EditableLayoutResolver."
+                "build_page_plan"
+            ),
+            return_value=[],
+        ):
+            result = (
+                EditablePageRenderResolver
+                .build_page_plan(
+                    page
+                )
+            )
+
+        self.assertEqual(
+            result.instructions[0].action,
+            EditableRenderAction.IGNORE,
+        )
         
 if __name__ == "__main__":
     unittest.main()

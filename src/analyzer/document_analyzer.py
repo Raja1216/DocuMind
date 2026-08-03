@@ -73,6 +73,9 @@ from src.analyzer.editable_image_placement_planner import (
 from src.analyzer.editable_image_payload_extractor import (
     EditableImagePayloadExtractor,
 )
+from src.analyzer.editable_image_validator import (
+    EditableImageValidator,
+)
 
 class DocumentAnalyzer:
 
@@ -161,6 +164,9 @@ class DocumentAnalyzer:
             document
         )
         EditableImagePayloadExtractor.extract_document(
+            document
+        )
+        EditableImageValidator.validate_document(
             document
         )
         # -----------------------------------------------------

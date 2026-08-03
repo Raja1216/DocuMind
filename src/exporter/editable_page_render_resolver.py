@@ -24,7 +24,9 @@ from src.models.editable_image import (
     EditableImagePayloadStatus,
     EditableImagePlacement,
 )
-
+from src.models.editable_image_validation import (
+    EditableImageRenderDecision,
+)
 
 class EditableRenderAction(
     str,
@@ -326,6 +328,15 @@ class EditablePageRenderResolver:
             )
             or []
         )
+        
+        image_validation_reports = dict(
+            getattr(
+                page,
+                "editable_image_validation_reports",
+                {},
+            )
+            or {}
+        )
 
         table_validation_reports = dict(
             getattr(
@@ -390,6 +401,9 @@ class EditablePageRenderResolver:
                     editable_images=(
                         editable_images
                     ),
+                    image_validation_reports=(
+                        image_validation_reports
+                    ),
                     table_validation_reports=(
                         table_validation_reports
                     ),
@@ -425,6 +439,10 @@ class EditablePageRenderResolver:
             EditableImage
         ],
         table_validation_reports: dict[str, Any],
+        image_validation_reports: dict[
+            str,
+            Any,
+        ],
     ) -> EditableRenderInstruction:
         source = render_item.source
 
@@ -467,6 +485,9 @@ class EditablePageRenderResolver:
             return cls._resolve_image_instruction(
                 render_item=render_item,
                 editable_images=editable_images,
+                image_validation_reports=(
+                    image_validation_reports
+                ),
             )
     
         action_map = {
@@ -507,6 +528,10 @@ class EditablePageRenderResolver:
         render_item: PageRenderItem,
         editable_images: list[
             EditableImage
+        ],
+        image_validation_reports: dict[
+            str,
+            Any,
         ],
     ) -> EditableRenderInstruction:
         """
@@ -550,7 +575,152 @@ class EditablePageRenderResolver:
                     warning
                 ],
             )
-    
+            
+        validation_report = (
+            image_validation_reports.get(
+                editable_image.image_id
+            )
+        )    
+
+        if validation_report is not None:
+            decision = getattr(
+                validation_report,
+                "decision",
+                EditableImageRenderDecision.DEFER,
+            )
+        
+            report_warnings = list(
+                getattr(
+                    validation_report,
+                    "warning_messages",
+                    [],
+                )
+                or []
+            )
+        
+            if (
+                decision
+                == EditableImageRenderDecision.SKIP
+            ):
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction.IGNORE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "The generalized image validator "
+                        "selected SKIP."
+                    ),
+                    warnings=report_warnings,
+                )
+        
+            if (
+                decision
+                == EditableImageRenderDecision.DEFER
+            ):
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction.DEFER_IMAGE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "The generalized image validator "
+                        "selected deferred rendering."
+                    ),
+                    warnings=report_warnings,
+                )
+        
+            if (
+                decision
+                == EditableImageRenderDecision
+                .NATIVE_INLINE_SAFE
+            ):
+                if (
+                    editable_image.placement
+                    != EditableImagePlacement.INLINE
+                    or render_item.placement
+                    != RenderPlacement.FLOW
+                ):
+                    return EditableRenderInstruction(
+                        order=render_item.order,
+                        action=(
+                            EditableRenderAction
+                            .DEFER_IMAGE
+                        ),
+                        source=editable_image,
+                        render_item=render_item,
+                        reason=(
+                            "The validator selected inline "
+                            "rendering but the image or render "
+                            "plan placement is inconsistent."
+                        ),
+                        warnings=report_warnings,
+                    )
+        
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction
+                        .RENDER_INLINE_IMAGE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "The generalized image validator "
+                        "approved native inline rendering."
+                    ),
+                    warnings=report_warnings,
+                )
+        
+            if (
+                decision
+                == EditableImageRenderDecision
+                .NATIVE_FLOATING_SAFE
+            ):
+                if (
+                    editable_image.placement
+                    != EditableImagePlacement.FLOATING
+                    or render_item.placement
+                    in {
+                        RenderPlacement.BACKGROUND,
+                        RenderPlacement.OVERLAY,
+                    }
+                ):
+                    return EditableRenderInstruction(
+                        order=render_item.order,
+                        action=(
+                            EditableRenderAction
+                            .DEFER_IMAGE
+                        ),
+                        source=editable_image,
+                        render_item=render_item,
+                        reason=(
+                            "The validator selected floating "
+                            "rendering but the image or render "
+                            "plan placement is inconsistent."
+                        ),
+                        warnings=report_warnings,
+                    )
+        
+                return EditableRenderInstruction(
+                    order=render_item.order,
+                    action=(
+                        EditableRenderAction
+                        .RENDER_FLOATING_IMAGE
+                    ),
+                    source=editable_image,
+                    render_item=render_item,
+                    reason=(
+                        "The generalized image validator "
+                        "approved native floating rendering."
+                    ),
+                    warnings=report_warnings,
+                )
+        
         if (
             editable_image.disposition
             == EditableImageDisposition.SKIP
@@ -644,7 +814,8 @@ class EditablePageRenderResolver:
                     "image-transform renderer."
                 ),
             )
-    
+
+        
         # -----------------------------------------------------
         # Native inline image
         # -----------------------------------------------------

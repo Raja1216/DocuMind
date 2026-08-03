@@ -56,6 +56,9 @@ from src.models.editable_table_export import (
 from src.models.editable_image import (
     EditableImage,
 )
+from src.models.editable_image_validation import (
+    EditableImageValidationReport,
+)
 
 @dataclass(slots=True)
 class Page:
@@ -88,6 +91,12 @@ class Page:
         EditableImage
     ] = field(
         default_factory=list
+    )
+    editable_image_validation_reports: dict[
+        str,
+        EditableImageValidationReport,
+    ] = field(
+        default_factory=dict
     )
     tables: list[Table] = field(
         default_factory=list
